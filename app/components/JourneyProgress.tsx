@@ -25,21 +25,38 @@ export interface JourneyStep {
   detail?: string;
 }
 
-const DOT_CLASSES: Record<JourneyStepStatus, string> = {
-  done: "bg-emerald-500",
-  inProgress: "bg-blue-600 ring-4 ring-blue-100",
-  available: "bg-blue-600 ring-4 ring-blue-100",
-  notStarted: "bg-zinc-300",
-  comingLater: "bg-zinc-200",
-};
+/** Only the single "you are here" step gets the bright ringed dot -- other
+ * reachable-but-not-current steps use a calmer mid-tone so exactly one step
+ * reads as "this is what matters right now" (AGENTS.md section 3/13). */
+function dotClasses(status: JourneyStepStatus, current: boolean): string {
+  if (current) return "bg-blue-600 ring-4 ring-blue-100";
+  switch (status) {
+    case "done":
+      return "bg-emerald-500";
+    case "inProgress":
+    case "available":
+      return "bg-blue-300";
+    case "notStarted":
+      return "bg-zinc-300";
+    case "comingLater":
+      return "bg-zinc-200";
+  }
+}
 
-const LABEL_CLASSES: Record<JourneyStepStatus, string> = {
-  done: "text-zinc-500",
-  inProgress: "text-zinc-900 font-semibold",
-  available: "text-zinc-900 font-semibold",
-  notStarted: "text-zinc-400",
-  comingLater: "text-zinc-300",
-};
+function labelClasses(status: JourneyStepStatus, current: boolean): string {
+  if (current) return "text-zinc-900 font-semibold";
+  switch (status) {
+    case "done":
+      return "text-zinc-500";
+    case "inProgress":
+    case "available":
+      return "text-zinc-600";
+    case "notStarted":
+      return "text-zinc-400";
+    case "comingLater":
+      return "text-zinc-300";
+  }
+}
 
 const LINE_DONE = "bg-emerald-300";
 const LINE_UPCOMING = "bg-zinc-200";
@@ -90,10 +107,10 @@ export default function JourneyProgress({
           const body = (
             <div className="flex flex-col items-center gap-2 px-1">
               <span
-                className={`h-3 w-3 shrink-0 rounded-full ${DOT_CLASSES[step.status]}`}
+                className={`h-3 w-3 shrink-0 rounded-full ${dotClasses(step.status, current)}`}
                 aria-hidden
               />
-              <span className={`whitespace-nowrap text-xs ${LABEL_CLASSES[step.status]}`}>
+              <span className={`whitespace-nowrap text-xs ${labelClasses(step.status, current)}`}>
                 {t(`steps.${step.key}`)}
               </span>
               {current && (
