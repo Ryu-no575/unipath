@@ -9,6 +9,7 @@ import { getCommunityProfile } from "@/app/lib/data/community";
 import ProfileEditForm from "@/app/components/profile/ProfileEditForm";
 import CommunityIdentityForm from "@/app/components/profile/CommunityIdentityForm";
 import DevStateError from "@/app/components/DevStateError";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 export default async function ProfilePage({ params }: PageProps<"/[locale]/profile">) {
   const { locale } = await params;
@@ -33,12 +34,7 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/profi
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-          {t("heading")}
-        </h1>
-        <p className="text-sm text-zinc-500">{t("subheading")}</p>
-      </div>
+      <PageHeader title={t("heading")} description={t("subheading")} />
 
       <CommunityIdentityForm
         locale={locale}
@@ -47,7 +43,11 @@ export default async function ProfilePage({ params }: PageProps<"/[locale]/profi
         studentStatusVerified={communityProfile?.student_status_verified ?? false}
       />
 
-      <ProfileEditForm locale={locale} initialValues={initialValues} />
+      <ProfileEditForm
+        locale={locale}
+        initialValues={initialValues}
+        sections={["personal", "studyGoal", "academic"]}
+      />
     </div>
   );
 }

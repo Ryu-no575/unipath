@@ -4,15 +4,16 @@ import { notFound, redirect } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
 import { getUserState } from "@/app/lib/supabase/user-state";
-import { getApplicationsWithDetails } from "@/app/lib/data/applications";
-import ApplicationsList from "@/app/components/applications/ApplicationsList";
+import { profileToFormValues } from "@/app/lib/profile-types";
+import ProfileEditForm from "@/app/components/profile/ProfileEditForm";
 import DevStateError from "@/app/components/DevStateError";
 import PageHeader from "@/app/components/ui/PageHeader";
-import Button from "@/app/components/ui/Button";
 
-export default async function ApplicationsPage({
+export default async function ProfilePreferencesPage({
   params,
-}: PageProps<"/[locale]/applications">) {
+}: {
+  params: Promise<{ locale: string }>;
+}) {
   const { locale } = await params;
   if (!hasLocale(routing.locales, locale)) notFound();
   setRequestLocale(locale);
@@ -24,18 +25,23 @@ export default async function ApplicationsPage({
 
   const { user, profile } = state;
   const supabase = await createClient();
-  const applications = await getApplicationsWithDetails(supabase, user.id);
-  const t = await getTranslations("Applications");
+  const [{ data: destinations }, { data: priorities }] = await Promise.all([
+    supabase.from("profile_destination_preferences").select("*").eq("user_id", user.id),
+    supabase.from("profile_priorities").select("*").eq("user_id", user.id),
+  ]);
+
+  const initialValues = profileToFormValues(profile, destinations ?? [], priorities ?? []);
+  const t = await getTranslations("Profile");
 
   return (
     <div className="flex flex-col gap-8">
-      <PageHeader
-        title={t("heading")}
-        description={t("subheading")}
-        primaryAction={<Button href="/applications/new">{t("newApplication")}</Button>}
-      />
+      <PageHeader title={t("tabPreferences")} />
 
-      <ApplicationsList applications={applications} userTimezone={profile.timezone} />
+      <ProfileEditForm
+        locale={locale}
+        initialValues={initialValues}
+        sections={["destination", "budget", "priorities"]}
+      />
     </div>
   );
 }

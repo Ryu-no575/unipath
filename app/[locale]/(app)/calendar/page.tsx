@@ -8,6 +8,7 @@ import { getApplicationsWithDetails } from "@/app/lib/data/applications";
 import { buildCalendarEvents } from "@/app/lib/journey";
 import CalendarView from "@/app/components/calendar/CalendarView";
 import DevStateError from "@/app/components/DevStateError";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 export default async function CalendarPage({ params }: PageProps<"/[locale]/calendar">) {
   const { locale } = await params;
@@ -48,10 +49,7 @@ export default async function CalendarPage({ params }: PageProps<"/[locale]/cale
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("heading")}</h1>
-        <p className="text-sm text-zinc-500">{t("subheading")}</p>
-      </div>
+      <PageHeader title={t("heading")} description={t("subheading")} />
 
       <CalendarView events={events} userTimezone={profile.timezone} />
     </div>

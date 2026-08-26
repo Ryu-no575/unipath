@@ -24,12 +24,35 @@ function Section({ title, children }: { title: string; children: React.ReactNode
   );
 }
 
+export type ProfileSectionKey =
+  | "personal"
+  | "studyGoal"
+  | "destination"
+  | "academic"
+  | "budget"
+  | "priorities";
+
+const ALL_SECTIONS: ProfileSectionKey[] = [
+  "personal",
+  "studyGoal",
+  "destination",
+  "academic",
+  "budget",
+  "priorities",
+];
+
 export default function ProfileEditForm({
   locale,
   initialValues,
+  sections = ALL_SECTIONS,
 }: {
   locale: AppLocale;
   initialValues: ProfileFormValues;
+  /** Which section blocks to render on this page -- the underlying form
+   * state always holds the full profile so saving from any subset never
+   * drops the other tabs' values (AGENTS.md: Profile is split into tabs,
+   * not into separate save actions). */
+  sections?: ProfileSectionKey[];
 }) {
   const t = useTranslations("Onboarding");
   const profileT = useTranslations("Profile");
@@ -49,26 +72,40 @@ export default function ProfileEditForm({
     });
   }
 
+  const show = (key: ProfileSectionKey) => sections.includes(key);
+
   return (
     <div className="flex flex-col gap-6">
-      <Section title={t("step1Title")}>
-        <PersonalSection values={values} onChange={handleChange} />
-      </Section>
-      <Section title={t("step2Title")}>
-        <StudyGoalSection values={values} onChange={handleChange} />
-      </Section>
-      <Section title={t("step3Title")}>
-        <DestinationSection values={values} onChange={handleChange} />
-      </Section>
-      <Section title={t("step4Title")}>
-        <AcademicSection values={values} onChange={handleChange} />
-      </Section>
-      <Section title={t("step5Title")}>
-        <BudgetSection values={values} onChange={handleChange} />
-      </Section>
-      <Section title={t("step6Title")}>
-        <PrioritiesSection values={values} onChange={handleChange} />
-      </Section>
+      {show("personal") && (
+        <Section title={t("step1Title")}>
+          <PersonalSection values={values} onChange={handleChange} />
+        </Section>
+      )}
+      {show("studyGoal") && (
+        <Section title={t("step2Title")}>
+          <StudyGoalSection values={values} onChange={handleChange} />
+        </Section>
+      )}
+      {show("destination") && (
+        <Section title={t("step3Title")}>
+          <DestinationSection values={values} onChange={handleChange} />
+        </Section>
+      )}
+      {show("academic") && (
+        <Section title={t("step4Title")}>
+          <AcademicSection values={values} onChange={handleChange} />
+        </Section>
+      )}
+      {show("budget") && (
+        <Section title={t("step5Title")}>
+          <BudgetSection values={values} onChange={handleChange} />
+        </Section>
+      )}
+      {show("priorities") && (
+        <Section title={t("step6Title")}>
+          <PrioritiesSection values={values} onChange={handleChange} />
+        </Section>
+      )}
 
       {error && (
         <p className="rounded-md bg-red-50 px-4 py-3 text-sm text-red-700" role="alert">

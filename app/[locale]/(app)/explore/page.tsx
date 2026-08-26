@@ -2,8 +2,11 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { Link } from "@/i18n/navigation";
 import ExploreSearch from "@/app/components/ExploreSearch";
+import PageHeader from "@/app/components/ui/PageHeader";
+import Card from "@/app/components/ui/Card";
+import SectionHeader from "@/app/components/ui/SectionHeader";
+import Button from "@/app/components/ui/Button";
 
 export default async function ExplorePage({
   params,
@@ -17,25 +20,20 @@ export default async function ExplorePage({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-          {t("heading")}
-        </h1>
-        <p className="text-sm text-zinc-500">{t("subheading")}</p>
-      </div>
+      <PageHeader title={t("heading")} description={t("subheading")} />
 
-      <div className="flex flex-col items-start justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-6 sm:flex-row sm:items-center">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-base font-semibold text-zinc-900">{cta("heading")}</h2>
+      <Card
+        padding="sm"
+        className="flex flex-col items-start justify-between gap-3 sm:flex-row sm:items-center"
+      >
+        <div className="flex flex-col gap-0.5">
+          <SectionHeader title={cta("heading")} />
           <p className="text-sm text-zinc-500">{cta("body")}</p>
         </div>
-        <Link
-          href="/explore/match"
-          className="shrink-0 rounded-md bg-zinc-900 px-5 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
-        >
+        <Button href="/explore/match" variant="secondary" className="shrink-0">
           {cta("button")}
-        </Link>
-      </div>
+        </Button>
+      </Card>
 
       <ExploreSearch />
     </div>

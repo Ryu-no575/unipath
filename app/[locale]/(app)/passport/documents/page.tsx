@@ -9,6 +9,7 @@ import { getApplicationsWithDetails } from "@/app/lib/data/applications";
 import { getApplicationDocuments, getDocumentLinksForUser } from "@/app/lib/data/passport";
 import DevStateError from "@/app/components/DevStateError";
 import DocumentList from "@/app/components/passport/DocumentList";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 export default async function PassportDocumentsPage({
   params,
@@ -44,10 +45,7 @@ export default async function PassportDocumentsPage({
         {t("back")}
       </Link>
 
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("heading")}</h1>
-        <p className="text-sm text-zinc-500">{t("subheading")}</p>
-      </div>
+      <PageHeader title={t("heading")} description={t("subheading")} />
 
       <DocumentList
         locale={locale}

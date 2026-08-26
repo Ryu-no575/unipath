@@ -65,7 +65,7 @@ export default async function RoutesPage({
 
       <RouteNextActionBanner route={routes.balanced} />
 
-      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {ROUTE_TYPES.map((type) => (
           <RouteCard key={type} route={routes[type]} hrefQuery={hrefQuery} />
         ))}

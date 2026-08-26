@@ -3,6 +3,8 @@ import type { CalendarEvent } from "@/app/lib/journey";
 import { getUrgency } from "@/app/lib/journey";
 import CategoryBadge from "./calendar/CategoryBadge";
 import UrgencyBadge from "./UrgencyBadge";
+import Card from "./ui/Card";
+import SectionHeader from "./ui/SectionHeader";
 
 const WINDOW_DAYS = 60;
 
@@ -19,16 +21,16 @@ export default function UpcomingDeadlines({ events }: { events: CalendarEvent[] 
 
   if (overdue.length === 0 && upcoming.length === 0) {
     return (
-      <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-6">
-        <h2 className="text-sm font-semibold text-zinc-900">{t("heading")}</h2>
+      <Card className="flex flex-col gap-2">
+        <SectionHeader title={t("heading")} />
         <p className="text-sm text-zinc-500">{t("empty")}</p>
-      </div>
+      </Card>
     );
   }
 
   return (
-    <div className="flex flex-col gap-5 rounded-xl border border-zinc-200 bg-white p-6">
-      <h2 className="text-sm font-semibold text-zinc-900">{t("heading")}</h2>
+    <Card className="flex flex-col gap-5">
+      <SectionHeader title={t("heading")} />
 
       {overdue.length > 0 && (
         <div className="flex flex-col gap-2">
@@ -40,7 +42,7 @@ export default function UpcomingDeadlines({ events }: { events: CalendarEvent[] 
       )}
 
       {upcoming.length > 0 && <EventRows events={upcoming} />}
-    </div>
+    </Card>
   );
 }
 

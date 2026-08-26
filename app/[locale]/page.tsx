@@ -40,7 +40,7 @@ export default async function Home({ params }: PageProps<"/[locale]">) {
               href="/dashboard"
               className="rounded-md px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
             >
-              {nav("dashboard")}
+              {nav("home")}
             </Link>
           </div>
         </div>

@@ -12,6 +12,7 @@ import DeletePostButton from "@/app/components/community/DeletePostButton";
 import ReportButton from "@/app/components/community/ReportButton";
 import CommentForm from "@/app/components/community/CommentForm";
 import CommentThread from "@/app/components/community/CommentThread";
+import Card from "@/app/components/ui/Card";
 
 export default async function CommunityPostDetailPage({
   params,
@@ -44,7 +45,7 @@ export default async function CommunityPostDetailPage({
         {t("back")}
       </Link>
 
-      <article className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-6">
+      <Card as="article" className="flex flex-col gap-4">
         <div className="flex items-start gap-3">
           <Avatar name={post.author.displayName} seed={post.author.userId} />
           <div className="flex flex-1 flex-col gap-0.5">
@@ -79,7 +80,7 @@ export default async function CommunityPostDetailPage({
           {isOwner && <DeletePostButton locale={locale} universityId={id} postId={post.id} />}
           {user && !isOwner && <ReportButton locale={locale} postId={post.id} />}
         </div>
-      </article>
+      </Card>
 
       <section className="flex flex-col gap-5">
         <h2 className="text-sm font-semibold uppercase tracking-wide text-zinc-400">

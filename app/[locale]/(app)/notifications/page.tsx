@@ -8,6 +8,8 @@ import { getUserState } from "@/app/lib/supabase/user-state";
 import { getNotificationsForUser } from "@/app/lib/data/notifications";
 import DevStateError from "@/app/components/DevStateError";
 import MarkAllReadButton from "@/app/components/notifications/MarkAllReadButton";
+import PageHeader from "@/app/components/ui/PageHeader";
+import EmptyState from "@/app/components/ui/EmptyState";
 
 export default async function NotificationsPage({
   params,
@@ -31,18 +33,14 @@ export default async function NotificationsPage({
 
   return (
     <div className="flex flex-col gap-6">
-      <div className="flex items-center justify-between gap-3">
-        <div className="flex flex-col gap-1">
-          <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("heading")}</h1>
-          <p className="text-sm text-zinc-500">{t("pageSubheading")}</p>
-        </div>
-        {notifications.some((n) => !n.read) && <MarkAllReadButton locale={locale} />}
-      </div>
+      <PageHeader
+        title={t("heading")}
+        description={t("pageSubheading")}
+        secondaryAction={notifications.some((n) => !n.read) && <MarkAllReadButton locale={locale} />}
+      />
 
       {notifications.length === 0 ? (
-        <div className="rounded-xl border border-zinc-200 bg-white p-6 text-sm text-zinc-500">
-          {t("empty")}
-        </div>
+        <EmptyState title={t("empty")} />
       ) : (
         <ul className="flex flex-col divide-y divide-zinc-100 rounded-xl border border-zinc-200 bg-white">
           {notifications.map((notification) => (

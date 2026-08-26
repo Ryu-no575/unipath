@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from "react";
 import { useTranslations } from "next-intl";
 import type { UniversitySearchResult } from "@/app/lib/ror";
 import UniversitySearchCard from "./UniversitySearchCard";
+import { SkeletonCardGrid } from "./ui/Skeleton";
 
 type Status = "idle" | "loading" | "success" | "empty" | "error";
 
@@ -83,9 +84,9 @@ export default function ExploreSearch() {
       )}
 
       {status === "loading" && (
-        <div className="flex items-center gap-2 text-sm text-zinc-500">
-          <span className="h-4 w-4 animate-spin rounded-full border-2 border-zinc-300 border-t-zinc-600" />
-          {t("loading")}
+        <div className="flex flex-col gap-3">
+          <p className="text-sm text-zinc-500">{t("loading")}</p>
+          <SkeletonCardGrid count={3} />
         </div>
       )}
 

@@ -8,6 +8,9 @@ import { getUserState } from "@/app/lib/supabase/user-state";
 import { getTestScores } from "@/app/lib/data/passport";
 import DevStateError from "@/app/components/DevStateError";
 import TestScoreList from "@/app/components/passport/TestScoreList";
+import PageHeader from "@/app/components/ui/PageHeader";
+import SectionHeader from "@/app/components/ui/SectionHeader";
+import Card from "@/app/components/ui/Card";
 
 export default async function PassportTestsPage({ params }: PageProps<"/[locale]/passport/tests">) {
   const { locale } = await params;
@@ -34,18 +37,17 @@ export default async function PassportTestsPage({ params }: PageProps<"/[locale]
         {t("back")}
       </Link>
 
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("heading")}</h1>
-        <p className="text-sm text-zinc-500">{t("subheading")}</p>
-      </div>
+      <PageHeader title={t("heading")} description={t("subheading")} />
 
-      <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-zinc-900">{t("primaryHeading")}</h2>
-          <Link href="/profile" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:underline">
-            {t("editInProfile")}
-          </Link>
-        </div>
+      <Card className="flex flex-col gap-2">
+        <SectionHeader
+          title={t("primaryHeading")}
+          action={
+            <Link href="/profile" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:underline">
+              {t("editInProfile")}
+            </Link>
+          }
+        />
         {hasPrimary ? (
           <p className="text-sm text-zinc-700">
             {englishTestOptions(profile.english_test_type ?? "other")}
@@ -54,7 +56,7 @@ export default async function PassportTestsPage({ params }: PageProps<"/[locale]
         ) : (
           <p className="text-sm text-zinc-400">{t("primaryEmpty")}</p>
         )}
-      </div>
+      </Card>
 
       <TestScoreList locale={locale} testScores={testScores} />
     </div>

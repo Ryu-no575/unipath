@@ -10,6 +10,9 @@ import { computeRealMatches } from "@/app/lib/match/real-engine";
 import { decodeMatchQuizAnswers } from "@/app/lib/match/query";
 import RealMatchCard from "@/app/components/match/RealMatchCard";
 import DevStateError from "@/app/components/DevStateError";
+import PageHeader from "@/app/components/ui/PageHeader";
+import EmptyState from "@/app/components/ui/EmptyState";
+import Button from "@/app/components/ui/Button";
 
 /**
  * Production Match Results: scores only real programs from
@@ -68,10 +71,7 @@ export default async function MatchResultsPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("heading")}</h1>
-        <p className="text-sm text-zinc-500">{t("subheading")}</p>
-      </div>
+      <PageHeader title={t("heading")} description={t("subheading")} />
 
       <p className="text-sm text-zinc-500">{t("disclaimer")}</p>
 
@@ -97,26 +97,18 @@ export default async function MatchResultsPage({
       )}
 
       {isDataLimited ? (
-        <div className="flex flex-col items-start gap-3 rounded-xl border border-zinc-200 bg-white p-6">
-          <h2 className="text-base font-semibold text-zinc-900">
-            {t("verifiedDataHeading", { count: computation.totalVerifiedPrograms })}
-          </h2>
-          <p className="text-sm text-zinc-500">{t("verifiedDataBody")}</p>
-          <div className="flex gap-3">
-            <Link
-              href="/profile"
-              className="rounded-md border border-zinc-300 px-4 py-2 text-sm font-medium text-zinc-700 hover:bg-zinc-100"
-            >
-              {t("goToProfile")}
-            </Link>
-            <Link
-              href="/explore"
-              className="rounded-md bg-zinc-900 px-4 py-2 text-center text-sm font-medium text-white hover:bg-zinc-700"
-            >
-              {t("backToExplore")}
-            </Link>
-          </div>
-        </div>
+        <EmptyState
+          title={t("verifiedDataHeading", { count: computation.totalVerifiedPrograms })}
+          description={t("verifiedDataBody")}
+          action={
+            <div className="flex gap-3">
+              <Button href="/profile" variant="secondary">
+                {t("goToProfile")}
+              </Button>
+              <Button href="/explore">{t("backToExplore")}</Button>
+            </div>
+          }
+        />
       ) : (
         <div className="flex flex-col gap-4">
           <p className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">

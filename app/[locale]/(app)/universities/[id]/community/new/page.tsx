@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { createClient, getOptionalUser } from "@/app/lib/supabase/server";
 import { getUniversityForCommunity, listProgramsForUniversity } from "@/app/lib/data/community";
 import NewCommunityPostForm from "@/app/components/community/NewCommunityPostForm";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 export default async function NewCommunityPostPage({
   params,
@@ -35,12 +36,10 @@ export default async function NewCommunityPostPage({
         {t("back")}
       </Link>
 
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">
-          {t("newPostHeading", { university: university.name })}
-        </h1>
-        <p className="text-sm text-zinc-500">{t("newPostSubheading")}</p>
-      </div>
+      <PageHeader
+        title={t("newPostHeading", { university: university.name })}
+        description={t("newPostSubheading")}
+      />
 
       <NewCommunityPostForm locale={locale} universityId={id} programs={programs} />
     </div>

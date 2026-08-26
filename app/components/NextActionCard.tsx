@@ -36,8 +36,8 @@ export default function NextActionCard({
   }
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-6">
-      <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
+    <div className="flex flex-col gap-4 rounded-xl border border-blue-100 bg-blue-50 p-6">
+      <h2 className="text-[11px] font-semibold uppercase tracking-wide text-blue-600">
         {t("heading")}
       </h2>
 

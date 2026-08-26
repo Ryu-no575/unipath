@@ -11,6 +11,9 @@ import {
   searchCommunityUniversities,
 } from "@/app/lib/data/community";
 import UniversityCommunityCard from "@/app/components/community/UniversityCommunityCard";
+import PageHeader from "@/app/components/ui/PageHeader";
+import SectionHeader from "@/app/components/ui/SectionHeader";
+import Card from "@/app/components/ui/Card";
 
 export default async function CommunityHomePage({
   params,
@@ -40,10 +43,7 @@ export default async function CommunityHomePage({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("mainHeading")}</h1>
-        <p className="text-sm text-zinc-500">{t("mainSubheading")}</p>
-      </div>
+      <PageHeader title={t("mainHeading")} description={t("mainSubheading")} />
 
       <form className="flex gap-2">
         <input
@@ -63,9 +63,7 @@ export default async function CommunityHomePage({
 
       {searchResults !== null && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-zinc-900">
-            {t("searchResultsHeading", { query })}
-          </h2>
+          <SectionHeader title={t("searchResultsHeading", { query })} />
           {searchResults.length === 0 ? (
             <p className="text-sm text-zinc-400">{t("searchNoResults")}</p>
           ) : (
@@ -80,7 +78,7 @@ export default async function CommunityHomePage({
 
       {user && (
         <section className="flex flex-col gap-3">
-          <h2 className="text-base font-semibold text-zinc-900">{t("yourCommunities")}</h2>
+          <SectionHeader title={t("yourCommunities")} />
           {yourCommunities.length === 0 ? (
             <p className="text-sm text-zinc-400">{t("noUserCommunities")}</p>
           ) : (
@@ -94,7 +92,7 @@ export default async function CommunityHomePage({
       )}
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-zinc-900">{t("popularCommunities")}</h2>
+        <SectionHeader title={t("popularCommunities")} />
         {popularCommunities.length === 0 ? (
           <p className="text-sm text-zinc-400">{t("noPopularCommunities")}</p>
         ) : (
@@ -107,16 +105,19 @@ export default async function CommunityHomePage({
       </section>
 
       <section className="flex flex-col gap-3">
-        <h2 className="text-base font-semibold text-zinc-900">{t("recentDiscussions")}</h2>
+        <SectionHeader title={t("recentDiscussions")} />
         {recentDiscussions.length === 0 ? (
           <p className="text-sm text-zinc-400">{t("noRecentDiscussions")}</p>
         ) : (
           <div className="flex flex-col gap-3">
             {recentDiscussions.map((post) => (
-              <Link
+              <Card
                 key={post.id}
+                as={Link}
                 href={`/universities/${post.universityId}/community/${post.id}`}
-                className="flex flex-col gap-1 rounded-xl border border-zinc-200 bg-white p-4 transition-colors hover:border-zinc-300 hover:bg-zinc-50"
+                interactive
+                padding="sm"
+                className="flex flex-col gap-1"
               >
                 <div className="flex items-center justify-between gap-2">
                   <span className="text-xs font-medium text-zinc-500">{post.universityName}</span>
@@ -126,7 +127,7 @@ export default async function CommunityHomePage({
                 </div>
                 {post.title && <h3 className="text-sm font-semibold text-zinc-900">{post.title}</h3>}
                 <p className="line-clamp-2 text-sm text-zinc-600">{post.body}</p>
-              </Link>
+              </Card>
             ))}
           </div>
         )}

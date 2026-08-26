@@ -30,12 +30,14 @@ export default function RouteCard({ route, hrefQuery = "" }: { route: Route; hre
         </span>
       </div>
 
-      <RouteComparisonStats comparison={route.comparison} />
+      <RouteComparisonStats comparison={route.comparison} compact />
 
       {currentLabel && (
         <div className="flex flex-col gap-1 rounded-lg border border-blue-100 bg-blue-50 px-4 py-3">
-          <span className="text-[11px] font-semibold uppercase tracking-wide text-blue-600">{t("nextActionHeading")}</span>
-          <span className="text-sm font-medium text-zinc-900">{currentLabel.title}</span>
+          <span className="text-[11px] font-semibold uppercase tracking-wide text-blue-600">
+            {t("nextActionHeading")}
+          </span>
+          <span className="text-sm font-semibold text-zinc-900">{currentLabel.title}</span>
           <span className="text-sm text-zinc-600">{currentLabel.detail}</span>
         </div>
       )}

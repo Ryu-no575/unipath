@@ -22,14 +22,22 @@ function Stat({ label, children }: { label: string; children: React.ReactNode })
   );
 }
 
-export default function RouteComparisonStats({ comparison }: { comparison: RouteComparison }) {
+export default function RouteComparisonStats({
+  comparison,
+  compact = false,
+}: {
+  comparison: RouteComparison;
+  /** Use inside a narrower card (e.g. the /routes comparison grid) so the
+   * 4 stats stay legible instead of cramming onto one row. */
+  compact?: boolean;
+}) {
   const t = useTranslations("Routes");
   const riskT = useTranslations("RouteRiskOptions");
   const prepT = useTranslations("RoutePrepLoadOptions");
 
   return (
     <div className="flex flex-col gap-4">
-      <div className="grid grid-cols-2 gap-4 sm:grid-cols-4">
+      <div className={`grid grid-cols-2 gap-4 ${compact ? "" : "sm:grid-cols-4"}`}>
         <Stat label={t("estimatedDuration")}>
           <span className="text-sm font-medium text-zinc-900">
             {comparison.estimatedDurationMonths != null

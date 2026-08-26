@@ -6,6 +6,7 @@ import { createClient } from "@/app/lib/supabase/server";
 import { getUserState } from "@/app/lib/supabase/user-state";
 import NewApplicationForm from "@/app/components/applications/NewApplicationForm";
 import DevStateError from "@/app/components/DevStateError";
+import PageHeader from "@/app/components/ui/PageHeader";
 
 function getParam(value: string | string[] | undefined): string {
   return typeof value === "string" ? value : "";
@@ -65,10 +66,7 @@ export default async function NewApplicationPage({
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("heading")}</h1>
-        <p className="text-sm text-zinc-500">{t("subheading")}</p>
-      </div>
+      <PageHeader title={t("heading")} description={t("subheading")} />
 
       <NewApplicationForm
         locale={locale}

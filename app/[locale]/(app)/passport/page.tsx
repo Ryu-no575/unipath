@@ -18,6 +18,10 @@ import { computeProfileCompletionPercent } from "@/app/lib/passport/readiness";
 import { readinessItemLabel } from "@/app/lib/passport/labels";
 import DevStateError from "@/app/components/DevStateError";
 import Progress from "@/app/components/ui/Progress";
+import PageHeader from "@/app/components/ui/PageHeader";
+import SectionHeader from "@/app/components/ui/SectionHeader";
+import Card from "@/app/components/ui/Card";
+import EmptyState from "@/app/components/ui/EmptyState";
 
 export default async function PassportPage({ params }: PageProps<"/[locale]/passport">) {
   const { locale } = await params;
@@ -55,6 +59,7 @@ export default async function PassportPage({ params }: PageProps<"/[locale]/pass
   const nextActionT = await getTranslations("NextAction");
   const documentTypeT = await getTranslations("DocumentTypeOptions");
   const testTypeT = await getTranslations("TestTypeOptions");
+  const planT = await getTranslations("Plan");
 
   await syncReadinessTasksForApplications(supabase, {
     userId: user.id,
@@ -72,20 +77,24 @@ export default async function PassportPage({ params }: PageProps<"/[locale]/pass
 
   if (isFullyEmpty) {
     return (
-      <div className="flex flex-col items-center gap-4 rounded-xl border border-dashed border-zinc-300 bg-white px-6 py-16 text-center">
-        <h1 className="text-xl font-semibold text-zinc-900">{t("emptyHeading")}</h1>
-        <p className="text-sm text-zinc-500">
-          {t("emptyDescriptionLine1")}
-          <br />
-          {t("emptyDescriptionLine2")}
-        </p>
-        <Link
-          href="/passport/documents"
-          className="mt-2 inline-flex items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
-        >
-          {t("emptyCta")}
-        </Link>
-      </div>
+      <EmptyState
+        title={t("emptyHeading")}
+        description={
+          <>
+            {t("emptyDescriptionLine1")}
+            <br />
+            {t("emptyDescriptionLine2")}
+          </>
+        }
+        action={
+          <Link
+            href="/passport/documents"
+            className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+          >
+            {t("emptyCta")}
+          </Link>
+        }
+      />
     );
   }
 
@@ -113,87 +122,84 @@ export default async function PassportPage({ params }: PageProps<"/[locale]/pass
 
   return (
     <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-1">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("heading")}</h1>
-        <p className="text-sm text-zinc-500">{t("subheading")}</p>
-      </div>
+      <PageHeader title={t("heading")} description={t("subheading")} />
 
-      <div className="rounded-xl border border-zinc-200 bg-white p-6">
-        <div className="flex items-center justify-between">
-          <h2 className="text-base font-semibold text-zinc-900">{t("profileCompletionHeading")}</h2>
-          <Link href="/profile" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:underline">
-            {t("editProfile")}
-          </Link>
+      {/* Hero: profile completion + next missing item, combined into one
+          clear focal point instead of two equally-weighted cards. */}
+      <Card padding="lg" className="flex flex-col gap-6">
+        <div>
+          <div className="flex items-center justify-between">
+            <h2 className="text-base font-semibold text-zinc-900">{t("profileCompletionHeading")}</h2>
+            <Link href="/profile" className="text-sm font-medium text-zinc-600 hover:text-zinc-900 hover:underline">
+              {t("editProfile")}
+            </Link>
+          </div>
+          <p className="mt-1 text-xs text-zinc-400">{t("profileCompletionDetail")}</p>
+          <div className="mt-3">
+            <Progress value={profileCompletion} />
+          </div>
         </div>
-        <p className="mt-1 text-xs text-zinc-400">{t("profileCompletionDetail")}</p>
-        <div className="mt-3">
-          <Progress value={profileCompletion} />
-        </div>
-      </div>
 
-      <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <Link
-          href="/passport/education"
-          className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm"
-        >
+        <div className="border-t border-zinc-100 pt-5">
+          <h3 className="text-[11px] font-semibold uppercase tracking-wide text-zinc-400">
+            {t("nextMissingHeading")}
+          </h3>
+          {nextMissing ? (
+            <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
+              <div>
+                <p className="text-base font-semibold text-zinc-900">{nextMissing.itemTitle}</p>
+                <p className="text-sm text-zinc-500">{nextMissing.universityName}</p>
+              </div>
+              <div className="flex shrink-0 items-center gap-4">
+                <Link
+                  href={`/applications/${nextMissing.applicationId}`}
+                  className="text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 hover:underline"
+                >
+                  {nextActionT("viewApplication")}
+                </Link>
+                <Link
+                  href="/plan"
+                  className="text-sm font-medium text-zinc-400 transition-colors hover:text-zinc-900 hover:underline"
+                >
+                  {planT("heading")} →
+                </Link>
+              </div>
+            </div>
+          ) : (
+            <p className="mt-2 text-sm text-zinc-500">{t("nextMissingEmpty")}</p>
+          )}
+        </div>
+      </Card>
+
+      {/* Secondary: Education / Tests / Documents -- clearly quieter than the hero above. */}
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+        <Card as={Link} href="/passport/education" interactive padding="sm" className="flex flex-col gap-1.5">
           <h2 className="text-sm font-semibold text-zinc-900">{t("educationHeading")}</h2>
-          <p className="text-sm text-zinc-500">{t("educationSummaryPrimary")}</p>
           <p className="text-xs text-zinc-400">
             {education.length > 0 ? t("educationSummaryCount", { count: education.length }) : t("educationEmpty")}
           </p>
           <span className="mt-1 text-sm font-medium text-zinc-600">{t("manage")}</span>
-        </Link>
+        </Card>
 
-        <Link
-          href="/passport/tests"
-          className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm"
-        >
+        <Card as={Link} href="/passport/tests" interactive padding="sm" className="flex flex-col gap-1.5">
           <h2 className="text-sm font-semibold text-zinc-900">{t("testsHeading")}</h2>
-          <p className="text-sm text-zinc-500">{t("testsSummaryPrimary")}</p>
           <p className="text-xs text-zinc-400">
             {testScores.length > 0 ? t("testsSummaryCount", { count: testScores.length }) : t("testsEmpty")}
           </p>
           <span className="mt-1 text-sm font-medium text-zinc-600">{t("manage")}</span>
-        </Link>
+        </Card>
 
-        <Link
-          href="/passport/documents"
-          className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-5 transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm"
-        >
+        <Card as={Link} href="/passport/documents" interactive padding="sm" className="flex flex-col gap-1.5">
           <h2 className="text-sm font-semibold text-zinc-900">{t("documentsHeading")}</h2>
-          <p className="text-sm text-zinc-500">
+          <p className="text-xs text-zinc-400">
             {documents.length > 0 ? t("documentsReadyCount", { ready: readyDocuments, total: documents.length }) : t("documentsEmpty")}
           </p>
           <span className="mt-1 text-sm font-medium text-zinc-600">{t("manage")}</span>
-        </Link>
-      </div>
-
-      <div className="rounded-xl border border-zinc-200 bg-white p-6">
-        <h2 className="text-xs font-semibold uppercase tracking-wide text-zinc-400">
-          {t("nextMissingHeading")}
-        </h2>
-        {nextMissing ? (
-          <div className="mt-2 flex items-center justify-between gap-3">
-            <div>
-              <p className="text-base font-semibold text-zinc-900">{nextMissing.itemTitle}</p>
-              <p className="text-sm text-zinc-500">{nextMissing.universityName}</p>
-            </div>
-            <Link
-              href={`/applications/${nextMissing.applicationId}`}
-              className="shrink-0 text-sm font-medium text-zinc-600 transition-colors hover:text-zinc-900 hover:underline"
-            >
-              {nextActionT("viewApplication")}
-            </Link>
-          </div>
-        ) : (
-          <p className="mt-2 text-sm text-zinc-500">{t("nextMissingEmpty")}</p>
-        )}
+        </Card>
       </div>
 
       <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold tracking-tight text-zinc-900">
-          {t("applicationsReadinessHeading")}
-        </h2>
+        <SectionHeader title={t("applicationsReadinessHeading")} />
 
         {applications.length === 0 ? (
           <p className="text-sm text-zinc-500">{t("applicationsReadinessEmpty")}</p>
@@ -203,10 +209,7 @@ export default async function PassportPage({ params }: PageProps<"/[locale]/pass
               const readiness = readinessByApplicationId.get(application.id);
               return (
                 <li key={application.id}>
-                  <Link
-                    href={`/applications/${application.id}`}
-                    className="flex items-center justify-between gap-4 rounded-xl border border-zinc-200 bg-white p-4 transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm"
-                  >
+                  <Card as={Link} href={`/applications/${application.id}`} interactive padding="sm" className="flex items-center justify-between gap-4">
                     <div>
                       <p className="text-sm font-medium text-zinc-900">
                         {application.university?.name ?? applicationsT("unknownUniversity")}
@@ -223,7 +226,7 @@ export default async function PassportPage({ params }: PageProps<"/[locale]/pass
                     ) : (
                       <span className="shrink-0 text-xs font-medium text-zinc-400">{readinessT("limitedData")}</span>
                     )}
-                  </Link>
+                  </Card>
                 </li>
               );
             })}
