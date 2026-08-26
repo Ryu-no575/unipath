@@ -16,7 +16,13 @@
     "newApplication": "+ New Application",
     "login": "Log In",
     "logout": "Log Out",
-    "routes": "Routes"
+    "routes": "Routes",
+    "home": "Home",
+    "plan": "Plan",
+    "settings": "Settings",
+    "menu": "Menu",
+    "skipToContent": "Skip to content",
+    "myAccount": "My account"
   },
   "Common": {
     "selectPlaceholder": "Select..."
@@ -61,7 +67,16 @@
     "subheading": "Keep your study abroad profile up to date.",
     "save": "Save Changes",
     "saving": "Saving...",
-    "saved": "Saved."
+    "saved": "Saved.",
+    "tabPersonal": "Personal Profile",
+    "tabPreferences": "Match Preferences",
+    "tabSettings": "Settings",
+    "settingsAccountHeading": "Account",
+    "settingsEmailLabel": "Email",
+    "settingsLanguageHeading": "Language",
+    "settingsLanguageBody": "Choose the language UniPath is displayed in.",
+    "settingsLogoutHeading": "Log out",
+    "settingsLogoutBody": "Sign out of UniPath on this device."
   },
   "ProfileFields": {
     "nationality": "Nationality",
@@ -132,7 +147,28 @@
   },
   "Explore": {
     "heading": "Explore Universities",
-    "subheading": "Find the right program for you from universities around the world."
+    "subheading": "Find the right program for you from universities around the world.",
+    "tabSearch": "Search",
+    "tabMatch": "Match",
+    "tabSaved": "Saved",
+    "tabCompare": "Compare",
+    "save": "Save",
+    "saved": "Saved",
+    "savedToast": "Saved to your list",
+    "removedToast": "Removed from your list",
+    "addToCompare": "Add to compare",
+    "removeFromCompare": "Remove from compare",
+    "compareFullToast": "You can compare up to {max} universities at a time",
+    "addedToCompareToast": "Added to compare",
+    "savedEmptyHeading": "Nothing saved yet",
+    "savedEmptyBody": "Save universities while you search so you can come back to them later.",
+    "savedEmptyCta": "Search universities",
+    "compareEmptyHeading": "Nothing to compare yet",
+    "compareEmptyBody": "Add 2 or more universities from search to compare them side by side.",
+    "compareEmptyCta": "Search universities",
+    "view": "View",
+    "remove": "Remove",
+    "locationLabel": "Location"
   },
   "ExploreSearch": {
     "label": "University Name",
@@ -238,7 +274,30 @@
     "officialWebsite": "Official website",
     "programsHeading": "Programs",
     "programsEmpty": "No programs listed yet.",
-    "viewRoute": "View Route"
+    "viewRoute": "View Route",
+    "tabAdmissions": "Admissions",
+    "tabYourFit": "Your Fit",
+    "tabStudentReality": "Student Reality",
+    "save": "Save",
+    "saved": "Saved",
+    "addToApplications": "Add to Applications",
+    "verified": "Verified",
+    "officialSource": "Official source",
+    "lastChecked": "Last checked {time}",
+    "admissionsHeading": "Admissions requirements",
+    "admissionsEmpty": "Official requirement data for this program isn't verified yet.",
+    "admissionsSourceNote": "Requirement data is checked against the official source below.",
+    "yourFitHeading": "Your fit",
+    "yourFitSignedOutHeading": "See your match with this university",
+    "yourFitSignedOutBody": "Take the Match quiz to see how well this university fits your goals.",
+    "yourFitCta": "Check your match",
+    "yourFitNoProgramsHeading": "No programs to match yet",
+    "yourFitNoProgramsBody": "This university doesn't have verified programs in our catalog yet.",
+    "studentRealityHeading": "Student reality",
+    "studentRealityBody": "Real questions and reports from students about this university.",
+    "studentRealityEmpty": "No student reports here yet.",
+    "studentRealityCta": "Ask the community",
+    "studentRealityViewAll": "View all discussions"
   },
   "ApplicationChecklist": {
     "heading": "Application Checklist",
@@ -400,7 +459,9 @@
       "visa": "Visa",
       "move": "Move",
       "arrival": "Arrival"
-    }
+    },
+    "youAreHere": "YOU ARE HERE",
+    "viewFullRoute": "View full route"
   },
   "JourneyStatus": {
     "done": "Done",
@@ -975,5 +1036,36 @@
     "low": "Low",
     "medium": "Medium",
     "high": "High"
+  },
+  "Status": {
+    "verified": "Verified",
+    "updated": "Updated",
+    "match": "{percent}% Match",
+    "ready": "Ready",
+    "missing": "Missing",
+    "dueSoon": "Due soon",
+    "completed": "Completed",
+    "needsAttention": "Needs attention",
+    "unknown": "Unknown"
+  },
+  "Plan": {
+    "heading": "Plan",
+    "subheading": "Your route, applications, passport, and calendar — connected.",
+    "tabOverview": "Overview",
+    "tabRoute": "Current Route",
+    "tabApplications": "Applications",
+    "tabPassport": "Passport",
+    "tabCalendar": "Calendar",
+    "chainHeading": "How this connects",
+    "chainRouteStepLabel": "Route step",
+    "chainPassportLabel": "Passport",
+    "chainTaskLabel": "Task",
+    "chainCalendarLabel": "Calendar",
+    "chainEmpty": "Complete your profile to see your connected plan.",
+    "viewRoute": "View full route",
+    "viewApplications": "View applications",
+    "viewPassport": "Open passport",
+    "viewCalendar": "Open calendar",
+    "emptyCta": "Complete your profile"
   }
 }

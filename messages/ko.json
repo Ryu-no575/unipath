@@ -16,7 +16,13 @@
     "newApplication": "+ 새 지원 추가",
     "login": "로그인",
     "logout": "로그아웃",
-    "routes": "루트"
+    "routes": "루트",
+    "home": "홈",
+    "plan": "플랜",
+    "settings": "설정",
+    "menu": "메뉴",
+    "skipToContent": "본문으로 건너뛰기",
+    "myAccount": "내 계정"
   },
   "Common": {
     "selectPlaceholder": "선택하세요..."
@@ -61,7 +67,16 @@
     "subheading": "유학 프로필을 최신 상태로 유지하세요.",
     "save": "변경사항 저장",
     "saving": "저장 중...",
-    "saved": "저장되었습니다."
+    "saved": "저장되었습니다.",
+    "tabPersonal": "개인 프로필",
+    "tabPreferences": "매칭 설정",
+    "tabSettings": "설정",
+    "settingsAccountHeading": "계정",
+    "settingsEmailLabel": "이메일",
+    "settingsLanguageHeading": "언어",
+    "settingsLanguageBody": "UniPath에 표시할 언어를 선택하세요.",
+    "settingsLogoutHeading": "로그아웃",
+    "settingsLogoutBody": "이 기기에서 UniPath 로그아웃합니다."
   },
   "ProfileFields": {
     "nationality": "국적",
@@ -132,7 +147,28 @@
   },
   "Explore": {
     "heading": "대학 탐색",
-    "subheading": "전 세계 대학 중에서 나에게 맞는 프로그램을 찾아보세요."
+    "subheading": "전 세계 대학 중에서 나에게 맞는 프로그램을 찾아보세요.",
+    "tabSearch": "검색",
+    "tabMatch": "매칭",
+    "tabSaved": "저장됨",
+    "tabCompare": "비교",
+    "save": "저장",
+    "saved": "저장됨",
+    "savedToast": "목록에 저장했습니다",
+    "removedToast": "목록에서 삭제했습니다",
+    "addToCompare": "비교에 추가",
+    "removeFromCompare": "비교에서 제거",
+    "compareFullToast": "한 번에 최대 {max}개 대학까지 비교할 수 있습니다",
+    "addedToCompareToast": "비교에 추가했습니다",
+    "savedEmptyHeading": "아직 저장된 항목이 없습니다",
+    "savedEmptyBody": "검색하는 동안 대학을 저장하면 나중에 다시 볼 수 있습니다.",
+    "savedEmptyCta": "대학 검색하기",
+    "compareEmptyHeading": "아직 비교할 항목이 없습니다",
+    "compareEmptyBody": "검색 결과에서 2개 이상의 대학을 추가하면 나란히 비교할 수 있습니다.",
+    "compareEmptyCta": "대학 검색하기",
+    "view": "보기",
+    "remove": "삭제",
+    "locationLabel": "위치"
   },
   "ExploreSearch": {
     "label": "대학 이름",
@@ -238,7 +274,30 @@
     "officialWebsite": "공식 웹사이트",
     "programsHeading": "프로그램",
     "programsEmpty": "아직 등록된 프로그램이 없습니다.",
-    "viewRoute": "루트 보기"
+    "viewRoute": "루트 보기",
+    "tabAdmissions": "입학 요건",
+    "tabYourFit": "나와의 궁합",
+    "tabStudentReality": "재학생 리얼리티",
+    "save": "저장",
+    "saved": "저장됨",
+    "addToApplications": "지원 목록에 추가",
+    "verified": "확인됨",
+    "officialSource": "공식 출처",
+    "lastChecked": "{time} 확인됨",
+    "admissionsHeading": "입학 요건",
+    "admissionsEmpty": "이 프로그램의 공식 요건 데이터가 아직 확인되지 않았습니다.",
+    "admissionsSourceNote": "요건 데이터는 아래 공식 출처를 기준으로 확인됩니다.",
+    "yourFitHeading": "나와의 궁합",
+    "yourFitSignedOutHeading": "이 대학과의 매칭도 확인하기",
+    "yourFitSignedOutBody": "매칭 퀴즈를 풀면 이 대학이 당신의 목표와 얼마나 잘 맞는지 알 수 있습니다.",
+    "yourFitCta": "매칭도 확인하기",
+    "yourFitNoProgramsHeading": "아직 비교할 프로그램이 없습니다",
+    "yourFitNoProgramsBody": "이 대학은 아직 카탈로그에 확인된 프로그램이 없습니다.",
+    "studentRealityHeading": "재학생 리얼리티",
+    "studentRealityBody": "이 대학에 대한 재학생들의 실제 질문과 후기.",
+    "studentRealityEmpty": "아직 재학생 게시물이 없습니다.",
+    "studentRealityCta": "커뮤니티에 질문하기",
+    "studentRealityViewAll": "모든 게시물 보기"
   },
   "ApplicationChecklist": {
     "heading": "지원 체크리스트",
@@ -400,7 +459,9 @@
       "visa": "비자",
       "move": "출국 준비",
       "arrival": "현지 도착"
-    }
+    },
+    "youAreHere": "현재 위치",
+    "viewFullRoute": "전체 루트 보기"
   },
   "JourneyStatus": {
     "done": "완료",
@@ -975,5 +1036,36 @@
     "low": "낮음",
     "medium": "보통",
     "high": "높음"
+  },
+  "Status": {
+    "verified": "확인됨",
+    "updated": "업데이트됨",
+    "match": "매칭 {percent}%",
+    "ready": "준비 완료",
+    "missing": "누락",
+    "dueSoon": "마감 임박",
+    "completed": "완료",
+    "needsAttention": "확인 필요",
+    "unknown": "알 수 없음"
+  },
+  "Plan": {
+    "heading": "플랜",
+    "subheading": "루트, 지원, 패스포트, 캘린더를 하나로 연결.",
+    "tabOverview": "개요",
+    "tabRoute": "현재 루트",
+    "tabApplications": "지원",
+    "tabPassport": "패스포트",
+    "tabCalendar": "캘린더",
+    "chainHeading": "연결 구조 보기",
+    "chainRouteStepLabel": "루트 단계",
+    "chainPassportLabel": "패스포트",
+    "chainTaskLabel": "작업",
+    "chainCalendarLabel": "캘린더",
+    "chainEmpty": "프로필을 완성하면 연결된 플랜을 볼 수 있습니다.",
+    "viewRoute": "전체 루트 보기",
+    "viewApplications": "지원 보기",
+    "viewPassport": "패스포트 열기",
+    "viewCalendar": "캘린더 열기",
+    "emptyCta": "프로필 완성하기"
   }
 }

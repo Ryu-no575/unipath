@@ -4,6 +4,7 @@ import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { isRtlLocale, routing } from "@/i18n/routing";
+import { ToastProvider } from "@/app/components/ui/Toast";
 import "../globals.css";
 
 const geistSans = Geist({
@@ -55,7 +56,7 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider messages={messages}>
-          {children}
+          <ToastProvider>{children}</ToastProvider>
         </NextIntlClientProvider>
       </body>
     </html>

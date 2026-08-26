@@ -1,7 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { ApplicationReadinessResult } from "@/app/lib/data/passport";
-import ProgressBar from "../ProgressBar";
+import Progress from "../ui/Progress";
 
 export default function RequirementReadiness({
   readiness,
@@ -64,7 +64,7 @@ export default function RequirementReadiness({
         <h2 className="text-base font-semibold text-zinc-900">{t("heading")}</h2>
         <span className="text-lg font-semibold text-zinc-900">{readiness.scorePercent}%</span>
       </div>
-      <ProgressBar value={readiness.scorePercent ?? 0} />
+      <Progress value={readiness.scorePercent ?? 0} />
       <p className="text-sm text-zinc-500">
         {t("summary", { ready: readiness.readyCount, total: readiness.trackableCount })}
       </p>

@@ -1,3 +1,6 @@
+"use client";
+
+import { useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import { getCountryOptions } from "@/app/lib/countries";
@@ -42,6 +45,7 @@ function reasonKey(kind: RealMatchReason["kind"]): string {
 }
 
 export default function RealMatchCard({ result, locale }: { result: RealMatchResult; locale: string }) {
+  const [expanded, setExpanded] = useState(false);
   const t = useTranslations("MatchResults");
   const liveData = useTranslations("LiveData");
   const fields = useTranslations("Fields");
@@ -113,16 +117,26 @@ export default function RealMatchCard({ result, locale }: { result: RealMatchRes
         </div>
       </div>
 
-      <div className="flex flex-col gap-1.5 border-t border-zinc-100 pt-4">
-        {reasons.map((reason, i) => (
-          <div key={i} className="flex items-start gap-2 text-sm">
-            <span className={reason.marker === "positive" ? "text-emerald-600" : "text-amber-600"} aria-hidden>
-              {reason.marker === "positive" ? "✓" : "△"}
-            </span>
-            <span className="text-zinc-700">{t(reasonKey(reason.kind) as "realWhyFieldPositive")}</span>
-          </div>
-        ))}
-      </div>
+      <button
+        type="button"
+        onClick={() => setExpanded((v) => !v)}
+        className="self-start border-t border-zinc-100 pt-4 text-sm font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
+      >
+        {expanded ? t("hideButton") : t("whyButton", { percent: scorePercent })}
+      </button>
+
+      {expanded && (
+        <div className="flex flex-col gap-1.5">
+          {reasons.map((reason, i) => (
+            <div key={i} className="flex items-start gap-2 text-sm">
+              <span className={reason.marker === "positive" ? "text-emerald-600" : "text-amber-600"} aria-hidden>
+                {reason.marker === "positive" ? "✓" : "△"}
+              </span>
+              <span className="text-zinc-700">{t(reasonKey(reason.kind) as "realWhyFieldPositive")}</span>
+            </div>
+          ))}
+        </div>
+      )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-4 text-xs text-zinc-400">
         <div className="flex items-center gap-3">

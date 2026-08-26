@@ -16,7 +16,13 @@
     "newApplication": "+ 新建申请",
     "login": "登录",
     "logout": "退出登录",
-    "routes": "路线"
+    "routes": "路线",
+    "home": "首页",
+    "plan": "计划",
+    "settings": "设置",
+    "menu": "菜单",
+    "skipToContent": "跳到主要内容",
+    "myAccount": "我的账户"
   },
   "Common": {
     "selectPlaceholder": "请选择..."
@@ -61,7 +67,16 @@
     "subheading": "保持你的留学资料为最新状态。",
     "save": "保存更改",
     "saving": "保存中...",
-    "saved": "已保存。"
+    "saved": "已保存。",
+    "tabPersonal": "个人资料",
+    "tabPreferences": "匹配偏好",
+    "tabSettings": "设置",
+    "settingsAccountHeading": "账户",
+    "settingsEmailLabel": "邮箱",
+    "settingsLanguageHeading": "语言",
+    "settingsLanguageBody": "选择 UniPath 的显示语言。",
+    "settingsLogoutHeading": "退出登录",
+    "settingsLogoutBody": "在此设备上退出 UniPath 登录。"
   },
   "ProfileFields": {
     "nationality": "国籍",
@@ -132,7 +147,28 @@
   },
   "Explore": {
     "heading": "探索大学",
-    "subheading": "从世界各地的大学中，找到适合你的项目。"
+    "subheading": "从世界各地的大学中，找到适合你的项目。",
+    "tabSearch": "搜索",
+    "tabMatch": "匹配",
+    "tabSaved": "已收藏",
+    "tabCompare": "对比",
+    "save": "收藏",
+    "saved": "已收藏",
+    "savedToast": "已保存到收藏列表",
+    "removedToast": "已从收藏列表移除",
+    "addToCompare": "加入对比",
+    "removeFromCompare": "移出对比",
+    "compareFullToast": "一次最多可对比 {max} 所大学",
+    "addedToCompareToast": "已加入对比",
+    "savedEmptyHeading": "暂无收藏",
+    "savedEmptyBody": "搜索时收藏大学，方便以后查看。",
+    "savedEmptyCta": "搜索大学",
+    "compareEmptyHeading": "暂无对比项",
+    "compareEmptyBody": "从搜索结果中添加 2 所及以上大学即可并排对比。",
+    "compareEmptyCta": "搜索大学",
+    "view": "查看",
+    "remove": "移除",
+    "locationLabel": "位置"
   },
   "ExploreSearch": {
     "label": "大学名称",
@@ -238,7 +274,30 @@
     "officialWebsite": "官方网站",
     "programsHeading": "专业项目",
     "programsEmpty": "暂无专业项目信息。",
-    "viewRoute": "查看路线"
+    "viewRoute": "查看路线",
+    "tabAdmissions": "录取要求",
+    "tabYourFit": "匹配度",
+    "tabStudentReality": "学生真实体验",
+    "save": "收藏",
+    "saved": "已收藏",
+    "addToApplications": "加入申请列表",
+    "verified": "已核实",
+    "officialSource": "官方来源",
+    "lastChecked": "{time}核实",
+    "admissionsHeading": "录取要求",
+    "admissionsEmpty": "该项目的官方要求数据尚未核实。",
+    "admissionsSourceNote": "要求数据以下方官方来源为准进行核实。",
+    "yourFitHeading": "匹配度",
+    "yourFitSignedOutHeading": "查看你与该校的匹配度",
+    "yourFitSignedOutBody": "完成匹配测验，了解这所大学与你目标的契合程度。",
+    "yourFitCta": "查看我的匹配度",
+    "yourFitNoProgramsHeading": "暂无可比对的项目",
+    "yourFitNoProgramsBody": "该大学在目录中还没有已核实的项目。",
+    "studentRealityHeading": "学生真实体验",
+    "studentRealityBody": "关于这所大学的真实学生提问与体验分享。",
+    "studentRealityEmpty": "这里还没有学生发布的内容。",
+    "studentRealityCta": "向社区提问",
+    "studentRealityViewAll": "查看全部讨论"
   },
   "ApplicationChecklist": {
     "heading": "申请清单",
@@ -400,7 +459,9 @@
       "visa": "签证",
       "move": "出行准备",
       "arrival": "抵达当地"
-    }
+    },
+    "youAreHere": "您在这里",
+    "viewFullRoute": "查看完整路线"
   },
   "JourneyStatus": {
     "done": "已完成",
@@ -975,5 +1036,36 @@
     "low": "低",
     "medium": "中",
     "high": "高"
+  },
+  "Status": {
+    "verified": "已核实",
+    "updated": "已更新",
+    "match": "匹配度 {percent}%",
+    "ready": "已就绪",
+    "missing": "缺失",
+    "dueSoon": "即将截止",
+    "completed": "已完成",
+    "needsAttention": "需要关注",
+    "unknown": "未知"
+  },
+  "Plan": {
+    "heading": "计划",
+    "subheading": "路线、申请、护照与日历，一站串联。",
+    "tabOverview": "概览",
+    "tabRoute": "当前路线",
+    "tabApplications": "申请",
+    "tabPassport": "护照",
+    "tabCalendar": "日历",
+    "chainHeading": "关联关系",
+    "chainRouteStepLabel": "路线步骤",
+    "chainPassportLabel": "护照",
+    "chainTaskLabel": "任务",
+    "chainCalendarLabel": "日历",
+    "chainEmpty": "完善你的资料后即可查看关联计划。",
+    "viewRoute": "查看完整路线",
+    "viewApplications": "查看申请",
+    "viewPassport": "打开护照",
+    "viewCalendar": "打开日历",
+    "emptyCta": "完善资料"
   }
 }

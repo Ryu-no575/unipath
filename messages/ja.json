@@ -16,7 +16,13 @@
     "newApplication": "+ 新しい出願",
     "login": "ログイン",
     "logout": "ログアウト",
-    "routes": "ルート"
+    "routes": "ルート",
+    "home": "ホーム",
+    "plan": "プラン",
+    "settings": "設定",
+    "menu": "メニュー",
+    "skipToContent": "コンテンツへスキップ",
+    "myAccount": "アカウント"
   },
   "Common": {
     "selectPlaceholder": "選択してください"
@@ -61,7 +67,16 @@
     "subheading": "留学プロフィールを最新の状態に保ちましょう。",
     "save": "変更を保存",
     "saving": "保存中...",
-    "saved": "保存しました。"
+    "saved": "保存しました。",
+    "tabPersonal": "プロフィール",
+    "tabPreferences": "マッチ設定",
+    "tabSettings": "設定",
+    "settingsAccountHeading": "アカウント",
+    "settingsEmailLabel": "メールアドレス",
+    "settingsLanguageHeading": "言語",
+    "settingsLanguageBody": "UniPathの表示言語を選択します。",
+    "settingsLogoutHeading": "ログアウト",
+    "settingsLogoutBody": "この端末でUniPathからログアウトします。"
   },
   "ProfileFields": {
     "nationality": "国籍",
@@ -132,7 +147,28 @@
   },
   "Explore": {
     "heading": "大学を探す",
-    "subheading": "世界中の大学から、自分に合った進学先を探す。"
+    "subheading": "世界中の大学から、自分に合った進学先を探す。",
+    "tabSearch": "検索",
+    "tabMatch": "マッチ",
+    "tabSaved": "保存済み",
+    "tabCompare": "比較",
+    "save": "保存",
+    "saved": "保存済み",
+    "savedToast": "リストに保存しました",
+    "removedToast": "リストから削除しました",
+    "addToCompare": "比較に追加",
+    "removeFromCompare": "比較から削除",
+    "compareFullToast": "比較は一度に最大{max}校までです",
+    "addedToCompareToast": "比較に追加しました",
+    "savedEmptyHeading": "まだ何も保存されていません",
+    "savedEmptyBody": "検索中に大学を保存すると、あとで見返せます。",
+    "savedEmptyCta": "大学を検索する",
+    "compareEmptyHeading": "まだ比較対象がありません",
+    "compareEmptyBody": "検索結果から2校以上を追加すると、並べて比較できます。",
+    "compareEmptyCta": "大学を検索する",
+    "view": "見る",
+    "remove": "削除",
+    "locationLabel": "所在地"
   },
   "ExploreSearch": {
     "label": "大学名",
@@ -238,7 +274,30 @@
     "officialWebsite": "公式サイト",
     "programsHeading": "プログラム",
     "programsEmpty": "まだプログラムが登録されていません。",
-    "viewRoute": "ルートを見る"
+    "viewRoute": "ルートを見る",
+    "tabAdmissions": "出願要件",
+    "tabYourFit": "あなたとの相性",
+    "tabStudentReality": "在学生のリアル",
+    "save": "保存",
+    "saved": "保存済み",
+    "addToApplications": "出願リストに追加",
+    "verified": "確認済み",
+    "officialSource": "公式情報源",
+    "lastChecked": "{time}に確認",
+    "admissionsHeading": "出願要件",
+    "admissionsEmpty": "このプログラムの公式な要件データはまだ確認されていません。",
+    "admissionsSourceNote": "要件データは下記の公式情報源で確認されています。",
+    "yourFitHeading": "あなたとの相性",
+    "yourFitSignedOutHeading": "この大学とのマッチ度を見る",
+    "yourFitSignedOutBody": "マッチ診断を受けると、この大学があなたの目標にどれだけ合っているかがわかります。",
+    "yourFitCta": "マッチ度を見る",
+    "yourFitNoProgramsHeading": "まだ比較できるプログラムがありません",
+    "yourFitNoProgramsBody": "この大学には、カタログ上で確認済みのプログラムがまだありません。",
+    "studentRealityHeading": "在学生のリアル",
+    "studentRealityBody": "この大学についての在学生からの質問やリアルな声。",
+    "studentRealityEmpty": "まだ在学生からの投稿はありません。",
+    "studentRealityCta": "コミュニティに質問する",
+    "studentRealityViewAll": "すべての投稿を見る"
   },
   "ApplicationChecklist": {
     "heading": "出願チェックリスト",
@@ -400,7 +459,9 @@
       "visa": "ビザ",
       "move": "渡航準備",
       "arrival": "現地到着"
-    }
+    },
+    "youAreHere": "現在地",
+    "viewFullRoute": "ルート全体を見る"
   },
   "JourneyStatus": {
     "done": "完了",
@@ -975,5 +1036,36 @@
     "low": "低い",
     "medium": "普通",
     "high": "高い"
+  },
+  "Status": {
+    "verified": "確認済み",
+    "updated": "更新あり",
+    "match": "マッチ度{percent}%",
+    "ready": "準備完了",
+    "missing": "未提出",
+    "dueSoon": "締切間近",
+    "completed": "完了",
+    "needsAttention": "要確認",
+    "unknown": "不明"
+  },
+  "Plan": {
+    "heading": "プラン",
+    "subheading": "ルート・出願・パスポート・カレンダーを、ひとつにつなげて管理。",
+    "tabOverview": "概要",
+    "tabRoute": "現在のルート",
+    "tabApplications": "出願",
+    "tabPassport": "パスポート",
+    "tabCalendar": "カレンダー",
+    "chainHeading": "つながりを見る",
+    "chainRouteStepLabel": "ルートのステップ",
+    "chainPassportLabel": "パスポート",
+    "chainTaskLabel": "タスク",
+    "chainCalendarLabel": "カレンダー",
+    "chainEmpty": "プロフィールを完成させると、つながったプランが表示されます。",
+    "viewRoute": "ルート全体を見る",
+    "viewApplications": "出願を見る",
+    "viewPassport": "パスポートを開く",
+    "viewCalendar": "カレンダーを開く",
+    "emptyCta": "プロフィールを完成させる"
   }
 }

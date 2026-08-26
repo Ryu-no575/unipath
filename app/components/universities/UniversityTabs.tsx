@@ -1,36 +1,27 @@
 import { getTranslations } from "next-intl/server";
-import { Link } from "@/i18n/navigation";
+import Tabs from "@/app/components/ui/Tabs";
+
+export type UniversityTab = "overview" | "admissions" | "yourFit" | "studentReality" | "community";
 
 export default async function UniversityTabs({
   universityId,
   active,
 }: {
   universityId: string;
-  active: "overview" | "community";
+  active: UniversityTab;
 }) {
   const t = await getTranslations("UniversityDetail");
+  const base = `/universities/${universityId}`;
 
-  const tabClass = (isActive: boolean) =>
-    `rounded-md px-3 py-2 text-sm font-medium transition-colors ${
-      isActive ? "bg-zinc-100 text-zinc-900" : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
-    }`;
+  const items: { key: UniversityTab; label: string; href: string }[] = [
+    { key: "overview", label: t("tabOverview"), href: base },
+    { key: "admissions", label: t("tabAdmissions"), href: `${base}/admissions` },
+    { key: "yourFit", label: t("tabYourFit"), href: `${base}/your-fit` },
+    { key: "studentReality", label: t("tabStudentReality"), href: `${base}/student-reality` },
+    { key: "community", label: t("tabCommunity"), href: `${base}/community` },
+  ];
 
   return (
-    <nav className="flex gap-1 border-b border-zinc-200 pb-2">
-      <Link
-        href={`/universities/${universityId}`}
-        aria-current={active === "overview" ? "page" : undefined}
-        className={tabClass(active === "overview")}
-      >
-        {t("tabOverview")}
-      </Link>
-      <Link
-        href={`/universities/${universityId}/community`}
-        aria-current={active === "community" ? "page" : undefined}
-        className={tabClass(active === "community")}
-      >
-        {t("tabCommunity")}
-      </Link>
-    </nav>
+    <Tabs items={items.map((item) => ({ ...item, active: item.key === active }))} />
   );
 }

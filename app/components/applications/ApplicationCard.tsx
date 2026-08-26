@@ -2,7 +2,7 @@ import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { ApplicationWithDetails } from "@/app/lib/data/applications";
 import ApplicationStatusBadge from "./ApplicationStatusBadge";
-import ProgressBar from "../ProgressBar";
+import Progress from "../ui/Progress";
 import DeadlineTime from "../DeadlineTime";
 import UrgencyBadge from "../UrgencyBadge";
 
@@ -63,7 +63,7 @@ export default function ApplicationCard({
         )}
       </div>
 
-      <ProgressBar value={application.progress} />
+      <Progress value={application.progress} />
       <p className="text-xs text-zinc-400">
         {t("updated", {
           date: format.dateTime(new Date(application.updatedAt), { dateStyle: "medium" }),

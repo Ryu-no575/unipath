@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useTranslations } from "next-intl";
 import type { AppLocale } from "@/i18n/routing";
 import type { Database } from "@/app/lib/supabase/database.types";
-import ProgressBar from "../ProgressBar";
+import Progress from "../ui/Progress";
 import TaskRow from "./TaskRow";
 import TaskForm from "./TaskForm";
 
@@ -43,7 +43,7 @@ export default function TaskList({
         </span>
       </div>
 
-      <ProgressBar value={progress} />
+      <Progress value={progress} />
 
       {editingId !== "new" && (
         <button

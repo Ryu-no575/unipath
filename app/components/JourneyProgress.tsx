@@ -1,5 +1,7 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
+import Card from "@/app/components/ui/Card";
+import SectionHeader from "@/app/components/ui/SectionHeader";
 
 export type JourneyStepStatus =
   | "done"
@@ -23,49 +25,108 @@ export interface JourneyStep {
   detail?: string;
 }
 
-const STATUS_STYLES: Record<JourneyStepStatus, string> = {
-  done: "border-emerald-200 bg-emerald-50",
-  inProgress: "border-blue-200 bg-blue-50",
-  available: "border-zinc-200 bg-white",
-  notStarted: "border-zinc-200 bg-white",
-  comingLater: "border-zinc-100 bg-zinc-50",
+const DOT_CLASSES: Record<JourneyStepStatus, string> = {
+  done: "bg-emerald-500",
+  inProgress: "bg-blue-600 ring-4 ring-blue-100",
+  available: "bg-blue-600 ring-4 ring-blue-100",
+  notStarted: "bg-zinc-300",
+  comingLater: "bg-zinc-200",
 };
 
-export default function JourneyProgress({ steps }: { steps: JourneyStep[] }) {
+const LABEL_CLASSES: Record<JourneyStepStatus, string> = {
+  done: "text-zinc-500",
+  inProgress: "text-zinc-900 font-semibold",
+  available: "text-zinc-900 font-semibold",
+  notStarted: "text-zinc-400",
+  comingLater: "text-zinc-300",
+};
+
+const LINE_DONE = "bg-emerald-300";
+const LINE_UPCOMING = "bg-zinc-200";
+
+/** The "you are here" step: the first one that's actionable right now. */
+function isCurrent(status: JourneyStepStatus): boolean {
+  return status === "inProgress" || status === "available";
+}
+
+/** One shared horizontal step rail for the whole journey (AGENTS.md section
+ * 4/11) -- same dot-and-line visual language as the Route map, just laid out
+ * horizontally for the Home summary. */
+export default function JourneyProgress({
+  steps,
+  routeHref,
+  routeDetail,
+}: {
+  steps: JourneyStep[];
+  /** "View full route" -- kept next to the rail so Home's Journey and
+   * Plan's Route stay visibly the same thing (AGENTS.md section 5). */
+  routeHref?: string;
+  routeDetail?: string;
+}) {
   const t = useTranslations("Journey");
   const statusT = useTranslations("JourneyStatus");
+  const currentIndex = steps.findIndex((step) => isCurrent(step.status));
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-6">
-      <h2 className="text-sm font-semibold text-zinc-900">{t("heading")}</h2>
-      <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-        {steps.map((step) => {
-          const body = (
-            <div
-              className={`flex h-full flex-col gap-1.5 rounded-lg border px-4 py-3 transition-colors ${
-                STATUS_STYLES[step.status]
-              } ${step.href ? "hover:border-zinc-300" : ""} ${
-                step.status === "comingLater" ? "opacity-60" : ""
-              }`}
+    <Card>
+      <SectionHeader
+        title={t("heading")}
+        action={
+          routeHref && (
+            <Link
+              href={routeHref}
+              className="text-sm font-medium text-zinc-600 underline underline-offset-2 hover:text-zinc-900"
             >
-              <span className="text-sm font-medium text-zinc-900">
+              {t("viewFullRoute")}
+            </Link>
+          )
+        }
+      />
+      {routeDetail && <p className="mt-1 text-sm text-zinc-500">{routeDetail}</p>}
+
+      <div className="mt-6 flex items-start overflow-x-auto pb-1">
+        {steps.map((step, index) => {
+          const current = index === currentIndex;
+          const body = (
+            <div className="flex flex-col items-center gap-2 px-1">
+              <span
+                className={`h-3 w-3 shrink-0 rounded-full ${DOT_CLASSES[step.status]}`}
+                aria-hidden
+              />
+              <span className={`whitespace-nowrap text-xs ${LABEL_CLASSES[step.status]}`}>
                 {t(`steps.${step.key}`)}
               </span>
-              <span className="text-xs text-zinc-500">{step.detail ?? statusT(step.status)}</span>
+              {current && (
+                <span className="whitespace-nowrap rounded-full bg-blue-100 px-2 py-0.5 text-[10px] font-bold uppercase tracking-wide text-blue-700">
+                  {t("youAreHere")}
+                </span>
+              )}
             </div>
           );
 
-          return step.href ? (
-            <Link key={step.key} href={step.href} className="block">
-              {body}
-            </Link>
-          ) : (
-            <div key={step.key} aria-disabled>
-              {body}
+          return (
+            <div key={step.key} className="flex min-w-0 flex-1 items-center">
+              {step.href ? (
+                <Link href={step.href} className="shrink-0">
+                  {body}
+                </Link>
+              ) : (
+                <div className="shrink-0" aria-disabled title={statusT(step.status)}>
+                  {body}
+                </div>
+              )}
+              {index < steps.length - 1 && (
+                <span
+                  className={`mx-1 mt-[-16px] h-px min-w-6 flex-1 ${
+                    step.status === "done" ? LINE_DONE : LINE_UPCOMING
+                  }`}
+                  aria-hidden
+                />
+              )}
             </div>
           );
         })}
       </div>
-    </div>
+    </Card>
   );
 }

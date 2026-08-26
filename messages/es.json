@@ -16,7 +16,13 @@
     "newApplication": "+ Nueva solicitud",
     "login": "Iniciar sesión",
     "logout": "Cerrar sesión",
-    "routes": "Rutas"
+    "routes": "Rutas",
+    "home": "Inicio",
+    "plan": "Plan",
+    "settings": "Ajustes",
+    "menu": "Menú",
+    "skipToContent": "Saltar al contenido",
+    "myAccount": "Mi cuenta"
   },
   "Common": {
     "selectPlaceholder": "Seleccionar..."
@@ -61,7 +67,16 @@
     "subheading": "Mantén actualizado tu perfil de estudios en el extranjero.",
     "save": "Guardar cambios",
     "saving": "Guardando...",
-    "saved": "Guardado."
+    "saved": "Guardado.",
+    "tabPersonal": "Perfil personal",
+    "tabPreferences": "Preferencias de match",
+    "tabSettings": "Ajustes",
+    "settingsAccountHeading": "Cuenta",
+    "settingsEmailLabel": "Correo electrónico",
+    "settingsLanguageHeading": "Idioma",
+    "settingsLanguageBody": "Elige el idioma en el que se muestra UniPath.",
+    "settingsLogoutHeading": "Cerrar sesión",
+    "settingsLogoutBody": "Cierra sesión de UniPath en este dispositivo."
   },
   "ProfileFields": {
     "nationality": "Nacionalidad",
@@ -132,7 +147,28 @@
   },
   "Explore": {
     "heading": "Explorar universidades",
-    "subheading": "Encuentra el programa adecuado para ti entre universidades de todo el mundo."
+    "subheading": "Encuentra el programa adecuado para ti entre universidades de todo el mundo.",
+    "tabSearch": "Buscar",
+    "tabMatch": "Match",
+    "tabSaved": "Guardados",
+    "tabCompare": "Comparar",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "savedToast": "Guardado en tu lista",
+    "removedToast": "Eliminado de tu lista",
+    "addToCompare": "Añadir a comparar",
+    "removeFromCompare": "Quitar de comparar",
+    "compareFullToast": "Puedes comparar hasta {max} universidades a la vez",
+    "addedToCompareToast": "Añadido a comparar",
+    "savedEmptyHeading": "Aún no has guardado nada",
+    "savedEmptyBody": "Guarda universidades mientras buscas para volver a verlas después.",
+    "savedEmptyCta": "Buscar universidades",
+    "compareEmptyHeading": "Aún no hay nada que comparar",
+    "compareEmptyBody": "Añade 2 o más universidades desde la búsqueda para compararlas.",
+    "compareEmptyCta": "Buscar universidades",
+    "view": "Ver",
+    "remove": "Quitar",
+    "locationLabel": "Ubicación"
   },
   "ExploreSearch": {
     "label": "Nombre de la universidad",
@@ -238,7 +274,30 @@
     "officialWebsite": "Sitio web oficial",
     "programsHeading": "Programas",
     "programsEmpty": "Aún no hay programas listados.",
-    "viewRoute": "Ver ruta"
+    "viewRoute": "Ver ruta",
+    "tabAdmissions": "Admisiones",
+    "tabYourFit": "Tu compatibilidad",
+    "tabStudentReality": "Realidad estudiantil",
+    "save": "Guardar",
+    "saved": "Guardado",
+    "addToApplications": "Añadir a solicitudes",
+    "verified": "Verificado",
+    "officialSource": "Fuente oficial",
+    "lastChecked": "Última verificación {time}",
+    "admissionsHeading": "Requisitos de admisión",
+    "admissionsEmpty": "Los datos oficiales de requisitos para este programa aún no están verificados.",
+    "admissionsSourceNote": "Los requisitos se verifican con la fuente oficial de abajo.",
+    "yourFitHeading": "Tu compatibilidad",
+    "yourFitSignedOutHeading": "Mira tu compatibilidad con esta universidad",
+    "yourFitSignedOutBody": "Haz el cuestionario de Match para ver qué tan bien encaja esta universidad con tus objetivos.",
+    "yourFitCta": "Ver mi compatibilidad",
+    "yourFitNoProgramsHeading": "Aún no hay programas para comparar",
+    "yourFitNoProgramsBody": "Esta universidad todavía no tiene programas verificados en nuestro catálogo.",
+    "studentRealityHeading": "Realidad estudiantil",
+    "studentRealityBody": "Preguntas y experiencias reales de estudiantes sobre esta universidad.",
+    "studentRealityEmpty": "Todavía no hay publicaciones de estudiantes aquí.",
+    "studentRealityCta": "Preguntar a la comunidad",
+    "studentRealityViewAll": "Ver todas las publicaciones"
   },
   "ApplicationChecklist": {
     "heading": "Lista de verificación de la solicitud",
@@ -400,7 +459,9 @@
       "visa": "Visa",
       "move": "Mudanza",
       "arrival": "Llegada"
-    }
+    },
+    "youAreHere": "ESTÁS AQUÍ",
+    "viewFullRoute": "Ver ruta completa"
   },
   "JourneyStatus": {
     "done": "Completado",
@@ -975,5 +1036,36 @@
     "low": "Baja",
     "medium": "Media",
     "high": "Alta"
+  },
+  "Status": {
+    "verified": "Verificado",
+    "updated": "Actualizado",
+    "match": "{percent}% de coincidencia",
+    "ready": "Listo",
+    "missing": "Falta",
+    "dueSoon": "Vence pronto",
+    "completed": "Completado",
+    "needsAttention": "Requiere atención",
+    "unknown": "Desconocido"
+  },
+  "Plan": {
+    "heading": "Plan",
+    "subheading": "Tu ruta, solicitudes, pasaporte y calendario, todo conectado.",
+    "tabOverview": "Resumen",
+    "tabRoute": "Ruta actual",
+    "tabApplications": "Solicitudes",
+    "tabPassport": "Pasaporte",
+    "tabCalendar": "Calendario",
+    "chainHeading": "Cómo se conecta esto",
+    "chainRouteStepLabel": "Paso de la ruta",
+    "chainPassportLabel": "Pasaporte",
+    "chainTaskLabel": "Tarea",
+    "chainCalendarLabel": "Calendario",
+    "chainEmpty": "Completa tu perfil para ver tu plan conectado.",
+    "viewRoute": "Ver ruta completa",
+    "viewApplications": "Ver solicitudes",
+    "viewPassport": "Abrir pasaporte",
+    "viewCalendar": "Abrir calendario",
+    "emptyCta": "Completa tu perfil"
   }
 }
