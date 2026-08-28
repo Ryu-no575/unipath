@@ -3,9 +3,9 @@ import type { Route } from "@/app/lib/routes/types";
 import { routeStepLabel } from "@/app/lib/routes/labels";
 
 /** The single "NEXT ACTION" banner shown at the top of /routes -- always
- * sourced from the same route (Balanced, see app/[locale]/routes/page.tsx)
- * as the Dashboard's "Your Current Route" widget, so the two can never
- * disagree (task brief item 9's Dashboard/Route consistency requirement). */
+ * sourced from the user's active route (see app/lib/routes/activeRoute.ts)
+ * so it agrees with Dashboard's "Your Current Route" widget and updates the
+ * moment the user switches routes (task brief item 14). */
 export default function RouteNextActionBanner({ route }: { route: Route }) {
   const t = useTranslations("Routes");
   const typeT = useTranslations("RouteTypeOptions");

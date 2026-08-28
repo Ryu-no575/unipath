@@ -8,7 +8,11 @@
     "start": "next start",
     "lint": "eslint",
     "import:universities": "node --no-warnings --env-file=.env.local scripts/import-universities.ts",
-    "sync:universities": "npm run import:universities"
+    "sync:universities": "npm run import:universities",
+    "validate:sources": "node --no-warnings --env-file=.env.local scripts/validate-sources.ts",
+    "verify:universities": "node --no-warnings --env-file=.env.local scripts/verify-universities.ts",
+    "data:status": "node --no-warnings --env-file=.env.local scripts/data-status.ts",
+    "priority:report": "node --no-warnings --env-file=.env.local scripts/priority-report.ts"
   },
   "dependencies": {
     "@supabase/ssr": "^0.12.5",

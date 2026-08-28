@@ -1,6 +1,8 @@
 import type { RouteContext } from "./context";
-import type { RouteStepParams } from "./steps";
-import type { RouteComparison, RoutePrepLoad, RouteRiskLevel, RouteStep } from "./types";
+import type { GapAnalysis } from "./gapAnalysis";
+import type { RoutePolicy } from "./routePolicies";
+import { assessFeasibility } from "./backwardPlanner";
+import type { RouteComparison, RoutePrepLoad, RouteRiskLevel, RouteStep, StudyIntensity } from "./types";
 
 function monthsUntil(todayIso: string, targetIso: string): number {
   const today = new Date(todayIso);
@@ -20,19 +22,21 @@ function estimateCost(ctx: RouteContext): { amount: number; currency: string } |
   return { amount: known.reduce((sum, t) => sum + t!.amount, 0), currency: [...currencies][0] };
 }
 
-/** Risk is a structural property of the route's own strategy (how many
- * backup options it targets, how much preparation buffer it leaves) plus,
- * when real classifiable requirement data exists, whether the shortlist
- * actually includes any safety-tier options. It is explicitly NOT an
- * admission-probability estimate -- see task brief item 13; the UI must
- * always render the disclaimer alongside this value. */
-function computeRisk(ctx: RouteContext, params: RouteStepParams): RouteRiskLevel {
+/** Risk is a structural property of the route's own strategy (shortlist
+ * size, buffer, risk tolerance) plus, when real classifiable requirement
+ * data exists, whether the shortlist actually includes any safety-tier
+ * options. Explicitly NOT an admission-probability estimate (task brief
+ * item 13/15); the UI always renders the disclaimer alongside this value. */
+function computeRisk(ctx: RouteContext, policy: RoutePolicy): RouteRiskLevel {
   let score = 0;
-  if (params.shortlistTarget <= 3) score += 2;
-  else if (params.shortlistTarget <= 5) score += 1;
+  if (policy.shortlistTarget <= 3) score += 2;
+  else if (policy.shortlistTarget <= 5) score += 1;
 
-  if (params.suggestedLeadDays <= 5) score += 2;
-  else if (params.suggestedLeadDays <= 14) score += 1;
+  if (policy.riskTolerance === "high") score += 1;
+  if (policy.riskTolerance === "low") score -= 1;
+
+  if (policy.bufferDays <= 5) score += 1;
+  if (policy.bufferDays >= 20) score -= 1;
 
   if (!ctx.isTargetMode && ctx.shortlistCount > 0) {
     if (ctx.eligibilityCounts.reach > 0 && ctx.eligibilityCounts.safety === 0) score += 1;
@@ -51,11 +55,58 @@ function computePreparationLoad(steps: RouteStep[]): RoutePrepLoad {
   return "high";
 }
 
-export function computeComparison(ctx: RouteContext, params: RouteStepParams, steps: RouteStep[]): RouteComparison {
+function computeExtraStudy(policy: RoutePolicy, gap: GapAnalysis): StudyIntensity {
+  if (policy.studyIntensity === "high") return "high";
+  if (policy.studyIntensity === "low" && !gap.english.hasGap && !gap.entranceExam.required) return "low";
+  return policy.studyIntensity;
+}
+
+/** Earliest not-yet-done, dated step (parent or sub-step) -- task brief item
+ * 19's "Starts". Null (rendered as "Now") when nothing on the route has a
+ * suggested date yet. */
+function computeStartsDate(steps: RouteStep[]): string | null {
+  let earliest: string | null = null;
+  for (const step of steps) {
+    if (step.status === "done") continue;
+    const candidates = [step.date?.suggestedDate, ...step.subSteps.map((s) => s.date?.suggestedDate)].filter(
+      (d): d is string => Boolean(d),
+    );
+    for (const iso of candidates) {
+      if (earliest == null || iso < earliest) earliest = iso;
+    }
+  }
+  return earliest;
+}
+
+/** The minimum lead time (never the route's preferred, longer one) each
+ * *actually required* activity needs -- feeds assessFeasibility so a route
+ * is only flagged infeasible because of real mandatory work (task brief
+ * item 15). */
+function requiredMinimumLeadDays(policy: RoutePolicy, gap: GapAnalysis): number[] {
+  const days: number[] = [policy.leadTime.application.min];
+  if (gap.english.hasGap) days.push(policy.leadTime.english.min);
+  if (gap.portfolio.required && !gap.portfolio.ready) days.push(policy.leadTime.portfolio.min);
+  if (gap.entranceExam.required && !gap.entranceExam.ready) days.push(policy.leadTime.entranceExam.min);
+  return days;
+}
+
+export function computeComparison(
+  ctx: RouteContext,
+  policy: RoutePolicy,
+  gap: GapAnalysis,
+  steps: RouteStep[],
+): RouteComparison {
   return {
     estimatedDurationMonths: ctx.earliestDeadline ? monthsUntil(ctx.input.today, ctx.earliestDeadline.date) : null,
     estimatedCost: estimateCost(ctx),
-    risk: computeRisk(ctx, params),
+    risk: computeRisk(ctx, policy),
     preparationLoad: computePreparationLoad(steps),
+    extraStudy: computeExtraStudy(policy, gap),
+    startsDate: computeStartsDate(steps),
+    feasibility: assessFeasibility({
+      today: ctx.input.today,
+      deadlineISO: ctx.earliestDeadline?.date ?? null,
+      requiredMinimumLeadDays: requiredMinimumLeadDays(policy, gap),
+    }),
   };
 }

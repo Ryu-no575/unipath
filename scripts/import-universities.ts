@@ -45,11 +45,12 @@ import type { Database } from "../app/lib/supabase/database.types.ts";
 // one region -- importUniversitiesForCountries accepts any ISO country list.
 const DEFAULT_SEED_COUNTRIES = [
   "US", "GB", "CA", "AU", "NZ", // North America / UK / Oceania
-  "DE", "FR", "NL", "IT", "ES", "CH", "SE", "DK", "FI", "IE", "BE", "AT", // Europe
-  "JP", "KR", "SG", "HK", "CN", "TW", "MY", "IN", // Asia
+  "DE", "FR", "NL", "IT", "ES", "CH", "SE", "DK", "FI", "IE", "BE", "AT", "PT", "NO", "PL", "CZ", "GR", "HU", // Europe
+  "JP", "KR", "SG", "HK", "CN", "TW", "MY", "IN", "TH", "VN", "PH", "ID", // East / Southeast Asia
+  "AE", "SA", "QA", "IL", "TR", // Middle East
 ];
-const DEFAULT_TARGET_TOTAL = 120;
-const DEFAULT_PER_COUNTRY_CAP = 10;
+const DEFAULT_TARGET_TOTAL = 320;
+const DEFAULT_PER_COUNTRY_CAP = 12;
 
 function parseArgs(argv: string[]): { countries?: string[]; target?: number; names?: string[] } {
   const result: { countries?: string[]; target?: number; names?: string[] } = {};

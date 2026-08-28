@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import NavShell from "@/app/components/nav/NavShell";
 import { createClient, getOptionalUser } from "@/app/lib/supabase/server";
+import { getUserRole } from "@/app/lib/supabase/roles";
 import { getNotificationBellData } from "@/app/lib/data/notifications";
 
 export default async function AppShellLayout({
@@ -18,9 +19,10 @@ export default async function AppShellLayout({
   setRequestLocale(locale);
 
   const user = await getOptionalUser();
-  const { unreadCount: unreadNotificationCount, recentNotifications } = user
-    ? await getNotificationBellData(await createClient(), user.id)
-    : { unreadCount: 0, recentNotifications: [] };
+  const [{ unreadCount: unreadNotificationCount, recentNotifications }, isAdmin] = await Promise.all([
+    user ? getNotificationBellData(await createClient(), user.id) : Promise.resolve({ unreadCount: 0, recentNotifications: [] }),
+    user ? getUserRole(user.id).then((role) => role === "admin") : Promise.resolve(false),
+  ]);
 
   return (
     <NavShell
@@ -28,6 +30,7 @@ export default async function AppShellLayout({
       locale={locale}
       unreadNotificationCount={unreadNotificationCount}
       recentNotifications={recentNotifications}
+      isAdmin={isAdmin}
     >
       {children}
     </NavShell>

@@ -2,6 +2,7 @@ import type {
   ApplicationStatus,
   DocumentType,
   TaskType,
+  TestType,
   Database,
 } from "@/app/lib/supabase/database.types";
 import {
@@ -48,12 +49,27 @@ export interface RouteContext {
   readinessAvgPercent: number | null;
   eligibilityCounts: { safety: number; match: number; reach: number; unknown: number };
   reachEnglishTarget: number | null;
+  /** The single toughest published English minimum across the whole scope
+   * (not just reach-tier items) -- what "improve your English" actually
+   * targets, regardless of route. */
+  toughestEnglishTarget: number | null;
+  /** A real, classified (never guessed) non-English standardized-test
+   * requirement -- e.g. SAT/ACT/GRE/GMAT -- surfaced by at least one
+   * in-scope program's admission_requirements. */
+  entranceExamRequired: boolean;
+  entranceExamReady: boolean;
+  entranceExamTestHint: TestType | null;
   hasInterviewSignal: boolean;
   completedTaskTypes: Set<TaskType>;
   anyTaskByType: Map<TaskType, TaskRow[]>;
 }
 
 const SUBMITTED_STATUSES: ApplicationStatus[] = ["applied", "interview", "accepted", "rejected", "withdrawn"];
+
+/** Standardized tests that are never the English requirement -- when one of
+ * these is a real, classified requirement (see classifyRequirement), the
+ * program has an entrance exam. Never inferred from anything else. */
+const ENTRANCE_EXAM_TEST_TYPES: TestType[] = ["sat", "act", "gre", "gmat"];
 
 function parseEnglishScore(scoreText: string | null): number | null {
   if (!scoreText) return null;
@@ -133,6 +149,9 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
   const missingDocumentTypes = new Map<DocumentType, string[]>();
   let portfolioRequired = false;
   let portfolioReady = true;
+  let entranceExamRequired = false;
+  let entranceExamReady = true;
+  let entranceExamTestHint: TestType | null = null;
   const computedPercents: number[] = [];
 
   for (const item of scope) {
@@ -143,6 +162,17 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
       if (readinessItem.documentType === "portfolio") {
         portfolioRequired = true;
         if (readinessItem.status !== "ready") portfolioReady = false;
+        continue;
+      }
+      if (
+        readinessItem.category === "test" &&
+        readinessItem.testHint &&
+        readinessItem.testHint !== "english" &&
+        ENTRANCE_EXAM_TEST_TYPES.includes(readinessItem.testHint)
+      ) {
+        entranceExamRequired = true;
+        entranceExamTestHint = readinessItem.testHint;
+        if (readinessItem.status !== "ready") entranceExamReady = false;
         continue;
       }
       if (readinessItem.status === "missing" && readinessItem.documentType) {
@@ -160,14 +190,17 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
 
   const eligibilityCounts = { safety: 0, match: 0, reach: 0, unknown: 0 };
   let reachEnglishTarget: number | null = null;
+  let toughestEnglishTarget: number | null = null;
   for (const item of scope) {
     eligibilityCounts[item.eligibilityTier]++;
-    if (item.eligibilityTier === "reach") {
-      const assessment = assessEligibility({ requirements: item.requirements, englishScore });
-      if (assessment.englishTarget != null) {
-        reachEnglishTarget =
-          reachEnglishTarget == null ? assessment.englishTarget : Math.max(reachEnglishTarget, assessment.englishTarget);
-      }
+    const assessment = assessEligibility({ requirements: item.requirements, englishScore });
+    if (assessment.englishTarget != null) {
+      toughestEnglishTarget =
+        toughestEnglishTarget == null ? assessment.englishTarget : Math.max(toughestEnglishTarget, assessment.englishTarget);
+    }
+    if (item.eligibilityTier === "reach" && assessment.englishTarget != null) {
+      reachEnglishTarget =
+        reachEnglishTarget == null ? assessment.englishTarget : Math.max(reachEnglishTarget, assessment.englishTarget);
     }
   }
 
@@ -200,6 +233,10 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
     readinessAvgPercent,
     eligibilityCounts,
     reachEnglishTarget,
+    toughestEnglishTarget,
+    entranceExamRequired,
+    entranceExamReady,
+    entranceExamTestHint,
     hasInterviewSignal,
     completedTaskTypes,
     anyTaskByType,

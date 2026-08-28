@@ -85,11 +85,27 @@ interface RorSearchResponse {
  * wrongly-included hospital or primary school would show up in Match
  * Results, which is the worse failure mode.
  */
-const HEI_QUALIFY_PATTERN =
+export const HEI_QUALIFY_PATTERN =
   /\buniversit(y|ies|e|ät|à|é|eit|aria|arios)\b|\bpolytechnic\b|\bpolitecnico\b|\binstitute[s]? of technology\b|\btechnische (universität|hochschule)\b|\bhochschule\b|\bfachhochschule\b|\bcollege\b|\buniversité\b|\buniversidad\b|\buniversiteit\b|\bécole (polytechnique|normale|centrale|des mines|nationale)\b|\bgrande[s]? école\b|\binstituto (superior|politécnico|tecnológico|universitario)\b|\bconservator(y|io|iu?m)\b|\bgraduate school\b|\bbusiness school\b|\bschool of (management|business|law|medicine|engineering|design|art|music)\b/i;
 
-const HEI_DISQUALIFY_PATTERN =
-  /\bhospital\b|\bklinik\b|\bclinic\b|\bmedical (center|centre)\b|\bgymnasium\b|\bgrundschule\b|\bprimary school\b|\belementary school\b|\bmiddle school\b|\b(junior|senior) high school\b|\bhigh school\b|\bkindergarten\b|\bpreschool\b|\bmontessori\b|\bberufsschule\b|\bvocational school\b/i;
+export const HEI_DISQUALIFY_PATTERN =
+  /\bhospital\b|\bklinik\b|\bclinic\b|\bmedical (center|centre)\b|\bgymnasium\b|\bgrundschule\b|\bprimary school\b|\belementary school\b|\bmiddle school\b|\b(junior|senior) high school\b|\bhigh school\b|\bkindergarten\b|\bpreschool\b|\bmontessori\b|\bberufsschule\b|\bvocational school\b|\bresearch (institute|center|centre)\b|\blaborator(y|ies)\b|\bacademy of sciences\b|\bnational laboratory\b|\bmuseum\b|\bobservatory\b/i;
+
+/**
+ * Name-only version of the qualify/disqualify heuristic above, for
+ * re-screening a university row already in the catalog (no ROR `types`/
+ * `status` fields available at that point -- see
+ * scripts/verify-universities.ts's Bad Data Detection pass). Deliberately
+ * conservative in the same direction as isLikelyHigherEducationInstitution:
+ * "qualifies" is true whenever the disqualify pattern doesn't match, since a
+ * name with neither pattern (e.g. a short acronym ROR sometimes returns as
+ * the display name) is ambiguous, not disqualified.
+ */
+export function classifyInstitutionNamePattern(name: string): "qualifies" | "disqualifies" | "ambiguous" {
+  if (HEI_DISQUALIFY_PATTERN.test(name)) return "disqualifies";
+  if (HEI_QUALIFY_PATTERN.test(name)) return "qualifies";
+  return "ambiguous";
+}
 
 export function isLikelyHigherEducationInstitution(item: RorItem): boolean {
   if (item.status && item.status !== "active") return false;

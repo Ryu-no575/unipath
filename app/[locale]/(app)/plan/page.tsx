@@ -10,6 +10,7 @@ import { getApplicationDocuments } from "@/app/lib/data/passport";
 import { computeProfileCompletionPercent } from "@/app/lib/passport/readiness";
 import { getRouteEngineInput } from "@/app/lib/data/routes";
 import { generateRoute } from "@/app/lib/routes/generateRoute";
+import { getActiveRouteType } from "@/app/lib/routes/activeRoute";
 import { routeStepLabel } from "@/app/lib/routes/labels";
 import DevStateError from "@/app/components/DevStateError";
 import PageHeader from "@/app/components/ui/PageHeader";
@@ -38,7 +39,7 @@ export default async function PlanOverviewPage({ params }: PageProps<"/[locale]/
     supabase.from("tasks").select("*").eq("user_id", user.id),
   ]);
 
-  const route = generateRoute(routeInput, "balanced");
+  const route = generateRoute(routeInput, getActiveRouteType(profile));
   const t = await getTranslations("Plan");
   const stepTypes = await getTranslations("RouteStepTypeOptions");
   const stepDetails = await getTranslations("RouteStepDetails");

@@ -107,6 +107,10 @@ export type DocumentType =
   | "degree_certificate"
   | "other";
 export type DocumentStatus = "draft" | "ready" | "submitted" | "expired";
+/** "user" | "admin" today; a future role (e.g. "moderator") is a one-line
+ * constraint change in 20260829000000_admin_roles_v1.sql, not a type
+ * migration -- see app/lib/supabase/roles.ts. */
+export type UserRole = "user" | "admin";
 
 export interface Database {
   public: {
@@ -135,6 +139,18 @@ export interface Database {
           timezone: string | null;
           onboarding_completed_at: string | null;
           onboarding_completed: boolean;
+          /** "fastest" | "safest" | "budget" | "ambitious" | "balanced" --
+           * raw text here (not the app's RouteType) since database.types.ts
+           * mirrors the SQL column, which is a plain text column with a
+           * CHECK constraint rather than a Postgres enum. Null means the
+           * user has never picked a route; callers default to "balanced"
+           * (see app/lib/routes/activeRoute.ts). */
+          active_route_type: string | null;
+          /** Route Decision Engine v2 Capacity Check -- user-declared hours
+           * per week they can realistically dedicate to prep (see
+           * app/lib/routes/capacityCheck.ts). Null means never set; never
+           * defaulted to a guessed number. */
+          weekly_study_hours_available: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -221,6 +237,39 @@ export interface Database {
         Update: Partial<Database["public"]["Tables"]["universities"]["Insert"]>;
         Relationships: [];
       };
+      user_roles: {
+        Row: {
+          id: string;
+          user_id: string;
+          role: UserRole;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["user_roles"]["Row"], "id" | "created_at" | "updated_at">> & {
+          user_id: string;
+          role: UserRole;
+        };
+        Update: Partial<Database["public"]["Tables"]["user_roles"]["Insert"]>;
+        Relationships: [];
+      };
+      admin_audit_logs: {
+        Row: {
+          id: string;
+          admin_user_id: string;
+          action: string;
+          entity_type: string;
+          entity_id: string | null;
+          metadata: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["admin_audit_logs"]["Row"], "id" | "created_at">> & {
+          admin_user_id: string;
+          action: string;
+          entity_type: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["admin_audit_logs"]["Insert"]>;
+        Relationships: [];
+      };
       user_custom_universities: {
         Row: {
           id: string;
@@ -252,6 +301,9 @@ export interface Database {
           official_url: string | null;
           /** When a curator last confirmed these fields against the official page. */
           verified_at: string | null;
+          /** Admin-flagged as needing another look (e.g. extracted official_url
+           * turned out wrong) -- distinct from simply "not verified yet". */
+          needs_review: boolean;
           created_at: string;
           updated_at: string;
         };
@@ -343,6 +395,12 @@ export interface Database {
            * source row instead of editing this one in place). */
           replaced_by_source_id: string | null;
           next_check_due_at: string | null;
+          /** Human review decision, independent of url_status -- see
+           * 20260829000000_admin_roles_v1.sql. A rejected source is excluded
+           * from Healthy counts and from Verified regardless of url_status. */
+          admin_rejected: boolean;
+          admin_rejected_at: string | null;
+          admin_rejected_by: string | null;
           created_at: string;
           updated_at: string;
         };

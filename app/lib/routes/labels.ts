@@ -1,5 +1,14 @@
 import type { DocumentType } from "@/app/lib/supabase/database.types";
-import type { RouteReason, RouteReasonKind, RouteStep, RouteStepType } from "./types";
+import type {
+  RouteDiffEntry,
+  RouteDiffKind,
+  RouteReason,
+  RouteReasonKind,
+  RouteStep,
+  RouteStepType,
+  RouteSubStep,
+  RouteSubStepKey,
+} from "./types";
 
 /** Every key routeStepLabel below can request from the "RouteStepDetails"
  * message namespace -- kept as an explicit union (rather than `string`) so
@@ -8,27 +17,42 @@ import type { RouteReason, RouteReasonKind, RouteStep, RouteStepType } from "./t
 export type RouteStepDetailKey =
   | "profileDone"
   | "profileTodo"
+  | "academicImprovement"
   | "languageTestMet"
   | "languageTestMetTarget"
   | "languageTestGeneric"
   | "languageTestTarget"
   | "universitySearch"
+  | "backupUniversities"
+  | "backupUniversitiesReady"
   | "shortlistProgress"
   | "shortlistClassification"
   | "documentReady"
   | "documentPrepare"
   | "documentPrepareFor"
+  | "documentVerification"
   | "portfolioReady"
   | "portfolioPrepare"
+  | "portfolioPrepareIterations"
+  | "entranceExamReady"
+  | "entranceExamPrepare"
+  | "scholarship"
+  | "scholarshipResearch"
+  | "tuitionComparison"
+  | "costOfLiving"
+  | "affordableHousing"
+  | "flightMonitoring"
   | "applicationSubmit"
   | "applicationProgress"
-  | "scholarship"
+  | "earlySubmission"
   | "interview"
   | "admissionWait"
   | "admissionAccepted"
   | "payment"
   | "visa"
+  | "backupVisa"
   | "housing"
+  | "multipleHousing"
   | "travel"
   | "arrival";
 
@@ -59,6 +83,9 @@ export function routeStepLabel(step: RouteStep, t: RouteStepTranslators): RouteS
     case "profile":
       return { title, detail: t.stepDetails(done ? "profileDone" : "profileTodo") };
 
+    case "academic_improvement":
+      return { title, detail: t.stepDetails("academicImprovement", { count: p.reachCount ?? 0 }) };
+
     case "language_test": {
       if (done) {
         return {
@@ -79,6 +106,14 @@ export function routeStepLabel(step: RouteStep, t: RouteStepTranslators): RouteS
 
     case "university_search":
       return { title, detail: t.stepDetails("universitySearch") };
+
+    case "backup_universities":
+      return {
+        title,
+        detail: done
+          ? t.stepDetails("backupUniversitiesReady")
+          : t.stepDetails("backupUniversities", { count: p.count ?? 0, target: p.targetCount ?? 0 }),
+      };
 
     case "shortlist": {
       const base = t.stepDetails("shortlistProgress", { count: p.count ?? 0, target: p.targetCount ?? 0 });
@@ -105,8 +140,34 @@ export function routeStepLabel(step: RouteStep, t: RouteStepTranslators): RouteS
       };
     }
 
+    case "document_verification":
+      return { title, detail: t.stepDetails("documentVerification") };
+
     case "portfolio":
-      return { title, detail: t.stepDetails(done ? "portfolioReady" : "portfolioPrepare") };
+      if (done) return { title, detail: t.stepDetails("portfolioReady") };
+      return {
+        title,
+        detail:
+          (p.count ?? 1) >= 2
+            ? t.stepDetails("portfolioPrepareIterations", { count: p.count ?? 1 })
+            : t.stepDetails("portfolioPrepare"),
+      };
+
+    case "entrance_exam":
+      return { title, detail: t.stepDetails(done ? "entranceExamReady" : "entranceExamPrepare") };
+
+    case "scholarship":
+      return { title, detail: t.stepDetails("scholarship") };
+    case "scholarship_research":
+      return { title, detail: t.stepDetails("scholarshipResearch") };
+    case "tuition_comparison":
+      return { title, detail: t.stepDetails("tuitionComparison") };
+    case "cost_of_living":
+      return { title, detail: t.stepDetails("costOfLiving") };
+    case "affordable_housing":
+      return { title, detail: t.stepDetails("affordableHousing") };
+    case "flight_monitoring":
+      return { title, detail: t.stepDetails("flightMonitoring") };
 
     case "application":
       return {
@@ -116,8 +177,8 @@ export function routeStepLabel(step: RouteStep, t: RouteStepTranslators): RouteS
           : t.stepDetails("applicationProgress", { submitted: p.submittedCount ?? 0, total: p.totalCount ?? 0 }),
       };
 
-    case "scholarship":
-      return { title, detail: t.stepDetails("scholarship") };
+    case "early_submission":
+      return { title, detail: t.stepDetails("earlySubmission") };
 
     case "interview":
       return { title, detail: t.stepDetails("interview") };
@@ -130,9 +191,13 @@ export function routeStepLabel(step: RouteStep, t: RouteStepTranslators): RouteS
 
     case "visa":
       return { title, detail: t.stepDetails("visa") };
+    case "backup_visa":
+      return { title, detail: t.stepDetails("backupVisa") };
 
     case "housing":
       return { title, detail: t.stepDetails("housing") };
+    case "multiple_housing":
+      return { title, detail: t.stepDetails("multipleHousing") };
 
     case "travel":
       return { title, detail: t.stepDetails("travel") };
@@ -142,9 +207,32 @@ export function routeStepLabel(step: RouteStep, t: RouteStepTranslators): RouteS
   }
 }
 
+/** "RouteSubStepOptions" namespace -- one short label per RouteSubStepKey.
+ * Progressive Disclosure (task brief item 7): these only render once a
+ * step's expand affordance is opened. */
+export function routeSubStepLabel(
+  subStep: RouteSubStep,
+  t: (key: RouteSubStepKey, values?: Values) => string,
+): string {
+  return t(subStep.key, subStep.labelParams.iteration != null ? { iteration: subStep.labelParams.iteration } : undefined);
+}
+
 /** Resolves one "Why this route?" bullet -- see app/lib/routes/reasons.ts
  * for how RouteReason values are computed from real numbers. `t` is the
  * "RouteReasons" namespace. */
 export function routeReasonLabel(reason: RouteReason, t: (key: RouteReasonKind, values?: Values) => string): string {
   return t(reason.kind, reason.params);
+}
+
+/** Resolves one "Switching to X route will: ..." bullet -- see
+ * app/lib/routes/routeDiff.ts. `t` is the "RouteDiffs" namespace;
+ * `stepTypes` is "RouteStepTypeOptions", used when a diff names a step. */
+export function routeDiffLabel(
+  diff: RouteDiffEntry,
+  t: (key: RouteDiffKind, values?: Values) => string,
+  stepTypes: (key: RouteStepType) => string,
+): string {
+  const values: Values = { ...diff.params };
+  if (diff.stepType) values.step = stepTypes(diff.stepType);
+  return t(diff.kind, values);
 }

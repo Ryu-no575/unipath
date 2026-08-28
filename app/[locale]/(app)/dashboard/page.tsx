@@ -16,6 +16,7 @@ import { readinessItemLabel } from "@/app/lib/passport/labels";
 import { buildCalendarEvents, selectNextAction } from "@/app/lib/journey";
 import { getRouteEngineInput } from "@/app/lib/data/routes";
 import { generateRoute } from "@/app/lib/routes/generateRoute";
+import { getActiveRouteType } from "@/app/lib/routes/activeRoute";
 import { routeStepLabel } from "@/app/lib/routes/labels";
 import type { JourneyStep } from "@/app/components/JourneyProgress";
 import NextActionCard from "@/app/components/NextActionCard";
@@ -52,7 +53,7 @@ export default async function DashboardPage({
     getDocumentLinksForUser(supabase),
     getRouteEngineInput(supabase, user.id, profile),
   ]);
-  const balancedRoute = generateRoute(routeInput, "balanced");
+  const activeRoute = generateRoute(routeInput, getActiveRouteType(profile));
 
   const t = await getTranslations("Dashboard");
   const applicationsT = await getTranslations("Applications");
@@ -151,8 +152,8 @@ export default async function DashboardPage({
     { key: "arrival", status: "comingLater", href: null },
   ];
 
-  const currentStepLabel = balancedRoute.currentStep
-    ? routeStepLabel(balancedRoute.currentStep, {
+  const currentStepLabel = activeRoute.currentStep
+    ? routeStepLabel(activeRoute.currentStep, {
         stepTypes: stepTypesT,
         stepDetails: stepDetailsT,
         documentTypes: (key) => documentTypeT(key),

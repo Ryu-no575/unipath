@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { hasServiceRoleEnv } from "@/app/lib/supabase/admin";
+import { requireAdmin } from "@/app/lib/supabase/roles";
 import { runDueValidations } from "@/app/lib/live-data/scheduler";
 
 const MAX_LIMIT = 100;
@@ -12,21 +13,27 @@ const MAX_LIMIT = 100;
  * endpoint already exists so wiring one up later is just "call this on a
  * timer", not new code.
  *
- * Gated two ways: always allowed outside production (same convention as
- * /admin, for manual triggering during development), and in production only
- * when the caller presents SOURCE_VALIDATION_CRON_SECRET as a Bearer token
- * -- unset by default, so this route is simply disabled in production until
- * an operator deliberately configures a scheduler for it.
+ * Two ways in: an authenticated admin (task brief item 27 -- re-checked
+ * server-side via requireAdmin(), same as every other admin action), or a
+ * caller presenting SOURCE_VALIDATION_CRON_SECRET as a Bearer token for an
+ * unattended scheduler -- unset by default, so the cron path is disabled
+ * until an operator deliberately configures one. Outside production, either
+ * check passing is enough; a signed-out request with no cron secret is still
+ * rejected everywhere.
  */
 export async function POST(request: NextRequest): Promise<NextResponse> {
   if (!hasServiceRoleEnv()) {
     return NextResponse.json({ error: "SUPABASE_SERVICE_ROLE_KEY is not set." }, { status: 500 });
   }
 
-  if (process.env.NODE_ENV === "production") {
-    const secret = process.env.SOURCE_VALIDATION_CRON_SECRET;
-    const provided = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
-    if (!secret || provided !== secret) {
+  const secret = process.env.SOURCE_VALIDATION_CRON_SECRET;
+  const provided = request.headers.get("authorization")?.replace(/^Bearer\s+/i, "");
+  const cronAuthorized = Boolean(secret) && provided === secret;
+
+  if (!cronAuthorized) {
+    try {
+      await requireAdmin();
+    } catch {
       return NextResponse.json({ error: "Not found." }, { status: 404 });
     }
   }

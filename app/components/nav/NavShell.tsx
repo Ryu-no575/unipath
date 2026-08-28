@@ -20,12 +20,14 @@ export default function NavShell({
   userEmail,
   unreadNotificationCount = 0,
   recentNotifications = [],
+  isAdmin = false,
   children,
 }: {
   userEmail: string | null;
   locale: AppLocale;
   unreadNotificationCount?: number;
   recentNotifications?: NotificationSummary[];
+  isAdmin?: boolean;
   children: React.ReactNode;
 }) {
   const pathname = usePathname();
@@ -41,6 +43,7 @@ export default function NavShell({
     pathname.startsWith("/plan");
   const isCommunity = pathname.startsWith("/community");
   const isProfile = pathname.startsWith("/profile");
+  const isAdminSection = pathname.startsWith("/admin");
 
   const items: NavItem[] = [
     { key: "home", href: "/dashboard", label: t("home"), icon: HomeIcon, active: isHome },
@@ -94,6 +97,19 @@ export default function NavShell({
           </nav>
 
           <div className="flex items-center gap-1">
+            {isAdmin && (
+              <Link
+                href="/admin"
+                aria-current={isAdminSection ? "page" : undefined}
+                className={`hidden rounded-md px-3 py-2 text-sm font-medium transition-colors sm:block ${
+                  isAdminSection
+                    ? "bg-zinc-900 text-white"
+                    : "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900"
+                }`}
+              >
+                {t("admin")}
+              </Link>
+            )}
             {userEmail && (
               <NotificationBell
                 unreadCount={unreadNotificationCount}

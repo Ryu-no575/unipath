@@ -165,7 +165,14 @@ export default function MonthView({
                         {prefix ? `${prefix} — ` : ""}
                         {mainLabel}
                       </span>
-                      <CategoryBadge category={event.category} className="w-fit" />
+                      <div className="flex flex-wrap items-center gap-2">
+                        <CategoryBadge category={event.category} className="w-fit" />
+                        {event.origin === "route_generated" && (
+                          <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+                            {t("suggestedByRoute")}
+                          </span>
+                        )}
+                      </div>
                     </div>
                     <UrgencyBadge dueAt={event.dueAt} className="w-fit shrink-0" />
                   </li>

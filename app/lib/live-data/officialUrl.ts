@@ -13,6 +13,11 @@ export interface OfficialSourceLite {
   pageType: SourcePageType | null;
   sourceType: string;
   replacedBySourceId: string | null;
+  /** An admin has reviewed this source and decided it's not a legitimate
+   * official page for the entity it's attached to (see
+   * 20260829000000_admin_roles_v1.sql) -- excluded from the fallback chain
+   * entirely, the same as a hard-broken URL, regardless of urlStatus. */
+  adminRejected?: boolean;
 }
 
 export type OfficialSourceOutcome =
@@ -63,7 +68,7 @@ export function resolveBestOfficialUrl(
     .map((s) => followReplacements(s, byId))
     // A registry record (ROR) is a provenance reference, not the
     // university's own page -- never offered as "the" Official Source link.
-    .filter((s) => s.sourceType !== "ror" && !isHardBroken(s.urlStatus))
+    .filter((s) => s.sourceType !== "ror" && !isHardBroken(s.urlStatus) && !s.adminRejected)
     .sort((a, b) => pageTypeRank(a.pageType) - pageTypeRank(b.pageType));
 
   for (const candidate of candidates) {

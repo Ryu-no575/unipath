@@ -6,10 +6,12 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/app/lib/supabase/server";
 import { getUserState } from "@/app/lib/supabase/user-state";
 import { getRouteEngineInput } from "@/app/lib/data/routes";
-import { generateAllRoutes } from "@/app/lib/routes/generateRoute";
+import { generateAllRoutes, recommendRoute } from "@/app/lib/routes/generateRoute";
 import { ROUTE_TYPES } from "@/app/lib/routes/types";
+import { getActiveRouteType } from "@/app/lib/routes/activeRoute";
 import RouteCard from "@/app/components/routes/RouteCard";
 import RouteNextActionBanner from "@/app/components/routes/RouteNextActionBanner";
+import RouteRecommendationBanner from "@/app/components/routes/RouteRecommendationBanner";
 import DevStateError from "@/app/components/DevStateError";
 
 function firstParam(value: string | string[] | undefined): string | null {
@@ -41,6 +43,8 @@ export default async function RoutesPage({
     targetProgramId,
   });
   const routes = generateAllRoutes(input);
+  const activeRouteType = getActiveRouteType(profile);
+  const recommendation = recommendRoute(routes, input.scholarshipNeed);
 
   const t = await getTranslations("Routes");
   const hrefQuery = targetUniversityId
@@ -63,11 +67,26 @@ export default async function RoutesPage({
         </div>
       )}
 
-      <RouteNextActionBanner route={routes.balanced} />
+      <RouteNextActionBanner route={routes[activeRouteType]} />
+
+      <RouteRecommendationBanner recommendation={recommendation} />
+
+      <div className="flex justify-end">
+        <Link href={`/routes/compare${hrefQuery}`} className="text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900">
+          {t("compareRoutesLink")}
+        </Link>
+      </div>
 
       <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
         {ROUTE_TYPES.map((type) => (
-          <RouteCard key={type} route={routes[type]} hrefQuery={hrefQuery} />
+          <RouteCard
+            key={type}
+            route={routes[type]}
+            hrefQuery={hrefQuery}
+            locale={locale}
+            isActive={type === activeRouteType}
+            isRecommended={type === recommendation.recommendedType}
+          />
         ))}
       </div>
     </div>

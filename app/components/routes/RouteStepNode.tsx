@@ -1,10 +1,11 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { RouteStep } from "@/app/lib/routes/types";
-import { routeStepLabel } from "@/app/lib/routes/labels";
+import { routeStepLabel, routeSubStepLabel } from "@/app/lib/routes/labels";
 import { ROUTE_STEP_STYLES } from "@/app/lib/routes/step-style";
 import DeadlineTime from "@/app/components/DeadlineTime";
 import RouteStepIcon from "./RouteStepIcon";
+import RouteSubSteps from "./RouteSubSteps";
 
 const NODE_STATUS_CLASSES: Record<RouteStep["status"], string> = {
   done: "bg-emerald-100 text-emerald-700 ring-4 ring-emerald-50",
@@ -37,6 +38,7 @@ export default function RouteStepNode({
   const stepTypes = useTranslations("RouteStepTypeOptions");
   const stepDetails = useTranslations("RouteStepDetails");
   const documentTypes = useTranslations("DocumentTypeOptions");
+  const subStepTypes = useTranslations("RouteSubStepOptions");
   const format = useFormatter();
 
   const label = routeStepLabel(step, {
@@ -45,6 +47,12 @@ export default function RouteStepNode({
     documentTypes: (key) => documentTypes(key),
   });
   const style = ROUTE_STEP_STYLES[step.type];
+  const subStepViews = step.subSteps.map((sub) => ({
+    key: sub.key,
+    title: routeSubStepLabel(sub, subStepTypes),
+    dateText: sub.date?.suggestedDate ? format.dateTime(new Date(sub.date.suggestedDate), "long") : null,
+    done: sub.done,
+  }));
 
   return (
     <div className="relative flex gap-4 pb-7 last:pb-0">
@@ -103,6 +111,8 @@ export default function RouteStepNode({
             )}
           </div>
         )}
+
+        <RouteSubSteps items={subStepViews} showLabel={t("showSubSteps")} hideLabel={t("hideSubSteps")} />
 
         <div className="mt-1 flex flex-wrap items-center gap-3 text-xs">
           {step.calendarLinked && (

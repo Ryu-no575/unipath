@@ -1,5 +1,6 @@
 import type { TaskType } from "./supabase/database.types";
 import type { ApplicationWithDetails } from "./data/applications";
+import type { RouteType } from "./routes/types";
 
 // ---------------------------------------------------------------------------
 // Deadline urgency
@@ -87,6 +88,13 @@ export function selectNextAction<T extends NextActionTask>(tasks: T[]): T | null
 // separate calendar table, per the "don't duplicate data" requirement)
 // ---------------------------------------------------------------------------
 
+/** Where a Calendar entry came from -- task brief item 13. "official" is a
+ * verified admission_cycles deadline; "user_created" is a real `tasks` row;
+ * "route_generated" is a UniPath-computed suggested date from the user's
+ * active Route (see routeCalendarSync.ts) -- never persisted as a task, and
+ * always visibly labeled "UniPath Suggested" wherever it's rendered. */
+export type CalendarEventOrigin = "official" | "user_created" | "route_generated";
+
 export interface CalendarEvent {
   id: string;
   kind: "task" | "deadline";
@@ -99,6 +107,10 @@ export interface CalendarEvent {
   applicationId: string | null;
   taskId: string | null;
   priority: number | null;
+  origin: CalendarEventOrigin;
+  /** Set only when origin is "route_generated" -- which active route
+   * produced this suggested date (task brief item 13). */
+  routeType: RouteType | null;
 }
 
 export interface CalendarSourceTask {
@@ -135,6 +147,8 @@ export function buildCalendarEvents(
         applicationId: task.applicationId,
         taskId: task.id,
         priority: task.priority,
+        origin: "user_created",
+        routeType: null,
       };
     });
 
@@ -154,6 +168,8 @@ export function buildCalendarEvents(
         applicationId: app.id,
         taskId: null,
         priority: null,
+        origin: "official",
+        routeType: null,
       };
     });
 

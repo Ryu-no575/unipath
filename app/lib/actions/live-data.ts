@@ -4,6 +4,7 @@ import { revalidatePath } from "next/cache";
 import type { AppLocale } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
 import { hasServiceRoleEnv } from "@/app/lib/supabase/admin";
+import { requireAdmin, AdminAuthError } from "@/app/lib/supabase/roles";
 import { simulateChangeForUser } from "@/app/lib/live-data/simulate";
 import { checkSource, type CheckSourceResult } from "@/app/lib/live-data/checkSource";
 import { runDueValidations, type RunDueValidationsSummary } from "@/app/lib/live-data/scheduler";
@@ -94,16 +95,22 @@ export interface RunDueValidationsActionResult {
 /**
  * Admin-only manual trigger for the same batch job a real scheduler would
  * call on a timer (see app/lib/live-data/scheduler.ts and
- * app/api/admin/validate-sources/route.ts) -- lets a developer see Source
+ * app/api/admin/validate-sources/route.ts) -- lets an admin see Source
  * Health move without waiting for `next_check_due_at` to arrive on its own.
- * Gated to non-production like the rest of the /admin page.
+ * Independently re-checks `requireAdmin()` (task brief item 27) -- this is a
+ * public Server Action endpoint regardless of which page's button calls it.
  */
 export async function runDueValidationsAction(locale: AppLocale): Promise<RunDueValidationsActionResult> {
-  if (process.env.NODE_ENV === "production") {
-    return { error: "Only available outside production." };
-  }
   if (!hasServiceRoleEnv()) {
     return { error: "SUPABASE_SERVICE_ROLE_KEY is not set in .env.local." };
+  }
+  try {
+    await requireAdmin();
+  } catch (err) {
+    if (err instanceof AdminAuthError) {
+      return { error: err.reason === "unauthenticated" ? "Not authenticated." : "Admin role required." };
+    }
+    return { error: "Admin check failed." };
   }
 
   try {

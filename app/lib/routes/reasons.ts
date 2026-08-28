@@ -1,5 +1,7 @@
 import type { RouteContext } from "./context";
-import type { RouteStepParams } from "./steps";
+import type { GapAnalysis } from "./gapAnalysis";
+import type { RoutePolicy } from "./routePolicies";
+import { assessFeasibility } from "./backwardPlanner";
 import type { RouteReason, RouteType } from "./types";
 
 function monthsUntil(todayIso: string, targetIso: string): number {
@@ -9,15 +11,37 @@ function monthsUntil(todayIso: string, targetIso: string): number {
   return Math.max(0, Math.round(days / 30));
 }
 
-/** Every reason cites a real, already-computed number from RouteContext --
- * never freeform text. This is what keeps "Why this route?" from being a
- * black box (task brief item 12): each bullet traces back to a specific
- * field the caller can also see rendered elsewhere on the page. */
-export function buildReasons(ctx: RouteContext, params: RouteStepParams, routeType: RouteType): RouteReason[] {
+/** Every reason cites a real, already-computed number from RouteContext,
+ * GapAnalysis, or this route's own Policy -- never freeform text. This is
+ * what keeps "Why this route?" from being a black box (task brief item 12):
+ * each bullet traces back to a specific field the caller can also see
+ * rendered elsewhere on the page. */
+export function buildReasons(
+  ctx: RouteContext,
+  policy: RoutePolicy,
+  gap: GapAnalysis,
+  routeType: RouteType,
+): RouteReason[] {
   const reasons: RouteReason[] = [];
 
-  if (ctx.reachEnglishTarget != null && ctx.englishScore != null && ctx.englishScore < ctx.reachEnglishTarget) {
-    reasons.push({ kind: "english_gap", params: { current: ctx.englishScore, target: ctx.reachEnglishTarget } });
+  const feasibility = assessFeasibility({
+    today: ctx.input.today,
+    deadlineISO: ctx.earliestDeadline?.date ?? null,
+    requiredMinimumLeadDays: [
+      policy.leadTime.application.min,
+      ...(gap.english.hasGap ? [policy.leadTime.english.min] : []),
+      ...(gap.portfolio.required && !gap.portfolio.ready ? [policy.leadTime.portfolio.min] : []),
+      ...(gap.entranceExam.required && !gap.entranceExam.ready ? [policy.leadTime.entranceExam.min] : []),
+    ],
+  });
+  if (feasibility.status === "infeasible") {
+    reasons.push({ kind: "feasibility_infeasible" });
+  } else if (feasibility.status === "tight") {
+    reasons.push({ kind: "feasibility_tight" });
+  }
+
+  if (gap.english.hasGap) {
+    reasons.push({ kind: "english_gap", params: { current: gap.english.current!, target: gap.english.target! } });
   } else if (ctx.hasEnglishSignal) {
     reasons.push({ kind: "english_met" });
   }
@@ -33,23 +57,39 @@ export function buildReasons(ctx: RouteContext, params: RouteStepParams, routeTy
   }
 
   if (!ctx.isTargetMode) {
-    reasons.push({ kind: "shortlist_target", params: { count: ctx.shortlistCount, target: params.shortlistTarget } });
+    reasons.push({ kind: "shortlist_target", params: { count: ctx.shortlistCount, target: policy.shortlistTarget } });
   }
 
   if (!ctx.input.profile.onboarding_completed) {
     reasons.push({ kind: "profile_incomplete" });
   }
 
-  if (params.includeScholarshipStep) {
+  if (policy.steps.budgetSteps) {
+    reasons.push({ kind: ctx.input.scholarshipNeed ? "scholarship_signal" : "scholarship_prioritized" });
+    reasons.push({ kind: "budget_focus" });
+  } else if (policy.steps.scholarshipStep) {
     reasons.push({ kind: ctx.input.scholarshipNeed ? "scholarship_signal" : "scholarship_prioritized" });
   }
 
-  if (routeType === "budget") reasons.push({ kind: "budget_focus" });
-  if (routeType === "safest") reasons.push({ kind: "safety_focus" });
+  if (routeType === "safest") {
+    reasons.push({ kind: "safety_focus" });
+    reasons.push({ kind: "large_buffer", params: { days: policy.bufferDays } });
+  }
+
+  if (policy.steps.academicImprovement && gap.reachCount > 0) {
+    reasons.push({ kind: "academic_improvement_reach", params: { count: gap.reachCount } });
+  }
   if (routeType === "ambitious" && ctx.eligibilityCounts.reach > 0) {
     reasons.push({ kind: "reach_included", params: { count: ctx.eligibilityCounts.reach } });
   }
+  if (policy.portfolioIterations >= 2 && gap.portfolio.required) {
+    reasons.push({ kind: "portfolio_iterations", params: { count: policy.portfolioIterations } });
+  }
+  if (policy.steps.entranceExamPrepPlan && gap.entranceExam.required) {
+    reasons.push({ kind: "entrance_exam_prep" });
+  }
+
   if (routeType === "fastest") reasons.push({ kind: "fast_track" });
 
-  return reasons.slice(0, 5);
+  return reasons.slice(0, 6);
 }

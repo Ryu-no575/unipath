@@ -67,6 +67,7 @@ type SourceLite = {
   program_id: string | null;
   verified_at: string | null;
   last_checked_at: string | null;
+  admin_rejected: boolean;
 };
 
 /**
@@ -99,7 +100,7 @@ export async function getRealMatchCandidates(): Promise<RealProgramCandidate[]> 
       ? supabase
           .from("sources")
           .select(
-            "id, official_url, resolved_url, url_status, page_type, source_type, replaced_by_source_id, university_id, program_id, verified_at, last_checked_at",
+            "id, official_url, resolved_url, url_status, page_type, source_type, replaced_by_source_id, university_id, program_id, verified_at, last_checked_at, admin_rejected",
           )
           .or(
             [
@@ -161,6 +162,7 @@ export async function getRealMatchCandidates(): Promise<RealProgramCandidate[]> 
         pageType: s.page_type,
         sourceType: s.source_type,
         replacedBySourceId: s.replaced_by_source_id,
+        adminRejected: s.admin_rejected,
       })),
       university.official_website,
     );

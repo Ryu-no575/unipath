@@ -73,6 +73,11 @@ export default function TimelineView({
                       </span>
                       <div className="flex flex-wrap items-center gap-2">
                         <CategoryBadge category={event.category} />
+                        {event.origin === "route_generated" && (
+                          <span className="rounded-full bg-indigo-50 px-2 py-0.5 text-[11px] font-medium text-indigo-700">
+                            {t("suggestedByRoute")}
+                          </span>
+                        )}
                         <DeadlineTime
                           isoInstant={event.dueAt}
                           sourceTimezone={event.timezone}

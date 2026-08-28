@@ -17,9 +17,12 @@ const shared = {
 
 /** One glyph per RouteStepType. Reuses CategoryIcon for the step types that
  * map 1:1 onto a TaskType (see ROUTE_STEP_STYLES.taskIconType) so a "Visa"
- * step and a "Visa" task/calendar entry always look the same; only the five
- * Route-only step types (profile, university_search, shortlist, portfolio,
- * admission) get a distinct glyph here. */
+ * step and a "Visa" task/calendar entry always look the same; every other
+ * Route-only step type (profile, university_search, shortlist, portfolio,
+ * admission, academic_improvement, backup_universities, tuition_comparison/
+ * cost_of_living) gets a distinct glyph here so a route's own extra steps
+ * are visually recognizable at a glance (task brief item 8), never the
+ * fallback dot. */
 export default function RouteStepIcon({ type, className }: { type: RouteStepType; className?: string }) {
   const style = ROUTE_STEP_STYLES[type];
   if (style.taskIconType) {
@@ -62,6 +65,27 @@ export default function RouteStepIcon({ type, className }: { type: RouteStepType
         <svg {...props}>
           <path d="M3 8.5 10 4l7 4.5-7 4.5-7-4.5Z" />
           <path d="M6 10.3v3.4c0 1.1 1.8 2 4 2s4-.9 4-2v-3.4" />
+        </svg>
+      );
+    case "academic_improvement":
+      return (
+        <svg {...props}>
+          <path d="M2.5 7.5 10 4l7.5 3.5L10 11 2.5 7.5Z" />
+          <path d="M5.5 9v3.3c0 1.3 2 2.4 4.5 2.4s4.5-1.1 4.5-2.4V9" />
+        </svg>
+      );
+    case "backup_universities":
+      return (
+        <svg {...props}>
+          <rect x="3" y="4" width="11" height="9" rx="1.2" />
+          <path d="M6 7.5h11a1.2 1.2 0 0 1 1.2 1.2V16" />
+        </svg>
+      );
+    case "tuition_comparison":
+    case "cost_of_living":
+      return (
+        <svg {...props}>
+          <path d="M10 3v14M5 6h10M6.5 6 4 11a2.5 2.5 0 0 0 5 0L6.5 6ZM13.5 6 11 11a2.5 2.5 0 0 0 5 0L13.5 6Z" />
         </svg>
       );
     default:

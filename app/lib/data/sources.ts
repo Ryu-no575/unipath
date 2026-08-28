@@ -18,6 +18,7 @@ export interface SourceSummary {
   verifiedAt: string | null;
   lastCheckedAt: string | null;
   replacedBySourceId: string | null;
+  adminRejected: boolean;
 }
 
 /** Official sources registered for a university/program/admission cycle
@@ -47,6 +48,7 @@ export async function getSourcesForEntities(
     verifiedAt: row.verified_at,
     lastCheckedAt: row.last_checked_at,
     replacedBySourceId: row.replaced_by_source_id,
+    adminRejected: row.admin_rejected,
   }));
 }
 
@@ -67,6 +69,7 @@ export function pickBestOfficialSource(
       pageType: s.pageType,
       sourceType: s.sourceType,
       replacedBySourceId: s.replacedBySourceId,
+      adminRejected: s.adminRejected,
     })),
     fallbackWebsite,
   );
