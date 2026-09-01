@@ -18,7 +18,13 @@ export type AdminAuditAction =
   | "ADMIN_ROLE_REVOKED"
   | "UNIVERSITY_SOURCE_MANUALLY_VERIFIED"
   | "UNIVERSITY_KEPT_NEEDS_REVIEW"
-  | "UNIVERSITY_SOURCE_REVALIDATED";
+  | "UNIVERSITY_SOURCE_REVALIDATED"
+  | "VISA_PROFILE_CREATED"
+  | "VISA_PROFILE_UPDATED"
+  | "VISA_ITEM_ADDED"
+  | "VISA_ITEM_REMOVED"
+  | "VISA_SOURCE_ADDED"
+  | "FEEDBACK_REVIEWED";
 
 export type AdminAuditEntityType =
   | "program"
@@ -26,7 +32,9 @@ export type AdminAuditEntityType =
   | "change_event"
   | "community_report"
   | "user_role"
-  | "university";
+  | "university"
+  | "visa_requirement_profile"
+  | "user_feedback";
 
 /**
  * Durable record of a privileged admin action (task brief item 22). Never

@@ -6,6 +6,7 @@ import { getUserState } from "@/app/lib/supabase/user-state";
 import { getMatchProfileData } from "@/app/lib/data/match";
 import { getCountryOptions } from "@/app/lib/countries";
 import MatchQuizWizard from "@/app/components/match/MatchQuizWizard";
+import GuestMatchQuizWizard from "@/app/components/match/GuestMatchQuizWizard";
 import DevStateError from "@/app/components/DevStateError";
 
 export default async function MatchQuizPage({
@@ -16,7 +17,11 @@ export default async function MatchQuizPage({
   setRequestLocale(locale);
 
   const state = await getUserState();
-  if (state.status === "unauthenticated") redirect(`/${locale}/login`);
+  // No hard login wall (task brief section 5) -- an unauthenticated visitor
+  // gets the guest quiz instead of a login redirect. An account that exists
+  // but hasn't finished onboarding still needs the real profile fields
+  // filled in there first, so that path is unchanged.
+  if (state.status === "unauthenticated") return <GuestMatchQuizWizard locale={locale} />;
   if (state.status === "needs_onboarding") redirect(`/${locale}/onboarding`);
   if (state.status === "error") return <DevStateError message={state.message} />;
 

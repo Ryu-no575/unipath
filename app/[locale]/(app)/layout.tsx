@@ -3,9 +3,11 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import NavShell from "@/app/components/nav/NavShell";
+import FeedbackWidget from "@/app/components/feedback/FeedbackWidget";
 import { createClient, getOptionalUser } from "@/app/lib/supabase/server";
 import { getUserRole } from "@/app/lib/supabase/roles";
 import { getNotificationBellData } from "@/app/lib/data/notifications";
+import type { AppLocale } from "@/i18n/routing";
 
 export default async function AppShellLayout({
   children,
@@ -25,14 +27,17 @@ export default async function AppShellLayout({
   ]);
 
   return (
-    <NavShell
-      userEmail={user?.email ?? null}
-      locale={locale}
-      unreadNotificationCount={unreadNotificationCount}
-      recentNotifications={recentNotifications}
-      isAdmin={isAdmin}
-    >
-      {children}
-    </NavShell>
+    <>
+      <NavShell
+        userEmail={user?.email ?? null}
+        locale={locale}
+        unreadNotificationCount={unreadNotificationCount}
+        recentNotifications={recentNotifications}
+        isAdmin={isAdmin}
+      >
+        {children}
+      </NavShell>
+      <FeedbackWidget locale={locale as AppLocale} />
+    </>
   );
 }

@@ -13,11 +13,11 @@ import {
   syncReadinessTasksForApplications,
 } from "@/app/lib/data/passport";
 import { readinessItemLabel } from "@/app/lib/passport/labels";
-import { buildCalendarEvents, selectNextAction } from "@/app/lib/journey";
+import { buildCalendarEvents, deriveLateJourneyStatuses, resolveNextActionFallbackStep, selectNextAction } from "@/app/lib/journey";
 import { getRouteEngineInput } from "@/app/lib/data/routes";
 import { generateRoute } from "@/app/lib/routes/generateRoute";
 import { getActiveRouteType } from "@/app/lib/routes/activeRoute";
-import { routeStepLabel } from "@/app/lib/routes/labels";
+import { routeStepHref, routeStepLabel } from "@/app/lib/routes/labels";
 import type { JourneyStep } from "@/app/components/JourneyProgress";
 import NextActionCard from "@/app/components/NextActionCard";
 import UpcomingDeadlines from "@/app/components/UpcomingDeadlines";
@@ -117,6 +117,8 @@ export default async function DashboardPage({
     (a) => a.status !== "considering" && a.status !== "withdrawn" && a.status !== "rejected",
   ).length;
 
+  const lateStatuses = deriveLateJourneyStatuses(activeRoute);
+
   const journeySteps: JourneyStep[] = [
     {
       key: "profile",
@@ -146,10 +148,10 @@ export default async function DashboardPage({
           ? t("applicationsDetail", { count: activeApplicationsCount })
           : undefined,
     },
-    { key: "funding", status: "comingLater", href: null },
-    { key: "visa", status: "comingLater", href: null },
-    { key: "move", status: "comingLater", href: null },
-    { key: "arrival", status: "comingLater", href: null },
+    { key: "funding", status: lateStatuses.funding, href: lateStatuses.funding === "comingLater" ? null : "/applications" },
+    { key: "visa", status: lateStatuses.visa, href: lateStatuses.visa === "comingLater" ? null : "/plan/visa" },
+    { key: "move", status: lateStatuses.move, href: lateStatuses.move === "comingLater" ? null : "/plan/housing" },
+    { key: "arrival", status: lateStatuses.arrival, href: lateStatuses.arrival === "comingLater" ? null : "/plan/arrival" },
   ];
 
   const currentStepLabel = activeRoute.currentStep
@@ -159,6 +161,24 @@ export default async function DashboardPage({
         documentTypes: (key) => documentTypeT(key),
       })
     : null;
+
+  const fallbackStep = nextTask ? null : resolveNextActionFallbackStep(activeRoute, profile.self_reported_stage);
+  const nextActionFallback =
+    fallbackStep && fallbackStep.fromSelfReport
+      ? {
+          title: stepTypesT(fallbackStep.type),
+          detail: t("selfReportedFallbackDetail"),
+          href: routeStepHref(fallbackStep.type),
+          dueAt: null,
+        }
+      : fallbackStep && activeRoute.currentStep
+        ? {
+            title: currentStepLabel!.title,
+            detail: currentStepLabel!.detail,
+            href: routeStepHref(activeRoute.currentStep.type),
+            dueAt: activeRoute.currentStep.date?.suggestedDate ?? activeRoute.currentStep.date?.officialDate ?? null,
+          }
+        : null;
 
   return (
     <div className="flex flex-col gap-8">
@@ -179,6 +199,7 @@ export default async function DashboardPage({
               }
             : null
         }
+        fallback={nextActionFallback}
       />
 
       {/* 2. Your Journey / Current Route -- one rail, links straight into Plan */}

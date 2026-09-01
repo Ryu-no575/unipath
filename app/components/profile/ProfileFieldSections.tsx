@@ -12,9 +12,10 @@ import {
   INTAKE_SEASONS,
   PRIORITY_LABEL_KEYS,
   PRIORITY_TYPES,
+  SELF_REPORTED_STAGES,
   type ProfileFormValues,
 } from "@/app/lib/profile-types";
-import type { PriorityType } from "@/app/lib/supabase/database.types";
+import type { JourneyStage, PriorityType } from "@/app/lib/supabase/database.types";
 
 const inputClasses =
   "w-full rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 placeholder:text-zinc-400 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500";
@@ -41,6 +42,41 @@ function Field({
       <span className={labelClasses}>{label}</span>
       {children}
     </label>
+  );
+}
+
+/** "Where are you in your study abroad journey?" (AGENTS.md section 1) --
+ * always the wizard's first step, before any of the granular profile
+ * questions below. Big single-tap options, never a dropdown -- this is the
+ * one question every first-time user answers within seconds of arriving. */
+export function JourneyStageSection({ values, onChange }: SectionProps) {
+  const t = useTranslations("Onboarding");
+  const stageT = useTranslations("JourneyStageOptions");
+
+  return (
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+      {SELF_REPORTED_STAGES.map((stage) => {
+        const selected = values.selfReportedStage === stage;
+        return (
+          <button
+            key={stage}
+            type="button"
+            onClick={() => onChange({ selfReportedStage: stage as JourneyStage })}
+            aria-pressed={selected}
+            className={`flex flex-col gap-1 rounded-lg border px-4 py-3.5 text-left transition-colors ${
+              selected
+                ? "border-zinc-900 bg-zinc-900 text-white"
+                : "border-zinc-200 bg-white text-zinc-700 hover:border-zinc-400"
+            }`}
+          >
+            <span className="text-sm font-medium">{stageT(stage)}</span>
+          </button>
+        );
+      })}
+      {!values.selfReportedStage && (
+        <p className="sm:col-span-2 text-xs text-zinc-400">{t("stageRequired")}</p>
+      )}
+    </div>
   );
 }
 

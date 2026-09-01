@@ -22,8 +22,10 @@ function buildNewApplicationHref(result: UniversitySearchResult): string {
 
 export default function UniversitySearchCard({
   result,
+  loggedIn,
 }: {
   result: UniversitySearchResult;
+  loggedIn: boolean;
 }) {
   const t = useTranslations("UniversitySearchCard");
   const location = [result.city, result.country].filter(Boolean).join(", ");
@@ -61,7 +63,7 @@ export default function UniversitySearchCard({
 
       <div className="mt-auto flex flex-col gap-2 border-t border-zinc-100 pt-4">
         <div className="flex items-center gap-2">
-          <SaveButton item={savedItem} />
+          <SaveButton item={savedItem} loggedIn={loggedIn} />
           <Link
             href={buildNewApplicationHref(result)}
             className="flex-1 rounded-md bg-zinc-900 px-3 py-2 text-center text-sm font-medium text-white transition-colors hover:bg-zinc-700"

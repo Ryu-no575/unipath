@@ -5,6 +5,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
 import { encodeMatchQuizAnswers } from "@/app/lib/match/query";
 import type { MatchQuizAnswers } from "@/app/lib/match/types";
+import { recordAnalyticsEvent } from "@/app/lib/analytics/track";
 
 /** Best-effort only: the match_preferences table (see
  * supabase/migrations/20260826200000_match_preferences.sql) is not required
@@ -43,6 +44,7 @@ export async function submitMatchQuizAction(locale: AppLocale, answers: MatchQui
   if (!user) redirect(`/${locale}/login`);
 
   await persistMatchPreferences(user.id, answers);
+  await recordAnalyticsEvent(supabase, user.id, "match_completed");
 
   redirect(`/${locale}/explore/match/results?${encodeMatchQuizAnswers(answers)}`);
 }

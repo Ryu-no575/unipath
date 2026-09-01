@@ -9,6 +9,16 @@ async function resolveEntityName(
   entityType: ChangeEntityType,
   entityId: string,
 ): Promise<string> {
+  if (entityType === "visa_requirement_profile") {
+    const { data } = await supabase
+      .from("visa_requirement_profiles")
+      .select("nationality_country, destination_country")
+      .eq("id", entityId)
+      .maybeSingle();
+    return data
+      ? `Your ${data.destination_country} student visa (from ${data.nationality_country})`
+      : "A visa requirement you're tracking";
+  }
   if (entityType === "university") {
     const { data } = await supabase.from("universities").select("official_name").eq("id", entityId).maybeSingle();
     return data?.official_name ?? "A university you're tracking";
@@ -42,6 +52,16 @@ async function resolveWatchingUserIds(
   entityType: ChangeEntityType,
   entityId: string,
 ): Promise<string[]> {
+  if (entityType === "visa_requirement_profile") {
+    // A user's own user_visa_journeys row IS their subscription -- no
+    // separate watch_subscriptions row exists for visa content (see
+    // 20260901000000_visa_center_v1.sql).
+    const { data } = await supabase
+      .from("user_visa_journeys")
+      .select("user_id")
+      .eq("visa_profile_id", entityId);
+    return [...new Set((data ?? []).map((row) => row.user_id))];
+  }
   if (entityType === "university") {
     const { data } = await supabase
       .from("watch_subscriptions")

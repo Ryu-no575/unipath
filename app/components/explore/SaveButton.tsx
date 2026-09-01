@@ -1,20 +1,40 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useTranslations } from "next-intl";
+import { useLocale, useTranslations } from "next-intl";
+import { usePathname, useRouter } from "@/i18n/navigation";
 import { useToast } from "@/app/components/ui/Toast";
 import { isSaved, toggleSaved, type SavedUniversityItem } from "@/app/lib/explore/savedUniversities";
 
-export default function SaveButton({ item }: { item: SavedUniversityItem }) {
+export default function SaveButton({
+  item,
+  loggedIn,
+}: {
+  item: SavedUniversityItem;
+  /** Saving a university is login-required (task brief section 2) -- a
+   * guest clicking this is sent to sign up/log in instead of silently
+   * writing to localStorage under no account at all. */
+  loggedIn: boolean;
+}) {
   const t = useTranslations("Explore");
   const showToast = useToast();
+  const router = useRouter();
+  const pathname = usePathname();
+  const locale = useLocale();
   const [saved, setSaved] = useState(false);
 
   useEffect(() => {
-    setSaved(isSaved(item.key));
-  }, [item.key]);
+    if (loggedIn) setSaved(isSaved(item.key));
+  }, [item.key, loggedIn]);
 
   function handleClick() {
+    if (!loggedIn) {
+      // redirectTo must be the full locale-prefixed pathname (see
+      // resolveDestination in app/lib/actions/auth.ts) -- usePathname() here
+      // is next-intl's locale-stripped version.
+      router.push(`/login?redirectTo=${encodeURIComponent(`/${locale}${pathname}`)}`);
+      return;
+    }
     const nowSaved = toggleSaved(item);
     setSaved(nowSaved);
     showToast(nowSaved ? t("savedToast") : t("removedToast"), nowSaved ? "success" : "neutral");

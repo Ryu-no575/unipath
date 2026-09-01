@@ -2,7 +2,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
-import { createClient } from "@/app/lib/supabase/server";
+import { createClient, getOptionalUser } from "@/app/lib/supabase/server";
 import { getUniversityForCommunity, listProgramsForUniversity } from "@/app/lib/data/community";
 import { getRealMatchCandidates } from "@/app/lib/data/match";
 import UniversityTabs from "@/app/components/universities/UniversityTabs";
@@ -21,7 +21,8 @@ export default async function UniversityDetailPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
-  const [university, programs, candidates] = await Promise.all([
+  const [user, university, programs, candidates] = await Promise.all([
+    getOptionalUser(),
     getUniversityForCommunity(supabase, id),
     listProgramsForUniversity(supabase, id),
     getRealMatchCandidates(),
@@ -69,7 +70,7 @@ export default async function UniversityDetailPage({
             {t("addToApplications")}
           </Button>
           <div className="w-32">
-            <SaveButton item={savedItem} />
+            <SaveButton item={savedItem} loggedIn={Boolean(user)} />
           </div>
           <Link
             href={`/routes?university=${id}${programs[0] ? `&program=${programs[0].id}` : ""}`}

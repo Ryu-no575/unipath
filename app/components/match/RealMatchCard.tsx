@@ -44,7 +44,19 @@ function reasonKey(kind: RealMatchReason["kind"]): string {
   }
 }
 
-export default function RealMatchCard({ result, locale }: { result: RealMatchResult; locale: string }) {
+export default function RealMatchCard({
+  result,
+  locale,
+  guest = false,
+}: {
+  result: RealMatchResult;
+  locale: string;
+  /** True on the guest Match Results page (task brief section 3) -- hides
+   * the "View Route" link, since /routes needs an account profile it can't
+   * compute anything from yet. Guests get a Route Preview via the page-level
+   * "See Route Preview" CTA instead (see explore/match/results/page.tsx). */
+  guest?: boolean;
+}) {
   const [expanded, setExpanded] = useState(false);
   const t = useTranslations("MatchResults");
   const liveData = useTranslations("LiveData");
@@ -151,12 +163,14 @@ export default function RealMatchCard({ result, locale }: { result: RealMatchRes
           >
             {t("communityLink")}
           </Link>
-          <Link
-            href={`/routes?university=${candidate.universityId}&program=${candidate.programId}`}
-            className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
-          >
-            {t("viewRoute")}
-          </Link>
+          {!guest && (
+            <Link
+              href={`/routes?university=${candidate.universityId}&program=${candidate.programId}`}
+              className="font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
+            >
+              {t("viewRoute")}
+            </Link>
+          )}
         </div>
         {candidate.officialUrlStatus === "unavailable" ? (
           <span className="text-amber-600">{liveData("sourceBeingReVerified")}</span>

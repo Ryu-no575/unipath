@@ -64,7 +64,7 @@ export type SourcePageType =
   | "scholarship"
   | "visa"
   | "other";
-export type ChangeEntityType = "university" | "program" | "admission_cycle";
+export type ChangeEntityType = "university" | "program" | "admission_cycle" | "visa_requirement_profile";
 export type ChangeType = "value_changed" | "added" | "removed";
 export type ChangeImportance = "critical" | "important" | "minor";
 export type ChangeReviewStatus =
@@ -111,6 +111,51 @@ export type DocumentStatus = "draft" | "ready" | "submitted" | "expired";
  * constraint change in 20260829000000_admin_roles_v1.sql, not a type
  * migration -- see app/lib/supabase/roles.ts. */
 export type UserRole = "user" | "admin";
+/** The onboarding question "Where are you in your study abroad journey?"
+ * (see 20260901000000_visa_center_v1.sql) -- self-reported, never inferred.
+ * Everything else the Journey rail shows is instead computed from the
+ * user's active Route -- see app/lib/journey.ts:deriveLateJourneyStatuses. */
+export type JourneyStage =
+  | "exploring"
+  | "choosing"
+  | "preparing_applications"
+  | "applied"
+  | "received_offer"
+  | "preparing_visa"
+  | "preparing_move"
+  | "arrived";
+export type VisaRequirementStatus = "verified" | "being_verified";
+export type VisaItemKey =
+  | "check_visa_type"
+  | "passport_validity"
+  | "admission_letter"
+  | "financial_proof"
+  | "accommodation_proof"
+  | "insurance"
+  | "application_form"
+  | "appointment"
+  | "biometrics"
+  | "submit_application"
+  | "receive_decision"
+  | "other";
+export type UserVisaJourneyStatus = "not_started" | "in_progress" | "submitted" | "decision_received";
+/** Public Beta feedback categories (AGENTS.md section 18). */
+export type FeedbackCategory = "confusing" | "wrong_information" | "missing_university" | "bug" | "feature_request" | "other";
+export type FeedbackStatus = "new" | "reviewed";
+/** Closed analytics event vocabulary (AGENTS.md section 19) -- never extend
+ * this with a raw string; every event this app fires is one of these. */
+export type AnalyticsEventName =
+  | "visit"
+  | "signup_started"
+  | "signup_completed"
+  | "onboarding_completed"
+  | "match_started"
+  | "match_completed"
+  | "route_viewed"
+  | "university_saved"
+  | "application_added"
+  | "visa_started"
+  | "community_posted";
 
 export interface Database {
   public: {
@@ -151,6 +196,8 @@ export interface Database {
            * app/lib/routes/capacityCheck.ts). Null means never set; never
            * defaulted to a guessed number. */
           weekly_study_hours_available: number | null;
+          /** The onboarding stage-selection question -- see JourneyStage. */
+          self_reported_stage: JourneyStage | null;
           created_at: string;
           updated_at: string;
         };
@@ -377,6 +424,9 @@ export interface Database {
           university_id: string | null;
           program_id: string | null;
           admission_cycle_id: string | null;
+          /** Alternative 4th entity link for a visa source -- see
+           * sources_single_entity_link, still capped at exactly one. */
+          visa_profile_id: string | null;
           /** Result of the most recent server-side reachability/domain check
            * (see app/lib/live-data/validateSource.ts). Only "valid" and
            * "redirected" count as Verified -- see AGENTS.md task notes on
@@ -488,6 +538,110 @@ export interface Database {
           user_id: string;
         };
         Update: Partial<Database["public"]["Tables"]["watch_subscriptions"]["Insert"]>;
+        Relationships: [];
+      };
+      visa_requirement_profiles: {
+        Row: {
+          id: string;
+          nationality_country: string;
+          destination_country: string;
+          study_level: ApplicationType;
+          visa_type: string | null;
+          summary: string | null;
+          status: VisaRequirementStatus;
+          last_checked_at: string | null;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["visa_requirement_profiles"]["Row"], "id" | "created_at" | "updated_at">> & {
+          nationality_country: string;
+          destination_country: string;
+          study_level: ApplicationType;
+        };
+        Update: Partial<Database["public"]["Tables"]["visa_requirement_profiles"]["Insert"]>;
+        Relationships: [];
+      };
+      visa_requirement_items: {
+        Row: {
+          id: string;
+          visa_profile_id: string;
+          item_key: VisaItemKey;
+          title: string | null;
+          description: string | null;
+          required: boolean;
+          order_index: number;
+          source_id: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["visa_requirement_items"]["Row"], "id" | "created_at">> & {
+          visa_profile_id: string;
+          item_key: VisaItemKey;
+        };
+        Update: Partial<Database["public"]["Tables"]["visa_requirement_items"]["Insert"]>;
+        Relationships: [];
+      };
+      user_visa_journeys: {
+        Row: {
+          id: string;
+          user_id: string;
+          application_id: string | null;
+          visa_profile_id: string;
+          status: UserVisaJourneyStatus;
+          created_at: string;
+          updated_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["user_visa_journeys"]["Row"], "id" | "created_at" | "updated_at">> & {
+          user_id: string;
+          visa_profile_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["user_visa_journeys"]["Insert"]>;
+        Relationships: [];
+      };
+      user_visa_checklist_progress: {
+        Row: {
+          id: string;
+          user_visa_journey_id: string;
+          visa_item_id: string;
+          completed: boolean;
+          completed_at: string | null;
+          created_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["user_visa_checklist_progress"]["Row"], "id" | "created_at">> & {
+          user_visa_journey_id: string;
+          visa_item_id: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["user_visa_checklist_progress"]["Insert"]>;
+        Relationships: [];
+      };
+      user_feedback: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          category: FeedbackCategory;
+          message: string;
+          page_path: string | null;
+          status: FeedbackStatus;
+          created_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["user_feedback"]["Row"], "id" | "created_at">> & {
+          category: FeedbackCategory;
+          message: string;
+        };
+        Update: Partial<Database["public"]["Tables"]["user_feedback"]["Insert"]>;
+        Relationships: [];
+      };
+      analytics_events: {
+        Row: {
+          id: string;
+          user_id: string | null;
+          event_name: AnalyticsEventName;
+          properties: Record<string, unknown>;
+          created_at: string;
+        };
+        Insert: Partial<Omit<Database["public"]["Tables"]["analytics_events"]["Row"], "id" | "created_at">> & {
+          event_name: AnalyticsEventName;
+        };
+        Update: Partial<Database["public"]["Tables"]["analytics_events"]["Insert"]>;
         Relationships: [];
       };
       applications: {

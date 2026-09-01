@@ -7,6 +7,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
 import type { ApplicationStatus, IntakeSeason } from "@/app/lib/supabase/database.types";
 import { CHECKLIST_TEMPLATE, type ChecklistTemplateItem } from "@/app/lib/checklist-template";
+import { recordAnalyticsEvent } from "@/app/lib/analytics/track";
 
 /**
  * Which university this application is for. `catalog` and `custom` reuse an
@@ -244,6 +245,10 @@ async function createApplicationRecord(
       if (error) throw new Error(error.message);
     }
   }
+
+  await recordAnalyticsEvent(supabase, user.id, "application_added", {
+    isCustomUniversity: Boolean(customUniversityId),
+  });
 
   return application.id;
 }

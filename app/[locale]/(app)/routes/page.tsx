@@ -13,6 +13,7 @@ import RouteCard from "@/app/components/routes/RouteCard";
 import RouteNextActionBanner from "@/app/components/routes/RouteNextActionBanner";
 import RouteRecommendationBanner from "@/app/components/routes/RouteRecommendationBanner";
 import DevStateError from "@/app/components/DevStateError";
+import { recordAnalyticsEvent } from "@/app/lib/analytics/track";
 
 function firstParam(value: string | string[] | undefined): string | null {
   if (Array.isArray(value)) return value[0] ?? null;
@@ -45,6 +46,7 @@ export default async function RoutesPage({
   const routes = generateAllRoutes(input);
   const activeRouteType = getActiveRouteType(profile);
   const recommendation = recommendRoute(routes, input.scholarshipNeed);
+  await recordAnalyticsEvent(supabase, user.id, "route_viewed", { activeRouteType });
 
   const t = await getTranslations("Routes");
   const hrefQuery = targetUniversityId

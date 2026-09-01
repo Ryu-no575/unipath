@@ -6,6 +6,7 @@ import type { AppLocale } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
 import type { CommunityPostType, StudentStatus } from "@/app/lib/supabase/database.types";
 import { notifyOnCommunityComment } from "@/app/lib/community/notify";
+import { recordAnalyticsEvent } from "@/app/lib/analytics/track";
 
 export interface CommunityActionResult {
   error?: string;
@@ -55,6 +56,8 @@ export async function createCommunityPostAction(
     .select("id")
     .single();
   if (error) return { error: error.message };
+
+  await recordAnalyticsEvent(supabase, user.id, "community_posted", { postType: input.postType });
 
   revalidatePath(`/${locale}/universities/${input.universityId}/community`);
   redirect(`/${locale}/universities/${input.universityId}/community/${data.id}`);

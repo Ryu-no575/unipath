@@ -61,12 +61,23 @@ async function attachEntityLabels(supabase: Client, changes: ChangeEventRow[]): 
   const programIds = new Set<string>();
   const cycleIds = new Set<string>();
   const sourceIds = new Set<string>();
+  const visaProfileIds = new Set<string>();
   for (const c of changes) {
     if (c.entity_type === "university") universityIds.add(c.entity_id);
     if (c.entity_type === "program") programIds.add(c.entity_id);
     if (c.entity_type === "admission_cycle") cycleIds.add(c.entity_id);
+    if (c.entity_type === "visa_requirement_profile") visaProfileIds.add(c.entity_id);
     if (c.source_id) sourceIds.add(c.source_id);
   }
+
+  const { data: visaProfiles } =
+    visaProfileIds.size > 0
+      ? await supabase
+          .from("visa_requirement_profiles")
+          .select("id, nationality_country, destination_country")
+          .in("id", Array.from(visaProfileIds))
+      : { data: [] as { id: string; nationality_country: string; destination_country: string }[] };
+  const visaProfileById = new Map((visaProfiles ?? []).map((v) => [v.id, v]));
 
   const [{ data: cycles }] = await Promise.all([
     cycleIds.size > 0
@@ -96,6 +107,10 @@ async function attachEntityLabels(supabase: Client, changes: ChangeEventRow[]): 
   const sourceById = new Map((sources ?? []).map((s) => [s.id, s]));
 
   function labelFor(change: ChangeEventRow): string {
+    if (change.entity_type === "visa_requirement_profile") {
+      const profile = visaProfileById.get(change.entity_id);
+      return profile ? `${profile.destination_country} visa — from ${profile.nationality_country}` : "Unknown visa profile";
+    }
     if (change.entity_type === "university") {
       return universityNameById.get(change.entity_id) ?? "Unknown university";
     }
@@ -132,6 +147,7 @@ async function attachEntityLabels(supabase: Client, changes: ChangeEventRow[]): 
   });
 }
 
+const VISA_PROFILE_COLUMNS = new Set(["summary", "visa_type"]);
 const UNIVERSITY_COLUMNS = new Set(["official_name", "country_code", "city", "official_website", "founded_year"]);
 const PROGRAM_COLUMNS = new Set(["official_name", "degree_type", "field", "language", "duration", "official_url"]);
 const ADMISSION_CYCLE_NUMERIC_COLUMNS = new Set(["tuition", "application_fee"]);
@@ -175,6 +191,24 @@ export async function applyApprovedChange(
   // real column names.
   function patchOf(value: string | number): Record<string, string | number> {
     return { [change.field_name]: value };
+  }
+
+  if (change.entity_type === "visa_requirement_profile") {
+    if (VISA_PROFILE_COLUMNS.has(change.field_name)) {
+      const { error } = await supabase
+        .from("visa_requirement_profiles")
+        .update({ [change.field_name]: change.new_value, status: "verified", last_checked_at: new Date().toISOString() } as never)
+        .eq("id", change.entity_id);
+      return error ? { applied: false, reason: error.message } : { applied: true };
+    }
+    // Checklist item content (financial_proof, processing_time, ...) has no
+    // direct column to write -- an admin edits visa_requirement_items
+    // directly from /admin/visa. Still mark the source re-verified.
+    const { error } = await supabase
+      .from("visa_requirement_profiles")
+      .update({ status: "verified", last_checked_at: new Date().toISOString() })
+      .eq("id", change.entity_id);
+    return error ? { applied: false, reason: error.message } : { applied: true };
   }
 
   if (change.entity_type === "university" && UNIVERSITY_COLUMNS.has(change.field_name)) {

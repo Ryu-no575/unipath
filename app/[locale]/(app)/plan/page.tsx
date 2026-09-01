@@ -6,6 +6,7 @@ import { Link } from "@/i18n/navigation";
 import { createClient } from "@/app/lib/supabase/server";
 import { getUserState } from "@/app/lib/supabase/user-state";
 import { getApplicationsWithDetails } from "@/app/lib/data/applications";
+import { visaEligibleApplications } from "@/app/lib/data/visa";
 import { getApplicationDocuments } from "@/app/lib/data/passport";
 import { computeProfileCompletionPercent } from "@/app/lib/passport/readiness";
 import { getRouteEngineInput } from "@/app/lib/data/routes";
@@ -63,6 +64,10 @@ export default async function PlanOverviewPage({ params }: PageProps<"/[locale]/
   const readyDocuments = documents.filter((d) => d.status === "ready" || d.status === "submitted").length;
   const profileCompletion = computeProfileCompletionPercent(profile);
   const upcomingTasks = (tasks ?? []).filter((task) => !task.completed && task.due_at).length;
+  // Progressive disclosure (AGENTS.md section 14): Visa/Housing/Travel/Arrival
+  // only appear once an offer is actually accepted -- a still-exploring user
+  // never sees them crowd the Plan hub.
+  const hasAcceptedApplication = visaEligibleApplications(applications).length > 0;
 
   return (
     <div className="flex flex-col gap-8">
@@ -141,6 +146,18 @@ export default async function PlanOverviewPage({ params }: PageProps<"/[locale]/
           cta={t("viewCalendar")}
         />
       </div>
+
+      {hasAcceptedApplication && (
+        <div className="flex flex-col gap-4">
+          <SectionHeader title={t("moveHeading")} />
+          <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            <PlanSummaryCard label={t("tabVisa")} value={t("tabVisaValue")} href="/plan/visa" cta={t("viewVisa")} />
+            <PlanSummaryCard label={t("tabHousing")} value={t("tabHousingValue")} href="/plan/housing" cta={t("viewHousing")} />
+            <PlanSummaryCard label={t("tabTravel")} value={t("tabTravelValue")} href="/plan/travel" cta={t("viewTravel")} />
+            <PlanSummaryCard label={t("tabArrival")} value={t("tabArrivalValue")} href="/plan/arrival" cta={t("viewArrival")} />
+          </div>
+        </div>
+      )}
     </div>
   );
 }

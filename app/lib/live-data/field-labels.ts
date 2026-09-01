@@ -20,6 +20,10 @@ export const FIELD_LABELS: Record<string, string> = {
   portfolio_requirement: "Portfolio requirement",
   language: "Program language",
   page_content: "Page content",
+  summary: "Visa requirement summary",
+  visa_type: "Visa type",
+  financial_proof: "Financial proof requirement",
+  processing_time: "Processing time",
 };
 
 export function fieldLabel(fieldName: string): string {

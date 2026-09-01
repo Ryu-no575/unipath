@@ -3,8 +3,22 @@ import type {
   Database,
   EnglishTestType,
   IntakeSeason,
+  JourneyStage,
   PriorityType,
 } from "./supabase/database.types";
+
+/** The onboarding question "Where are you in your study abroad journey?"
+ * (AGENTS.md section 1) -- order matters, it's rendered as this list. */
+export const SELF_REPORTED_STAGES: JourneyStage[] = [
+  "exploring",
+  "choosing",
+  "preparing_applications",
+  "applied",
+  "received_offer",
+  "preparing_visa",
+  "preparing_move",
+  "arrived",
+];
 
 /** Maps each PriorityType to its key in the PriorityOptions message
  * namespace (the DB enum is snake_case; message keys are camelCase). Shared
@@ -64,6 +78,7 @@ export const ENGLISH_TEST_TYPES: EnglishTestType[] = [
 /** Client-side form state — everything is a string/array so it maps 1:1 onto
  * <input>/<select> values; converted to typed DB values in the Server Action. */
 export interface ProfileFormValues {
+  selfReportedStage: JourneyStage | "";
   nationality: string;
   residenceCountry: string;
   preferredLocale: string;
@@ -88,6 +103,7 @@ export interface ProfileFormValues {
 
 export function emptyProfileFormValues(): ProfileFormValues {
   return {
+    selfReportedStage: "",
     nationality: "",
     residenceCountry: "",
     preferredLocale: "",
@@ -136,6 +152,7 @@ export function profileToFormValues(
   }
 
   return {
+    selfReportedStage: profile.self_reported_stage ?? "",
     nationality: profile.nationality ?? "",
     residenceCountry: profile.residence_country ?? "",
     preferredLocale: profile.preferred_locale ?? "",

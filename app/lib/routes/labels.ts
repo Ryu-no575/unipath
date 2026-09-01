@@ -63,6 +63,45 @@ export interface RouteStepLabel {
   detail: string;
 }
 
+/** Where Home's Next Action fallback (dashboard/page.tsx) sends the user when
+ * the route's currentStep has no real task yet to link to -- e.g. a brand
+ * new "exploring" profile whose currentStep is university_search, or a
+ * freshly-accepted offer whose currentStep is visa with no visa task
+ * created yet. Unmapped step types fall back to the full Route map. */
+const ROUTE_STEP_HREF: Partial<Record<RouteStepType, string>> = {
+  profile: "/profile",
+  academic_improvement: "/passport",
+  language_test: "/passport/tests",
+  entrance_exam: "/passport/tests",
+  university_search: "/explore/match",
+  shortlist: "/explore",
+  backup_universities: "/explore",
+  document: "/passport/documents",
+  document_verification: "/passport/documents",
+  portfolio: "/passport/documents",
+  application: "/applications",
+  early_submission: "/applications",
+  scholarship: "/applications",
+  scholarship_research: "/applications",
+  tuition_comparison: "/explore",
+  cost_of_living: "/plan/housing",
+  interview: "/applications",
+  admission: "/applications",
+  payment: "/applications",
+  visa: "/plan/visa",
+  backup_visa: "/plan/visa",
+  housing: "/plan/housing",
+  multiple_housing: "/plan/housing",
+  affordable_housing: "/plan/housing",
+  travel: "/plan/travel",
+  flight_monitoring: "/plan/travel",
+  arrival: "/plan/arrival",
+};
+
+export function routeStepHref(type: RouteStepType): string {
+  return ROUTE_STEP_HREF[type] ?? "/routes";
+}
+
 export interface RouteStepTranslators {
   /** "RouteStepDetails" namespace. */
   stepDetails: (key: RouteStepDetailKey, values?: Values) => string;

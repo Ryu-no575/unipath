@@ -11,7 +11,7 @@ type Status = "idle" | "loading" | "success" | "empty" | "error";
 const MIN_QUERY_LENGTH = 2;
 const DEBOUNCE_MS = 400;
 
-export default function ExploreSearch() {
+export default function ExploreSearch({ loggedIn }: { loggedIn: boolean }) {
   const [query, setQuery] = useState("");
   const [results, setResults] = useState<UniversitySearchResult[]>([]);
   const [status, setStatus] = useState<Status>("idle");
@@ -105,7 +105,7 @@ export default function ExploreSearch() {
       {status === "success" && (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {results.map((result) => (
-            <UniversitySearchCard key={result.rorId} result={result} />
+            <UniversitySearchCard key={result.rorId} result={result} loggedIn={loggedIn} />
           ))}
         </div>
       )}

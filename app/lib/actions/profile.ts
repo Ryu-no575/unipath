@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
 import { PRIORITY_TYPES, type ProfileFormValues } from "@/app/lib/profile-types";
+import { recordAnalyticsEvent } from "@/app/lib/analytics/track";
 
 function toNullableNumber(value: string): number | null {
   if (value.trim() === "") return null;
@@ -31,6 +32,7 @@ async function saveProfile(values: ProfileFormValues) {
   const { error: profileError } = await supabase.from("profiles").upsert(
     {
       user_id: user.id,
+      self_reported_stage: values.selfReportedStage || null,
       nationality: toNullableString(values.nationality),
       residence_country: toNullableString(values.residenceCountry),
       preferred_locale: toNullableString(values.preferredLocale),
@@ -113,6 +115,10 @@ export async function completeOnboardingAction(
       })
       .eq("user_id", user.id);
     if (completionError) throw new Error(completionError.message);
+
+    await recordAnalyticsEvent(supabase, user.id, "onboarding_completed", {
+      selfReportedStage: values.selfReportedStage || null,
+    });
   } catch (err) {
     // redirect() must not be called from inside a try/catch, so failures
     // return here instead — the caller keeps the wizard open with the

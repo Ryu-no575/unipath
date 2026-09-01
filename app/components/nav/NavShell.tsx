@@ -45,23 +45,20 @@ export default function NavShell({
   const isProfile = pathname.startsWith("/profile");
   const isAdminSection = pathname.startsWith("/admin");
 
-  const items: NavItem[] = [
-    { key: "home", href: "/dashboard", label: t("home"), icon: HomeIcon, active: isHome },
-    { key: "explore", href: "/explore", label: t("explore"), icon: ExploreIcon, active: isExplore },
-    ...(userEmail
-      ? [{ key: "plan", href: "/plan", label: t("plan"), icon: PlanIcon, active: isPlan }]
-      : []),
-    {
-      key: "community",
-      href: "/community",
-      label: t("community"),
-      icon: CommunityIcon,
-      active: isCommunity,
-    },
-    ...(userEmail
-      ? [{ key: "profile", href: "/profile", label: t("profile"), icon: ProfileIcon, active: isProfile }]
-      : []),
-  ];
+  // Signed-in nav: Home, Explore, Plan, Community, Profile (task brief
+  // section 7). A guest gets a deliberately minimal, marketing-style nav
+  // instead -- no Home (it's /dashboard, which a guest can't use) and no
+  // Plan/Profile (both entirely login-gated) -- so there's nothing here that
+  // dead-ends into a login redirect.
+  const items: NavItem[] = userEmail
+    ? [
+        { key: "home", href: "/dashboard", label: t("home"), icon: HomeIcon, active: isHome },
+        { key: "explore", href: "/explore", label: t("explore"), icon: ExploreIcon, active: isExplore },
+        { key: "plan", href: "/plan", label: t("plan"), icon: PlanIcon, active: isPlan },
+        { key: "community", href: "/community", label: t("community"), icon: CommunityIcon, active: isCommunity },
+        { key: "profile", href: "/profile", label: t("profile"), icon: ProfileIcon, active: isProfile },
+      ]
+    : [{ key: "explore", href: "/explore", label: t("explore"), icon: ExploreIcon, active: isExplore }];
 
   return (
     <div className="flex flex-1 flex-col bg-zinc-50">
@@ -74,7 +71,7 @@ export default function NavShell({
 
       <header className="sticky top-0 z-10 border-b border-zinc-200 bg-white/80 backdrop-blur">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-4 px-4 py-3 sm:px-6">
-          <Link href="/dashboard" className="text-lg font-semibold tracking-tight text-zinc-900">
+          <Link href={userEmail ? "/dashboard" : "/"} className="text-lg font-semibold tracking-tight text-zinc-900">
             {t("brand")}
           </Link>
 
@@ -94,6 +91,14 @@ export default function NavShell({
                 {item.label}
               </Link>
             ))}
+            {!userEmail && (
+              <Link
+                href="/#how-it-works"
+                className="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+              >
+                {t("howItWorks")}
+              </Link>
+            )}
           </nav>
 
           <div className="flex items-center gap-1">
@@ -120,12 +125,20 @@ export default function NavShell({
               <LanguageSwitcher />
             </div>
             {!userEmail && (
-              <Link
-                href="/login"
-                className="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
-              >
-                {t("login")}
-              </Link>
+              <>
+                <Link
+                  href="/login"
+                  className="rounded-md px-3 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900"
+                >
+                  {t("login")}
+                </Link>
+                <Link
+                  href="/explore"
+                  className="rounded-md bg-zinc-900 px-3 py-2 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+                >
+                  {t("tryFree")}
+                </Link>
+              </>
             )}
           </div>
         </div>

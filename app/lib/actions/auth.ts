@@ -4,6 +4,7 @@ import { redirect } from "next/navigation";
 import { routing, type AppLocale } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
 import { getUserState } from "@/app/lib/supabase/user-state";
+import { recordAnalyticsEvent } from "@/app/lib/analytics/track";
 
 export interface AuthFormState {
   error?: "missingFields" | "invalidCredentials" | "checkEmail" | "generic";
@@ -48,6 +49,7 @@ export async function signUpAction(
   if (!credentials) return { error: "missingFields" };
 
   const supabase = await createClient();
+  await recordAnalyticsEvent(supabase, null, "signup_started");
   const { data, error } = await supabase.auth.signUp(credentials);
 
   if (error) return { error: "generic" };
@@ -56,6 +58,8 @@ export async function signUpAction(
   // case there's no session yet, so send the user to check their inbox
   // instead of a protected page.
   if (!data.session) return { error: "checkEmail" };
+
+  await recordAnalyticsEvent(supabase, data.user?.id ?? null, "signup_completed");
 
   // Every new user goes through onboarding first, regardless of where they
   // were trying to go — there's no profile to act on yet.

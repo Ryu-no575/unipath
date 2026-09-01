@@ -13,6 +13,8 @@ interface AdminNavProps {
   navChanges: string;
   navCommunity: string;
   navPriorities: string;
+  navVisa: string;
+  navFeedback: string;
 }
 
 export default function AdminNav({
@@ -24,6 +26,8 @@ export default function AdminNav({
   navChanges,
   navCommunity,
   navPriorities,
+  navVisa,
+  navFeedback,
 }: AdminNavProps) {
   const pathname = usePathname();
 
@@ -33,8 +37,10 @@ export default function AdminNav({
     { href: "/admin/priorities", label: navPriorities },
     { href: "/admin/programs", label: navPrograms },
     { href: "/admin/sources", label: navSources },
+    { href: "/admin/visa", label: navVisa },
     { href: "/admin/changes", label: navChanges },
     { href: "/admin/community", label: navCommunity },
+    { href: "/admin/feedback", label: navFeedback },
   ] as const;
 
   return (

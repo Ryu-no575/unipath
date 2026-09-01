@@ -1,14 +1,16 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import type { AppLocale } from "@/i18n/routing";
 import type { ProfileFormValues } from "@/app/lib/profile-types";
 import { completeOnboardingAction } from "@/app/lib/actions/profile";
+import { consumeGuestProfileFromSession } from "@/app/lib/match/guestSession";
 import {
   AcademicSection,
   BudgetSection,
   DestinationSection,
+  JourneyStageSection,
   PersonalSection,
   PrioritiesSection,
   StudyGoalSection,
@@ -16,6 +18,7 @@ import {
 } from "./ProfileFieldSections";
 
 const STEPS = [
+  "stageTitle",
   "step1Title",
   "step2Title",
   "step3Title",
@@ -36,6 +39,31 @@ export default function OnboardingWizard({
   const [values, setValues] = useState(initialValues);
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
+
+  // Guest Match Quiz answers (task brief section 4: "don't make them redo
+  // the quiz") -- prefills whatever this brand-new profile hasn't already
+  // set, never overwriting a real value from an in-progress onboarding.
+  // Read once on mount and cleared immediately after (see guestSession.ts).
+  useEffect(() => {
+    const guest = consumeGuestProfileFromSession();
+    if (!guest) return;
+    setValues((prev) => ({
+      ...prev,
+      applicationType: prev.applicationType || guest.applicationType || prev.applicationType,
+      intakeYear: prev.intakeYear || guest.intakeYear || prev.intakeYear,
+      intakeSeason: prev.intakeSeason || guest.intakeSeason || prev.intakeSeason,
+      fieldOfStudy: prev.fieldOfStudy || guest.fieldOfStudy || prev.fieldOfStudy,
+      destinationCountries:
+        prev.destinationCountries.length > 0
+          ? prev.destinationCountries
+          : (guest.destinationCountries ?? prev.destinationCountries),
+      maxTuition: prev.maxTuition || guest.maxTuition || prev.maxTuition,
+      tuitionCurrency: prev.tuitionCurrency || guest.tuitionCurrency || prev.tuitionCurrency,
+      maxLivingCost: prev.maxLivingCost || guest.maxLivingCost || prev.maxLivingCost,
+      livingCostCurrency: prev.livingCostCurrency || guest.livingCostCurrency || prev.livingCostCurrency,
+    }));
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   function handleChange(patch: ProfileFieldPatch) {
     setValues((prev) => ({ ...prev, ...patch }));
@@ -62,6 +90,7 @@ export default function OnboardingWizard({
   }
 
   const isLastStep = step === STEPS.length - 1;
+  const nextDisabled = isPending || (step === 0 && !values.selfReportedStage);
 
   return (
     <div className="flex flex-col gap-8">
@@ -86,12 +115,13 @@ export default function OnboardingWizard({
       </div>
 
       <div className="rounded-xl border border-zinc-200 bg-white p-6 sm:p-8">
-        {step === 0 && <PersonalSection values={values} onChange={handleChange} />}
-        {step === 1 && <StudyGoalSection values={values} onChange={handleChange} />}
-        {step === 2 && <DestinationSection values={values} onChange={handleChange} />}
-        {step === 3 && <AcademicSection values={values} onChange={handleChange} />}
-        {step === 4 && <BudgetSection values={values} onChange={handleChange} />}
-        {step === 5 && <PrioritiesSection values={values} onChange={handleChange} />}
+        {step === 0 && <JourneyStageSection values={values} onChange={handleChange} />}
+        {step === 1 && <PersonalSection values={values} onChange={handleChange} />}
+        {step === 2 && <StudyGoalSection values={values} onChange={handleChange} />}
+        {step === 3 && <DestinationSection values={values} onChange={handleChange} />}
+        {step === 4 && <AcademicSection values={values} onChange={handleChange} />}
+        {step === 5 && <BudgetSection values={values} onChange={handleChange} />}
+        {step === 6 && <PrioritiesSection values={values} onChange={handleChange} />}
       </div>
 
       {error && (
@@ -112,7 +142,7 @@ export default function OnboardingWizard({
         <button
           type="button"
           onClick={goNext}
-          disabled={isPending}
+          disabled={nextDisabled}
           className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700 disabled:opacity-60"
         >
           {isPending ? t("saving") : isLastStep ? t("submit") : t("next")}

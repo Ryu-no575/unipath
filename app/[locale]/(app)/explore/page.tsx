@@ -2,6 +2,7 @@ import { hasLocale } from "next-intl";
 import { getTranslations, setRequestLocale } from "next-intl/server";
 import { notFound } from "next/navigation";
 import { routing } from "@/i18n/routing";
+import { getOptionalUser } from "@/app/lib/supabase/server";
 import ExploreSearch from "@/app/components/ExploreSearch";
 import PageHeader from "@/app/components/ui/PageHeader";
 import Card from "@/app/components/ui/Card";
@@ -17,6 +18,7 @@ export default async function ExplorePage({
 
   const t = await getTranslations("Explore");
   const cta = await getTranslations("MatchCta");
+  const user = await getOptionalUser();
 
   return (
     <div className="flex flex-col gap-8">
@@ -35,7 +37,7 @@ export default async function ExplorePage({
         </Button>
       </Card>
 
-      <ExploreSearch />
+      <ExploreSearch loggedIn={Boolean(user)} />
     </div>
   );
 }

@@ -261,6 +261,19 @@ export async function resolveReportAction(locale: AppLocale, reportId: string): 
   return result as AdminActionResult;
 }
 
+export async function markFeedbackReviewedAction(locale: AppLocale, feedbackId: string): Promise<AdminActionResult> {
+  const result = await withAdmin(async (adminUserId) => {
+    const admin = createAdminClient();
+    const { error } = await admin.from("user_feedback").update({ status: "reviewed" }).eq("id", feedbackId);
+    if (error) return { error: error.message };
+
+    await logAdminAction({ adminUserId, action: "FEEDBACK_REVIEWED", entityType: "user_feedback", entityId: feedbackId });
+    revalidatePath(`/${locale}/admin/feedback`);
+    return {};
+  });
+  return result as AdminActionResult;
+}
+
 export async function dismissReportAction(locale: AppLocale, reportId: string): Promise<AdminActionResult> {
   const result = await withAdmin(async (adminUserId) => {
     const admin = createAdminClient();

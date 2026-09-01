@@ -44,7 +44,11 @@ export default async function AdminDashboardPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
-  const status = await getRealDataStatus(supabase);
+  const [status, { count: visaBeingVerifiedCount }, { count: newFeedbackCount }] = await Promise.all([
+    getRealDataStatus(supabase),
+    supabase.from("visa_requirement_profiles").select("id", { count: "exact", head: true }).eq("status", "being_verified"),
+    supabase.from("user_feedback").select("id", { count: "exact", head: true }).eq("status", "new"),
+  ]);
 
   const t = await getTranslations("Admin");
 
@@ -69,6 +73,8 @@ export default async function AdminDashboardPage({
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
           <StatCard label={t("pendingReportsLabel")} value={String(status.pendingReportsCount)} href="/admin/community" />
           <StatCard label={t("requestedUniversitiesLabel")} value={String(status.requestedUniversitiesCount)} href="/admin/community" />
+          <StatCard label={t("visaBeingVerifiedLabel")} value={String(visaBeingVerifiedCount ?? 0)} href="/admin/visa" />
+          <StatCard label={t("newFeedbackLabel")} value={String(newFeedbackCount ?? 0)} href="/admin/feedback" />
         </div>
       </div>
 

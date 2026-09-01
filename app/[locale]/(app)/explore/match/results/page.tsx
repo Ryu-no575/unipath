@@ -8,11 +8,14 @@ import { getMatchProfileData, getRealMatchCandidates } from "@/app/lib/data/matc
 import { getCountryOptions } from "@/app/lib/countries";
 import { computeRealMatches } from "@/app/lib/match/real-engine";
 import { decodeMatchQuizAnswers } from "@/app/lib/match/query";
+import { decodeGuestMatchQuery } from "@/app/lib/match/guestQuery";
 import RealMatchCard from "@/app/components/match/RealMatchCard";
 import DevStateError from "@/app/components/DevStateError";
 import PageHeader from "@/app/components/ui/PageHeader";
 import EmptyState from "@/app/components/ui/EmptyState";
 import Button from "@/app/components/ui/Button";
+
+const GUEST_RESULT_LIMIT = 5;
 
 /**
  * Production Match Results: scores only real programs from
@@ -24,6 +27,11 @@ import Button from "@/app/components/ui/Button";
  * task notes on Match Results / Demo separation). When the verified catalog
  * is too small to be useful, this says so plainly instead of either an empty
  * "no matches" dead end or padding the list with invented candidates.
+ *
+ * An unauthenticated visitor gets the same real, verified catalog scored
+ * against their Guest Match Quiz answers (see guestQuery.ts) instead of an
+ * account profile, capped to the top 5 (task brief section 3) -- never a
+ * login redirect, per section 5's "no hard login wall".
  */
 export default async function MatchResultsPage({
   params,
@@ -34,11 +42,108 @@ export default async function MatchResultsPage({
   setRequestLocale(locale);
 
   const state = await getUserState();
-  if (state.status === "unauthenticated") redirect(`/${locale}/login`);
   if (state.status === "needs_onboarding") redirect(`/${locale}/onboarding`);
   if (state.status === "error") return <DevStateError message={state.message} />;
 
   const resolvedSearchParams = await searchParams;
+  const t = await getTranslations("MatchResults");
+  const applicationTypeLabels = await getTranslations("ApplicationTypeOptions");
+  const countryLabels = new Map(getCountryOptions(locale).map((c) => [c.code, c.label]));
+
+  if (state.status === "unauthenticated") {
+    const guest = decodeGuestMatchQuery(resolvedSearchParams);
+    if (!guest) redirect(`/${locale}/explore/match`);
+
+    const candidates = await getRealMatchCandidates();
+    const computation = computeRealMatches({
+      profile: guest.profileInputs,
+      destinationCountries: guest.destinationCountries,
+      candidates,
+    });
+    const topResults = computation.results.slice(0, GUEST_RESULT_LIMIT);
+    const isDataLimited = computation.totalVerifiedPrograms === 0 || topResults.length === 0;
+    const gt = await getTranslations("Guest");
+
+    const degreeTypeSummary = guest.profileInputs.applicationType
+      ? t("hardConstraintsSummary", { filters: applicationTypeLabels(guest.profileInputs.applicationType) })
+      : t("hardConstraintsSummaryAll");
+    const preferredCountriesLabel =
+      guest.destinationCountries.length > 0
+        ? guest.destinationCountries.map((code) => countryLabels.get(code) ?? code).join(", ")
+        : null;
+
+    // Carries the guest's original quiz-answer params along to Route
+    // Preview so its own "back to results" link can return here without
+    // losing them (see GuestRoutePreview's resultsHref) -- Route Preview
+    // never needs to decode these itself, only round-trip them.
+    const backQuery = new URLSearchParams();
+    for (const [key, value] of Object.entries(resolvedSearchParams)) {
+      const single = Array.isArray(value) ? value[0] : value;
+      if (typeof single === "string") backQuery.set(key, single);
+    }
+
+    const topMatch = topResults[0] ?? null;
+    let routePreviewHref: string | null = null;
+    if (topMatch) {
+      const previewParams = new URLSearchParams({
+        university: topMatch.candidate.universityName,
+        back: backQuery.toString(),
+      });
+      if (topMatch.candidate.programName) previewParams.set("program", topMatch.candidate.programName);
+      if (topMatch.candidate.applicationDeadline) {
+        previewParams.set("deadline", topMatch.candidate.applicationDeadline);
+      }
+      routePreviewHref = `/explore/match/route-preview?${previewParams.toString()}`;
+    }
+
+    return (
+      <div className="flex flex-col gap-8">
+        <PageHeader title={t("heading")} description={t("subheading")} />
+
+        <p className="text-sm text-zinc-500">{t("disclaimer")}</p>
+
+        <div className="flex flex-wrap items-center justify-between gap-3 text-sm text-zinc-500">
+          <div className="flex flex-col gap-1">
+            <span>{degreeTypeSummary}</span>
+            {preferredCountriesLabel && (
+              <span>{t("preferredCountriesNote", { countries: preferredCountriesLabel })}</span>
+            )}
+          </div>
+          <Link href="/explore/match" className="font-medium text-zinc-700 underline underline-offset-2">
+            {t("retakeQuiz")}
+          </Link>
+        </div>
+
+        {isDataLimited ? (
+          <EmptyState
+            title={t("verifiedDataHeading", { count: computation.totalVerifiedPrograms })}
+            description={t("verifiedDataBody")}
+            action={<Button href="/explore">{t("backToExplore")}</Button>}
+          />
+        ) : (
+          <>
+            <div className="flex flex-col gap-4">
+              {topResults.map((result) => (
+                <RealMatchCard key={result.candidate.programId} result={result} locale={locale} guest />
+              ))}
+            </div>
+
+            {routePreviewHref && (
+              <div className="flex flex-col items-center gap-2 pt-2 text-center">
+                <Link
+                  href={routePreviewHref}
+                  className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+                >
+                  {gt("seeRoutePreview")}
+                </Link>
+              </div>
+            )}
+          </>
+        )}
+      </div>
+    );
+  }
+
   const quiz = decodeMatchQuizAnswers(resolvedSearchParams);
   if (!quiz) redirect(`/${locale}/explore/match`);
 
@@ -53,10 +158,6 @@ export default async function MatchResultsPage({
     destinationCountries,
     candidates,
   });
-
-  const t = await getTranslations("MatchResults");
-  const applicationTypeLabels = await getTranslations("ApplicationTypeOptions");
-  const countryLabels = new Map(getCountryOptions(locale).map((c) => [c.code, c.label]));
 
   const degreeTypeSummary = profileInputs.applicationType
     ? t("hardConstraintsSummary", { filters: applicationTypeLabels(profileInputs.applicationType) })

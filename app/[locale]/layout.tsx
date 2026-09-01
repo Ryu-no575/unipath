@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
 import { getMessages, getTranslations, setRequestLocale } from "next-intl/server";
@@ -58,6 +59,7 @@ export default async function RootLayout({
         <NextIntlClientProvider messages={messages}>
           <ToastProvider>{children}</ToastProvider>
         </NextIntlClientProvider>
+        <Analytics />
       </body>
     </html>
   );

@@ -54,6 +54,8 @@ export default async function AdminLayout({
         navChanges={t("navChanges")}
         navCommunity={t("navCommunity")}
         navPriorities={t("navPriorities")}
+        navVisa={t("navVisa")}
+        navFeedback={t("navFeedback")}
       />
       {children}
     </div>

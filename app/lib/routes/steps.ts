@@ -500,9 +500,23 @@ function buildPaymentStep(ctx: RouteContext): RouteStepDraft | null {
 // Visa / housing / travel / arrival
 // ---------------------------------------------------------------------------
 
-function buildTaskDrivenStep(ctx: RouteContext, type: "visa" | "housing" | "travel"): RouteStepDraft {
+/** Visa/housing/travel prefer a real task's own due_at (task brief pattern
+ * shared with Interview/Payment above); when the user hasn't created that
+ * task yet, they fall back to this route's own backward-planned date so they
+ * show up on /calendar and the Visa/Housing/Travel timelines from day one,
+ * same as every other step -- never left undated just because no task
+ * exists (closes the gap Ambitious/Budget's backup/affordable variants
+ * already avoided by calling plannedDate() themselves). Travel has no
+ * dedicated lead time; it reuses housing's, matching buildFlightMonitoringStep. */
+function buildTaskDrivenStep(
+  ctx: RouteContext,
+  policy: RoutePolicy,
+  type: "visa" | "housing" | "travel",
+): RouteStepDraft {
   const rep = representativeTask(ctx, type);
-  const { date, taskId } = taskDrivenDate(ctx, type);
+  const { date: taskDate, taskId } = taskDrivenDate(ctx, type);
+  const leadTime = type === "housing" || type === "travel" ? policy.leadTime.housing : policy.leadTime.visa;
+  const date = taskDate ?? plannedDate(ctx, policy, leadTime, policy.bufferDays);
   return draft({
     type,
     done: ctx.completedTaskTypes.has(type),
@@ -539,13 +553,14 @@ function buildMultipleHousingStep(ctx: RouteContext, policy: RoutePolicy): Route
 
 function buildArrivalStep(ctx: RouteContext): RouteStepDraft {
   const rep = representativeTask(ctx, "enrollment");
+  const { date, taskId } = taskDrivenDate(ctx, "enrollment");
   return draft({
     type: "arrival",
     done: ctx.completedTaskTypes.has("enrollment"),
     labelParams: {},
-    date: null,
+    date,
     applicationId: rep?.application_id ?? null,
-    taskId: rep?.id ?? null,
+    taskId: taskId ?? rep?.id ?? null,
   });
 }
 
@@ -610,18 +625,18 @@ export function buildSteps(ctx: RouteContext, policy: RoutePolicy, gap: GapAnaly
   const payment = buildPaymentStep(ctx);
   if (payment) drafts.push(payment);
 
-  drafts.push(buildTaskDrivenStep(ctx, "visa"));
+  drafts.push(buildTaskDrivenStep(ctx, policy, "visa"));
   const backupVisa = buildBackupVisaStep(ctx, policy);
   if (backupVisa) drafts.push(backupVisa);
 
-  drafts.push(buildTaskDrivenStep(ctx, "housing"));
+  drafts.push(buildTaskDrivenStep(ctx, policy, "housing"));
   const multipleHousing = buildMultipleHousingStep(ctx, policy);
   if (multipleHousing) drafts.push(multipleHousing);
 
   const affordableHousing = buildAffordableHousingStep(ctx, policy);
   if (affordableHousing) drafts.push(affordableHousing);
 
-  drafts.push(buildTaskDrivenStep(ctx, "travel"));
+  drafts.push(buildTaskDrivenStep(ctx, policy, "travel"));
   const flightMonitoring = buildFlightMonitoringStep(ctx, policy);
   if (flightMonitoring) drafts.push(flightMonitoring);
 
