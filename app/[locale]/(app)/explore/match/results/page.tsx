@@ -4,12 +4,15 @@ import { notFound, redirect } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { Link } from "@/i18n/navigation";
 import { getUserState } from "@/app/lib/supabase/user-state";
+import { createClient } from "@/app/lib/supabase/server";
+import { recordAnalyticsEvent } from "@/app/lib/analytics/track";
 import { getMatchProfileData, getRealMatchCandidates } from "@/app/lib/data/match";
 import { getCountryOptions } from "@/app/lib/countries";
 import { computeRealMatches } from "@/app/lib/match/real-engine";
 import { decodeMatchQuizAnswers } from "@/app/lib/match/query";
 import { decodeGuestMatchQuery } from "@/app/lib/match/guestQuery";
 import RealMatchCard from "@/app/components/match/RealMatchCard";
+import ShareMyUniPath from "@/app/components/match/ShareMyUniPath";
 import DevStateError from "@/app/components/DevStateError";
 import PageHeader from "@/app/components/ui/PageHeader";
 import EmptyState from "@/app/components/ui/EmptyState";
@@ -60,6 +63,8 @@ export default async function MatchResultsPage({
       destinationCountries: guest.destinationCountries,
       candidates,
     });
+    const supabase = await createClient();
+    await recordAnalyticsEvent(supabase, null, "match_completed", { guest: true });
     const topResults = computation.results.slice(0, GUEST_RESULT_LIMIT);
     const isDataLimited = computation.totalVerifiedPrograms === 0 || topResults.length === 0;
     const gt = await getTranslations("Guest");
@@ -93,6 +98,7 @@ export default async function MatchResultsPage({
       if (topMatch.candidate.applicationDeadline) {
         previewParams.set("deadline", topMatch.candidate.applicationDeadline);
       }
+      if (topMatch.candidate.countryCode) previewParams.set("country", topMatch.candidate.countryCode);
       routePreviewHref = `/explore/match/route-preview?${previewParams.toString()}`;
     }
 
@@ -123,19 +129,34 @@ export default async function MatchResultsPage({
         ) : (
           <>
             <div className="flex flex-col gap-4">
-              {topResults.map((result) => (
-                <RealMatchCard key={result.candidate.programId} result={result} locale={locale} guest />
+              {topResults.map((result, index) => (
+                <RealMatchCard
+                  key={result.candidate.programId}
+                  result={result}
+                  locale={locale}
+                  guest
+                  variant={index === 0 ? "hero" : "default"}
+                  profile={index === 0 ? guest.profileInputs : undefined}
+                  destinationCountries={index === 0 ? guest.destinationCountries : undefined}
+                />
               ))}
             </div>
 
             {routePreviewHref && (
-              <div className="flex flex-col items-center gap-2 pt-2 text-center">
+              <div className="flex flex-col items-center gap-3 pt-2 text-center">
                 <Link
                   href={routePreviewHref}
-                  className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-6 py-3 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
+                  className="inline-flex items-center justify-center rounded-md bg-primary px-6 py-3 text-sm font-medium text-white shadow-soft transition-colors hover:bg-primary-dark"
                 >
                   {gt("seeRoutePreview")}
                 </Link>
+                {topMatch && (
+                  <ShareMyUniPath
+                    university={topMatch.candidate.universityName}
+                    program={topMatch.candidate.programName}
+                    destination={topMatch.candidate.countryCode}
+                  />
+                )}
               </div>
             )}
           </>
@@ -215,9 +236,25 @@ export default async function MatchResultsPage({
           <p className="rounded-md border border-zinc-200 bg-zinc-50 px-4 py-3 text-sm text-zinc-600">
             {t("verifiedDataHeading", { count: computation.totalVerifiedPrograms })}
           </p>
-          {computation.results.map((result) => (
-            <RealMatchCard key={result.candidate.programId} result={result} locale={locale} />
+          {computation.results.map((result, index) => (
+            <RealMatchCard
+              key={result.candidate.programId}
+              result={result}
+              locale={locale}
+              variant={index === 0 ? "hero" : "default"}
+              profile={index === 0 ? profileInputs : undefined}
+              destinationCountries={index === 0 ? destinationCountries : undefined}
+            />
           ))}
+          {computation.results[0] && (
+            <div className="flex justify-center pt-2">
+              <ShareMyUniPath
+                university={computation.results[0].candidate.universityName}
+                program={computation.results[0].candidate.programName}
+                destination={computation.results[0].candidate.countryCode}
+              />
+            </div>
+          )}
         </div>
       )}
 

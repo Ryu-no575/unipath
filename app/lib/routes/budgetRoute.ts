@@ -25,8 +25,12 @@ export const BUDGET_POLICY: RoutePolicy = {
     document: { min: 14, max: 21 },
     application: { min: 7, max: 14 },
     scholarship: { min: 60, max: 90 },
-    visa: { min: 21, max: 30 },
-    housing: { min: 45, max: 60 },
+  },
+  logistics: {
+    visaWindowPosition: 0.5,
+    visaBufferDays: 0,
+    housingLeadWeeks: 8,
+    travelBufferDays: 3,
   },
   includeShortlistClassification: false,
   steps: {

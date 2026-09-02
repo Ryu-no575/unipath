@@ -2,6 +2,7 @@ import type {
   Database,
   DocumentStatus,
   DocumentType,
+  SecondaryQualificationType,
   TestType,
 } from "@/app/lib/supabase/database.types";
 
@@ -21,10 +22,17 @@ export const TEST_TYPES: TestType[] = [
   "ielts",
   "toefl",
   "cambridge",
+  "duolingo",
   "sat",
   "act",
   "gre",
   "gmat",
+  "ap",
+  "cils",
+  "celi",
+  "plida",
+  "cert_it",
+  "university_specific",
   "other",
 ];
 
@@ -42,7 +50,12 @@ export const APPLICATION_SPECIFIC_DOCUMENT_TYPES: DocumentType[] = [
 
 const READY_DOCUMENT_STATUSES: DocumentStatus[] = ["ready", "submitted"];
 
-const ENGLISH_TEST_TYPES: TestType[] = ["ielts", "toefl", "cambridge"];
+/** "duolingo" is a real English proficiency test (Duolingo English Test) --
+ * included here now that test_scores.test_type can express it (Personalized
+ * Planning Phase 1 migration). Italian certs (cils/celi/plida/cert_it) are
+ * deliberately excluded -- those are a separate language, not an English
+ * signal. */
+const ENGLISH_TEST_TYPES: TestType[] = ["ielts", "toefl", "cambridge", "duolingo"];
 
 type AdmissionRequirementRow = Database["public"]["Tables"]["admission_requirements"]["Row"];
 type ApplicationDocumentRow = Database["public"]["Tables"]["application_documents"]["Row"];
@@ -61,7 +74,42 @@ type ProfileRow = Database["public"]["Tables"]["profiles"]["Row"];
 // organizes, sources decide" principle.
 // ---------------------------------------------------------------------------
 
-export type RequirementCategory = "document" | "test" | "unclassified";
+/** "academic" (Personalized Planning Phase 1 -- app/lib/eligibility) covers
+ * GPA-minimum and secondary/tertiary-qualification-type requirements.
+ * computeApplicationReadiness below deliberately does not handle this
+ * category (falls through to "unknown", same as "unclassified" was before)
+ * -- only the Eligibility Engine (app/lib/eligibility/programEligibility.ts)
+ * compares it, since it needs the user's GPA/qualification credentials that
+ * ApplicationReadiness's document/test-only inputs don't carry. */
+export type RequirementCategory = "document" | "test" | "academic" | "unclassified";
+
+/** Secondary/tertiary-qualification acceptance patterns -- e.g. a
+ * requirement mentioning "Bachelor's degree" only accepts
+ * `bachelor_degree`; one mentioning "high school diploma" / "secondary
+ * diploma" accepts any recognized secondary qualification. Exported so the
+ * Eligibility Engine and this module never diverge on what a requirement's
+ * wording actually accepts. */
+export const QUALIFICATION_ACCEPTANCE_PATTERNS: { pattern: RegExp; accepts: SecondaryQualificationType[] }[] = [
+  { pattern: /\bmaster'?s?\b/i, accepts: ["master_degree"] },
+  { pattern: /\bbachelor'?s?\b/i, accepts: ["bachelor_degree"] },
+  { pattern: /\bib diploma\b|\binternational baccalaureate\b/i, accepts: ["ib_diploma"] },
+  { pattern: /\ba[- ]levels?\b/i, accepts: ["a_levels"] },
+  { pattern: /\babitur\b/i, accepts: ["abitur"] },
+  { pattern: /\bbaccalaur[ée]at\b/i, accepts: ["french_baccalaureat"] },
+  {
+    pattern: /\bhigh school diploma\b|\bsecondary (school )?diploma\b|\bsecondary (school )?(certificate|qualification)\b/i,
+    accepts: [
+      "national_secondary_diploma",
+      "ib_diploma",
+      "a_levels",
+      "abitur",
+      "french_baccalaureat",
+      "other_national_secondary",
+    ],
+  },
+];
+
+const GPA_REQUIREMENT_PATTERN = /\bgpa\b|\bgrade point average\b|\bminimum (grade|average)\b|\bacademic average\b/i;
 
 export interface ClassifiedRequirement {
   category: RequirementCategory;
@@ -69,6 +117,8 @@ export interface ClassifiedRequirement {
   /** Only set when category is "test": which of the tracked test types (or
    * "english" for any accepted English test) this requirement is asking for. */
   testHint?: TestType | "english";
+  /** Only set when category is "academic". */
+  academicHint?: "gpa" | "qualification_type";
 }
 
 function matchesAny(text: string, patterns: RegExp[]): boolean {
@@ -126,6 +176,30 @@ export function classifyRequirement(req: {
   }
   if (matchesAny(text, [/\bgmat\b/])) {
     return { category: "test", testHint: "gmat" };
+  }
+  if (matchesAny(text, [/\bduolingo\b/])) {
+    return { category: "test", testHint: "duolingo" };
+  }
+  if (matchesAny(text, [/\bap\b|\badvanced placement\b/])) {
+    return { category: "test", testHint: "ap" };
+  }
+  if (matchesAny(text, [/\bcils\b/])) {
+    return { category: "test", testHint: "cils" };
+  }
+  if (matchesAny(text, [/\bceli\b/])) {
+    return { category: "test", testHint: "celi" };
+  }
+  if (matchesAny(text, [/\bplida\b/])) {
+    return { category: "test", testHint: "plida" };
+  }
+  if (matchesAny(text, [/\bcert\.?\s?it\b/])) {
+    return { category: "test", testHint: "cert_it" };
+  }
+  if (GPA_REQUIREMENT_PATTERN.test(text)) {
+    return { category: "academic", academicHint: "gpa" };
+  }
+  if (QUALIFICATION_ACCEPTANCE_PATTERNS.some(({ pattern }) => pattern.test(text))) {
+    return { category: "academic", academicHint: "qualification_type" };
   }
 
   return { category: "unclassified" };

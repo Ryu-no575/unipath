@@ -111,7 +111,17 @@ export default function DocumentUploadForm({
 
         <label className="flex flex-col gap-1 sm:col-span-2">
           <span className={labelClasses}>{t("fileLabel")}</span>
-          <input ref={fileInputRef} type="file" required className="text-sm text-zinc-700" />
+          <input
+            ref={fileInputRef}
+            type="file"
+            required
+            // No Capacitor plugin needed: both WKWebView and Android's
+            // WebView open the native file/photo picker for a plain file
+            // input already. `accept` just steers that picker toward the
+            // document types the Passport actually expects.
+            accept="application/pdf,image/*"
+            className="text-sm text-zinc-700"
+          />
         </label>
       </div>
 

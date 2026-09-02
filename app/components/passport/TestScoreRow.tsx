@@ -38,14 +38,21 @@ export default function TestScoreRow({
   return (
     <li className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-1">
-        <span className="flex items-center gap-2 text-sm font-medium text-zinc-800">
-          {testTypeT(entry.test_type)}
+        <span className="flex flex-wrap items-center gap-2 text-sm font-medium text-zinc-800">
+          {entry.custom_test_name || testTypeT(entry.test_type)}
           {entry.overall_score ? ` · ${entry.overall_score}` : ""}
+          {entry.cefr_level ? ` · ${entry.cefr_level.toUpperCase()}` : ""}
           {expired && (
             <span className="rounded-full bg-red-50 px-2 py-0.5 text-xs font-medium text-red-700">
               {t("expired")}
             </span>
           )}
+          {/* Task item 3: never imply a self-entered score has been
+              externally verified -- every credential row is always labeled
+              this way, with no "verified" state to escalate to yet. */}
+          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
+            {t("userReported")}
+          </span>
         </span>
         {(entry.test_date || entry.expires_at) && (
           <span className="text-xs text-zinc-400">

@@ -3,12 +3,17 @@
 import { revalidatePath } from "next/cache";
 import type { AppLocale } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
-import type { TestType } from "@/app/lib/supabase/database.types";
+import type { CefrLevel, TestType } from "@/app/lib/supabase/database.types";
 import type { PassportActionResult } from "./passport-education";
 
 export interface TestScoreFormInput {
   testType: TestType;
   overallScore: string;
+  /** Only meaningful for a test that reports a CEFR band directly (PLIDA,
+   * CELI, Cambridge) -- never derived from overallScore. */
+  cefrLevel: CefrLevel | "";
+  /** Only meaningful when testType is "university_specific" or "other". */
+  customTestName: string;
   testDate: string;
   expiresAt: string;
 }
@@ -37,6 +42,8 @@ export async function createTestScoreAction(
     user_id: user.id,
     test_type: input.testType,
     overall_score: toNullableString(input.overallScore),
+    cefr_level: input.cefrLevel || null,
+    custom_test_name: toNullableString(input.customTestName),
     test_date: toNullableString(input.testDate),
     expires_at: toNullableString(input.expiresAt),
   });
@@ -62,6 +69,8 @@ export async function updateTestScoreAction(
     .update({
       test_type: input.testType,
       overall_score: toNullableString(input.overallScore),
+      cefr_level: input.cefrLevel || null,
+      custom_test_name: toNullableString(input.customTestName),
       test_date: toNullableString(input.testDate),
       expires_at: toNullableString(input.expiresAt),
     })

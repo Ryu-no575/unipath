@@ -2,6 +2,7 @@ import type { RouteContext } from "./context";
 import type { GapAnalysis } from "./gapAnalysis";
 import type { RoutePolicy } from "./routePolicies";
 import { assessFeasibility } from "./backwardPlanner";
+import { effectiveSequencingDate } from "./dateConfidence";
 import type { RouteComparison, RoutePrepLoad, RouteRiskLevel, RouteStep, StudyIntensity } from "./types";
 
 function monthsUntil(todayIso: string, targetIso: string): number {
@@ -68,7 +69,7 @@ function computeStartsDate(steps: RouteStep[]): string | null {
   let earliest: string | null = null;
   for (const step of steps) {
     if (step.status === "done") continue;
-    const candidates = [step.date?.suggestedDate, ...step.subSteps.map((s) => s.date?.suggestedDate)].filter(
+    const candidates = [effectiveSequencingDate(step.date), ...step.subSteps.map((s) => effectiveSequencingDate(s.date))].filter(
       (d): d is string => Boolean(d),
     );
     for (const iso of candidates) {

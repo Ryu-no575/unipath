@@ -1,3 +1,4 @@
+import { effectiveSequencingDate } from "./dateConfidence";
 import type { Route, RouteDiffEntry, RouteStepType } from "./types";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
@@ -18,7 +19,7 @@ function collectByType(route: Route): Map<RouteStepType, TypeInfo> {
     if (step.type === "shortlist" && step.labelParams.targetCount != null) {
       existing.shortlistTarget = step.labelParams.targetCount;
     }
-    const candidates = [step.date?.suggestedDate, ...step.subSteps.map((s) => s.date?.suggestedDate)].filter(
+    const candidates = [effectiveSequencingDate(step.date), ...step.subSteps.map((s) => effectiveSequencingDate(s.date))].filter(
       (d): d is string => Boolean(d),
     );
     for (const iso of candidates) {

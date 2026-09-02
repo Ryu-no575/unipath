@@ -3,6 +3,8 @@ import { setRequestLocale } from "next-intl/server";
 import { notFound, redirect } from "next/navigation";
 import { routing } from "@/i18n/routing";
 import { getUserState } from "@/app/lib/supabase/user-state";
+import { createClient } from "@/app/lib/supabase/server";
+import { recordAnalyticsEvent } from "@/app/lib/analytics/track";
 import { getMatchProfileData } from "@/app/lib/data/match";
 import { getCountryOptions } from "@/app/lib/countries";
 import MatchQuizWizard from "@/app/components/match/MatchQuizWizard";
@@ -17,6 +19,9 @@ export default async function MatchQuizPage({
   setRequestLocale(locale);
 
   const state = await getUserState();
+  const supabase = await createClient();
+  await recordAnalyticsEvent(supabase, state.status === "unauthenticated" ? null : state.user.id, "match_started");
+
   // No hard login wall (task brief section 5) -- an unauthenticated visitor
   // gets the guest quiz instead of a login redirect. An account that exists
   // but hasn't finished onboarding still needs the real profile fields

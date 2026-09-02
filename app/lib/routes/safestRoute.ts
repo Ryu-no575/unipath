@@ -25,8 +25,12 @@ export const SAFEST_POLICY: RoutePolicy = {
     document: { min: 21, max: 35 },
     application: { min: 14, max: 25 },
     scholarship: { min: 30, max: 45 },
-    visa: { min: 45, max: 60 },
-    housing: { min: 45, max: 60 },
+  },
+  logistics: {
+    visaWindowPosition: 0.8,
+    visaBufferDays: 14,
+    housingLeadWeeks: 10,
+    travelBufferDays: 5,
   },
   includeShortlistClassification: true,
   steps: {

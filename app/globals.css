@@ -2,18 +2,110 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #171717;
+  --foreground: #0b1220;
 }
 
+/* UniPath brand system: light neutral surfaces, a near-black navy for
+   premium sections, a deep blue primary accent, and a warm gold accent
+   used sparingly (borders/highlights, never large fills). Emerald stays
+   reserved for verified/success states via Tailwind's built-in palette. */
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --font-sans: var(--font-geist-sans);
   --font-mono: var(--font-geist-mono);
+
+  --color-navy-950: #05070d;
+  --color-navy-900: #0b1220;
+  --color-navy-800: #10192c;
+  --color-navy-700: #172544;
+  --color-navy-600: #22315a;
+
+  --color-primary: #1d4ed8;
+  --color-primary-dark: #142f6b;
+  --color-primary-light: #3b82f6;
+
+  --color-gold: #c9a227;
+  --color-gold-soft: #e8d9a0;
+
+  --color-surface-muted: #f6f7fb;
+
+  --shadow-soft: 0 1px 2px rgba(11, 18, 32, 0.04), 0 8px 24px -12px rgba(11, 18, 32, 0.12);
+  --shadow-elevated: 0 20px 60px -18px rgba(11, 18, 32, 0.35), 0 8px 24px -12px rgba(11, 18, 32, 0.22);
+  --shadow-glow-gold: 0 0 0 1px rgba(201, 162, 39, 0.35), 0 8px 30px -12px rgba(201, 162, 39, 0.35);
+}
+
+:root {
+  /* Centralized safe-area insets (notch, Dynamic Island, home indicator,
+     Android system bars). `env()` resolves to 0px on any device without
+     one, so these are safe defaults everywhere -- components should read
+     these variables instead of calling env() ad hoc, so the fallback and
+     naming stay consistent across the app. Requires viewport-fit=cover,
+     set in the root layout's `viewport` export. */
+  --safe-top: env(safe-area-inset-top, 0px);
+  --safe-bottom: env(safe-area-inset-bottom, 0px);
+  --safe-left: env(safe-area-inset-left, 0px);
+  --safe-right: env(safe-area-inset-right, 0px);
+}
+
+html {
+  overflow-x: hidden;
 }
 
 body {
   background: var(--background);
   color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  font-family: var(--font-sans), system-ui, Arial, Helvetica, sans-serif;
+  width: 100%;
+  overflow-x: hidden;
+}
+
+/* Native-shell-only touch polish (guarded by the platform="native" attribute
+   NativeShellSetup puts on <html> -- see app/lib/platform/NativeShellSetup).
+   Left off on web so desktop/mobile-browser interactions are unaffected. */
+html[data-platform="native"] body {
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+
+/* Defense-in-depth only (never the fix itself -- the actual overflow source
+   must be corrected at the element level): any element a mobile layout pass
+   missed still gets clipped horizontally instead of pushing the whole page
+   into a horizontal scroll. */
+img,
+svg,
+video,
+canvas {
+  max-width: 100%;
+  height: auto;
+}
+
+/* Restrained glass surfaces for premium/navy sections. Plain rgba rather
+   than color-mix() for broad WebView compatibility (Capacitor targets). */
+.glass-panel-dark {
+  background: rgba(11, 18, 32, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+.glass-panel-light {
+  background: rgba(255, 255, 255, 0.72);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid rgba(11, 18, 32, 0.08);
+}
+
+/* Global reduced-motion guard: every custom animation/transition in the app
+   collapses to effectively instant instead of being individually re-guarded
+   at each call site. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
 }

@@ -3,7 +3,11 @@ import type { RouteContext } from "./context";
 import type { GapAnalysis } from "./gapAnalysis";
 import { marginAdjustedTarget } from "./gapAnalysis";
 import type { RoutePolicy } from "./routePolicies";
-import { backwardPlannedStepDate, planBackwardDate, planSequence } from "./backwardPlanner";
+import { backwardPlannedStepDate, makeRouteStepDate, planBackwardDate, planSequence } from "./backwardPlanner";
+import { buildVisaStepDate } from "./visaDates";
+import { buildHousingStepDate } from "./housingDates";
+import { buildTravelStepDate } from "./travelDates";
+import { buildArrivalSubSteps } from "./arrivalDates";
 import {
   CALENDAR_LINKED_STEP_TYPES,
   type RouteStep,
@@ -13,6 +17,7 @@ import {
   type RouteStepType,
   type RouteSubStep,
   type RouteSubStepKey,
+  type DateSourceInfo,
 } from "./types";
 
 type TaskRow = Database["public"]["Tables"]["tasks"]["Row"];
@@ -39,6 +44,10 @@ function deadlineTimezone(ctx: RouteContext): string | null {
   return ctx.earliestDeadline?.timezone ?? null;
 }
 
+function deadlineSource(ctx: RouteContext): DateSourceInfo | null {
+  return ctx.earliestDeadline?.source ?? null;
+}
+
 /** The one place every date on every step/sub-step comes from -- backward
  * planning from the real, verified deadline using this route's own policy
  * (task brief item 3/4). Returns null (never a fabricated date) when there
@@ -53,6 +62,7 @@ function plannedDate(
     today: ctx.input.today,
     deadlineISO: deadlineISO(ctx),
     timezone: deadlineTimezone(ctx),
+    officialSource: deadlineSource(ctx),
     range,
     aggressiveness: policy.aggressiveness,
     bufferDays,
@@ -60,12 +70,13 @@ function plannedDate(
 }
 
 function subStepDate(ctx: RouteContext, iso: string): RouteStepDate {
-  return {
+  return makeRouteStepDate({
     officialDate: deadlineISO(ctx),
     officialTimezone: deadlineTimezone(ctx),
+    officialSource: deadlineSource(ctx),
     suggestedDate: iso,
     suggestedSource: "unipath",
-  };
+  });
 }
 
 function subStep(key: RouteSubStepKey, iso: string | null, ctx: RouteContext, labelParams: RouteStepLabelParams = {}): RouteSubStep {
@@ -116,7 +127,7 @@ function taskDrivenDate(ctx: RouteContext, type: TaskType): { date: RouteStepDat
   }
   const task = withDue[0];
   return {
-    date: { officialDate: null, officialTimezone: null, suggestedDate: task.due_at, suggestedSource: "task" },
+    date: makeRouteStepDate({ suggestedDate: task.due_at, suggestedSource: "task" }),
     taskId: task.id,
   };
 }
@@ -300,7 +311,7 @@ function buildAffordableHousingStep(ctx: RouteContext, policy: RoutePolicy): Rou
     type: "affordable_housing",
     done: ctx.completedTaskTypes.has("housing"),
     labelParams: {},
-    date: plannedDate(ctx, policy, policy.leadTime.housing, policy.bufferDays),
+    date: buildHousingStepDate(ctx, policy),
     applicationId: null,
     taskId: null,
   });
@@ -312,7 +323,7 @@ function buildFlightMonitoringStep(ctx: RouteContext, policy: RoutePolicy): Rout
     type: "flight_monitoring",
     done: ctx.completedTaskTypes.has("travel"),
     labelParams: {},
-    date: plannedDate(ctx, policy, policy.leadTime.housing, 0),
+    date: buildTravelStepDate(ctx, policy),
     applicationId: null,
     taskId: null,
   });
@@ -500,26 +511,50 @@ function buildPaymentStep(ctx: RouteContext): RouteStepDraft | null {
 // Visa / housing / travel / arrival
 // ---------------------------------------------------------------------------
 
-/** Visa/housing/travel prefer a real task's own due_at (task brief pattern
- * shared with Interview/Payment above); when the user hasn't created that
- * task yet, they fall back to this route's own backward-planned date so they
- * show up on /calendar and the Visa/Housing/Travel timelines from day one,
- * same as every other step -- never left undated just because no task
- * exists (closes the gap Ambitious/Budget's backup/affordable variants
- * already avoided by calling plannedDate() themselves). Travel has no
- * dedicated lead time; it reuses housing's, matching buildFlightMonitoringStep. */
-function buildTaskDrivenStep(
-  ctx: RouteContext,
-  policy: RoutePolicy,
-  type: "visa" | "housing" | "travel",
-): RouteStepDraft {
-  const rep = representativeTask(ctx, type);
-  const { date: taskDate, taskId } = taskDrivenDate(ctx, type);
-  const leadTime = type === "housing" || type === "travel" ? policy.leadTime.housing : policy.leadTime.visa;
-  const date = taskDate ?? plannedDate(ctx, policy, leadTime, policy.bufferDays);
+/** Visa/Housing/Travel each prefer a real task's own due_at (task brief
+ * pattern shared with Interview/Payment above); when the user hasn't created
+ * that task yet, they fall back to their own Date Engine v2 domain module
+ * (visaDates.ts/housingDates.ts/travelDates.ts) -- never to a generic
+ * application-deadline backward-plan (that reuse was PART B's core bug: Visa,
+ * Housing, and Travel were all being computed with Application's own
+ * mechanism). Each domain module already returns null when its own domain
+ * isn't relevant yet, matching the previous "undated until real data exists"
+ * contract. */
+function buildVisaStep(ctx: RouteContext, policy: RoutePolicy): RouteStepDraft {
+  const rep = representativeTask(ctx, "visa");
+  const { date: taskDate, taskId } = taskDrivenDate(ctx, "visa");
+  const date = taskDate ?? buildVisaStepDate(ctx, policy);
   return draft({
-    type,
-    done: ctx.completedTaskTypes.has(type),
+    type: "visa",
+    done: ctx.completedTaskTypes.has("visa"),
+    labelParams: {},
+    date,
+    applicationId: rep?.application_id ?? null,
+    taskId: taskId ?? rep?.id ?? null,
+  });
+}
+
+function buildHousingStep(ctx: RouteContext, policy: RoutePolicy): RouteStepDraft {
+  const rep = representativeTask(ctx, "housing");
+  const { date: taskDate, taskId } = taskDrivenDate(ctx, "housing");
+  const date = taskDate ?? buildHousingStepDate(ctx, policy);
+  return draft({
+    type: "housing",
+    done: ctx.completedTaskTypes.has("housing"),
+    labelParams: {},
+    date,
+    applicationId: rep?.application_id ?? null,
+    taskId: taskId ?? rep?.id ?? null,
+  });
+}
+
+function buildTravelStep(ctx: RouteContext, policy: RoutePolicy): RouteStepDraft {
+  const rep = representativeTask(ctx, "travel");
+  const { date: taskDate, taskId } = taskDrivenDate(ctx, "travel");
+  const date = taskDate ?? buildTravelStepDate(ctx, policy);
+  return draft({
+    type: "travel",
+    done: ctx.completedTaskTypes.has("travel"),
     labelParams: {},
     date,
     applicationId: rep?.application_id ?? null,
@@ -533,7 +568,7 @@ function buildBackupVisaStep(ctx: RouteContext, policy: RoutePolicy): RouteStepD
     type: "backup_visa",
     done: false,
     labelParams: {},
-    date: plannedDate(ctx, policy, policy.leadTime.visa, policy.bufferDays),
+    date: buildVisaStepDate(ctx, policy),
     applicationId: null,
     taskId: null,
   });
@@ -545,7 +580,7 @@ function buildMultipleHousingStep(ctx: RouteContext, policy: RoutePolicy): Route
     type: "multiple_housing",
     done: false,
     labelParams: {},
-    date: plannedDate(ctx, policy, policy.leadTime.housing, policy.bufferDays),
+    date: buildHousingStepDate(ctx, policy),
     applicationId: null,
     taskId: null,
   });
@@ -561,6 +596,7 @@ function buildArrivalStep(ctx: RouteContext): RouteStepDraft {
     date,
     applicationId: rep?.application_id ?? null,
     taskId: taskId ?? rep?.id ?? null,
+    subSteps: buildArrivalSubSteps(ctx),
   });
 }
 
@@ -625,18 +661,18 @@ export function buildSteps(ctx: RouteContext, policy: RoutePolicy, gap: GapAnaly
   const payment = buildPaymentStep(ctx);
   if (payment) drafts.push(payment);
 
-  drafts.push(buildTaskDrivenStep(ctx, policy, "visa"));
+  drafts.push(buildVisaStep(ctx, policy));
   const backupVisa = buildBackupVisaStep(ctx, policy);
   if (backupVisa) drafts.push(backupVisa);
 
-  drafts.push(buildTaskDrivenStep(ctx, policy, "housing"));
+  drafts.push(buildHousingStep(ctx, policy));
   const multipleHousing = buildMultipleHousingStep(ctx, policy);
   if (multipleHousing) drafts.push(multipleHousing);
 
   const affordableHousing = buildAffordableHousingStep(ctx, policy);
   if (affordableHousing) drafts.push(affordableHousing);
 
-  drafts.push(buildTaskDrivenStep(ctx, policy, "travel"));
+  drafts.push(buildTravelStep(ctx, policy));
   const flightMonitoring = buildFlightMonitoringStep(ctx, policy);
   if (flightMonitoring) drafts.push(flightMonitoring);
 

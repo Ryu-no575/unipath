@@ -26,8 +26,15 @@ export const AMBITIOUS_POLICY: RoutePolicy = {
     document: { min: 30, max: 45 },
     application: { min: 21, max: 30 },
     scholarship: { min: 30, max: 45 },
-    visa: { min: 30, max: 45 },
-    housing: { min: 30, max: 45 },
+  },
+  // Deliberately identical to Balanced's defaults (task brief item 13): being
+  // Ambitious means front-loading academic prep, never pulling Visa/Travel
+  // earlier for no real reason.
+  logistics: {
+    visaWindowPosition: 0.5,
+    visaBufferDays: 0,
+    housingLeadWeeks: 4,
+    travelBufferDays: 2,
   },
   includeShortlistClassification: true,
   steps: {

@@ -3,6 +3,9 @@
     "title": "UniPath",
     "description": "海外大学出願を、ひとつの場所に。"
   },
+  "Offline": {
+    "message": "オフラインです。UniPathの一部の情報が利用できない場合があります。"
+  },
   "Navigation": {
     "brand": "UniPath",
     "explore": "大学を探す",
@@ -102,7 +105,8 @@
     "tuitionCurrency": "学費の通貨",
     "maxLivingCost": "年間生活費の上限",
     "livingCostCurrency": "生活費の通貨",
-    "timezone": "タイムゾーン"
+    "timezone": "タイムゾーン",
+    "qualificationType": "資格の種類"
   },
   "ApplicationTypeOptions": {
     "bachelor": "学士",
@@ -144,14 +148,18 @@
   },
   "Landing": {
     "eyebrow": "UniPath",
-    "titleLine1": "海外大学出願を、",
-    "titleLine2": "ひとつの場所に。",
+    "titleLine1": "行きたい場所を教えて。",
+    "titleLine2": "そこまでの道筋を、UniPathがつくる。",
     "subtitle": "複数の海外大学の締切・必要書類・試験・英語資格・出願状況をまとめて管理できます。",
     "cta": "はじめる",
     "footer": "© {year} UniPath",
-    "ctaTryUniPath": "UniPathを試す",
+    "ctaTryUniPath": "マッチを試す",
     "ctaExploreUniversities": "大学を探す",
     "ctaContinueJourney": "続きから始める",
+    "noLoginNote": "マッチはログイン不要でお試しいただけます。",
+    "heroJourneyOrigin": "東京",
+    "heroJourneyDestination": "ミラノ",
+    "heroJourneyInstitution": "Politecnico di Milano",
     "howItWorksHeading": "使い方",
     "howItWorksStep1Title": "探す・マッチする",
     "howItWorksStep1Body": "認証済みの大学を検索し、いくつかの質問に答えるだけであなたに合った大学がわかります。",
@@ -313,7 +321,15 @@
     "studentRealityBody": "この大学についての在学生からの質問やリアルな声。",
     "studentRealityEmpty": "まだ在学生からの投稿はありません。",
     "studentRealityCta": "コミュニティに質問する",
-    "studentRealityViewAll": "すべての投稿を見る"
+    "studentRealityViewAll": "すべての投稿を見る",
+    "requirementVerified": "検証済みの公式要件",
+    "requirementNeedsReview": "要確認",
+    "requirementBeingVerified": "確認中",
+    "internationalStudentsHeading": "留学生数",
+    "internationalStudentsPercentOfBody": "全学生の{percent}%",
+    "academicYear": "{year}年度",
+    "lastVerified": "最終確認: {date}",
+    "beingVerified": "確認中"
   },
   "ApplicationChecklist": {
     "heading": "出願チェックリスト",
@@ -526,6 +542,7 @@
     "heading": "マッチを探す",
     "tagline": "あなたに合う大学・プログラムを見つけるための簡単な質問です。プロフィールに既にある情報はそのまま使い、いくつかの新しい質問だけお答えください。",
     "stepLabel": "ステップ {current}/{total}",
+    "timeEstimate": "所要時間: 約45秒",
     "step1Title": "現在のプロフィール",
     "step2Title": "キャンパスの環境",
     "step3Title": "大学の規模",
@@ -616,12 +633,17 @@
     "realExcludedNotice": "確認済みプログラム{total}件中{excluded}件は学位タイプが異なるため非表示です。",
     "devDemoLinkNote": "架空のデモデータを見る（開発環境のみ）",
     "communityLink": "コミュニティ",
-    "viewRoute": "ルートを見る"
+    "viewRoute": "ルートを見る",
+    "topMatchLabel": "あなたの第1候補",
+    "whatIfHeading": "マッチ度を上げるには",
+    "whatIfBudget": "予算が約20%高い場合",
+    "whatIfCountry": "{country}も検討対象に加えた場合"
   },
   "Guest": {
     "quizHeading": "マッチを見つける",
     "quizTagline": "いくつかの簡単な質問に答えるだけ。アカウント登録は不要です。",
     "stepLabel": "ステップ {current}/{total}",
+    "timeEstimate": "所要時間: 約45秒",
     "step1Title": "学習の目標",
     "step2Title": "希望する国・地域",
     "step3Title": "予算",
@@ -912,7 +934,10 @@
     "saving": "保存中...",
     "edit": "編集",
     "delete": "削除",
-    "confirmDelete": "この学歴を削除しますか？"
+    "confirmDelete": "この学歴を削除しますか？",
+    "qualificationTypeLabel": "資格の種類",
+    "qualificationTypeNone": "資格の種類を選択",
+    "userReported": "自己申告"
   },
   "PassportTests": {
     "back": "← Passportに戻る",
@@ -934,7 +959,12 @@
     "saving": "保存中...",
     "edit": "編集",
     "delete": "削除",
-    "confirmDelete": "この試験スコアを削除しますか？"
+    "confirmDelete": "この試験スコアを削除しますか？",
+    "cefrLevelLabel": "CEFRレベル(報告されている場合)",
+    "cefrLevelNone": "CEFRレベルとしては報告されていません",
+    "customTestNameLabel": "試験名",
+    "customTestNamePlaceholder": "例: ARCHED、TIL-A",
+    "userReported": "自己申告"
   },
   "PassportDocuments": {
     "back": "← Passportに戻る",
@@ -985,7 +1015,14 @@
     "act": "ACT",
     "gre": "GRE",
     "gmat": "GMAT",
-    "other": "その他"
+    "other": "その他",
+    "duolingo": "Duolingo English Test",
+    "ap": "AP",
+    "cils": "CILS",
+    "celi": "CELI",
+    "plida": "PLIDA",
+    "cert_it": "CERT.IT",
+    "university_specific": "大学独自の入学試験"
   },
   "DocumentStatusOptions": {
     "draft": "下書き",
@@ -1014,6 +1051,8 @@
     "months": "{count}か月",
     "riskDisclaimer": "リスクは準備戦略を反映したものであり、合格の可能性を示すものではありません。",
     "officialDate": "公式締切",
+    "officialSource": "公式ソース",
+    "officialSourceUnavailable": "ソース未リンク — 確認中です",
     "suggestedDateUnipath": "UniPath推奨日",
     "suggestedDateTask": "あなたの予定日",
     "viewInCalendar": "カレンダーで見る",
@@ -1080,7 +1119,32 @@
     "compareCostFocus": "コスト重視度",
     "scorecardHeading": "スコアカード",
     "workloadHeading": "推定週間学習量",
-    "capacityHeading": "キャパシティチェック"
+    "capacityHeading": "キャパシティチェック",
+    "dateConfidenceLabel_official": "公式",
+    "dateConfidenceLabel_suggested": "推奨日程",
+    "dateConfidenceLabel_estimated_window": "目安",
+    "dateConfidenceLabel_unverified": "確認中",
+    "dateConfidenceExplainer_official": "大学・政府が発表した確定日です。",
+    "dateConfidenceExplainer_suggested": "公式日程からUniPathが逆算した推奨日です。",
+    "dateConfidenceExplainer_estimated_window": "まだ確定日はなく、公式情報から算出した期間の目安です。",
+    "dateConfidenceExplainer_unverified": "確認できた公式情報がまだなく、日付をお示しできません。",
+    "estimatedWindowLabel": "目安の期間",
+    "dateBeingVerifiedBody": "この項目の公式情報は現在確認中です。",
+    "whyThisDate": "この日付の根拠",
+    "whyLineFromTask": "ご自身で設定した日付です。",
+    "whyLineFromOfficialDeadline": "公式期限から、選択中のルートの余裕期間を使って逆算しました。",
+    "whyLineEstimatedSourced": "{source}の公式情報に基づいています。",
+    "whyLineEstimatedUnsourced": "プログラムの既知のスケジュールから算出した目安です。",
+    "whyLineUnverifiedBody": "まだ確認済みの公式情報がありません。",
+    "whyLineLastChecked": "最終確認日: {date}",
+    "viewSource": "情報源を見る",
+    "routePhaseHeading_prepare": "準備",
+    "routePhaseHeading_apply": "出願",
+    "routePhaseHeading_decide": "合否・入学決定",
+    "routePhaseHeading_move": "渡航準備",
+    "routePhaseHeading_arrive": "到着",
+    "futurePathHeading": "あなたの未来への道のり",
+    "futurePathToday": "今日"
   },
   "RouteTypeOptions": {
     "fastest": "最速",
@@ -1203,7 +1267,11 @@
     "essay_draft": "下書き",
     "essay_feedback": "フィードバック",
     "essay_revise": "修正",
-    "essay_final": "最終版"
+    "essay_final": "最終版",
+    "residence_permit_registration": "滞在許可証の登録",
+    "local_registration": "現地自治体・住所登録",
+    "student_card_registration": "学生証の登録",
+    "health_registration": "健康保険・医療制度への登録"
   },
   "RouteReasons": {
     "profile_ready": "プロフィールは完成しています。",
@@ -1527,7 +1595,19 @@
     "unmarkBrokenPending": "更新中...",
     "retryButton": "再検証",
     "retryPending": "確認中...",
-    "noSourceToAct": "この大学にはまだ操作対象の公式サイトソースがありません。"
+    "noSourceToAct": "この大学にはまだ操作対象の公式サイトソースがありません。",
+    "studentStatsHeading": "留学生統計",
+    "studentStatsSubheading": "管理者による手動入力のみです(このデータの自動インポート機能はありません)。空欄のままにすると、数値の代わりに「確認中」と表示されます。",
+    "studentStatsTotalLabel": "総学生数",
+    "studentStatsInternationalLabel": "留学生数",
+    "studentStatsPercentageLabel": "留学生の割合(%)",
+    "studentStatsAcademicYearLabel": "年度",
+    "studentStatsSourceNameLabel": "情報源の名称",
+    "studentStatsSourceUrlLabel": "情報源のURL",
+    "studentStatsSave": "保存",
+    "studentStatsSaving": "保存中...",
+    "studentStatsSaved": "保存しました。",
+    "studentStatsLastVerified": "最終確認: {date}"
   },
   "AdminPriorities": {
     "heading": "Demand Priority Engine（需要優先度エンジン）",
@@ -1610,7 +1690,11 @@
     "biometrics": "生体情報登録",
     "submit_application": "申請書の提出",
     "receive_decision": "審査結果の受領",
-    "other": "その他"
+    "other": "その他",
+    "residence_permit_registration": "滞在許可証の登録",
+    "local_registration": "現地自治体・住所登録",
+    "student_card_registration": "学生証の登録",
+    "health_registration": "健康保険・医療制度への登録"
   },
   "AdminVisa": {
     "heading": "ビザソース",
@@ -1656,7 +1740,15 @@
     "addSourceButton": "ソースを追加",
     "rejectButton": "却下",
     "unrejectButton": "却下を取り消す",
-    "neverChecked": "未確認"
+    "neverChecked": "未確認",
+    "timingSectionHeading": "Date Engine 用タイミング情報（任意）",
+    "timingSectionHint": "政府・大使館などの公式情報で確認できた場合のみ入力してください。不明な場合は空欄のままにしてください。",
+    "earliestMonthsLabel": "申請可能になる時期（コース開始の何か月前から）",
+    "latestSafeWeeksLabel": "安全な提出期限（コース開始の何週間前まで）",
+    "processingWeeksMinLabel": "処理期間の最短（週）",
+    "processingWeeksMaxLabel": "処理期間の最長（週）",
+    "timingUnknownPlaceholder": "不明",
+    "deadlineDaysAfterArrivalLabel": "期限（到着後何日以内）"
   },
   "Housing": {
     "heading": "住居",
@@ -1750,5 +1842,48 @@
     "guestLabel": "ゲスト",
     "reviewedLabel": "確認済み",
     "markReviewedButton": "確認済みにする"
+  },
+  "Share": {
+    "shareMyUniPath": "My UniPathをシェア",
+    "previewHeading": "あなたのUniPathカード",
+    "previewAlt": "あなたの第一志望マッチを示すシェア用カード",
+    "shareButton": "シェアする",
+    "sharing": "準備中...",
+    "downloadButton": "ダウンロード",
+    "privacyNote": "表示されるのはマッチ先と行き先のみです — 個人情報は含まれません。"
+  },
+  "QualificationTypeOptions": {
+    "national_secondary_diploma": "各国の高校卒業資格",
+    "ib_diploma": "国際バカロレア(IB)ディプロマ",
+    "a_levels": "Aレベル",
+    "abitur": "アビトゥーア",
+    "french_baccalaureat": "フランス・バカロレア",
+    "other_national_secondary": "その他の国の中等教育資格",
+    "bachelor_degree": "学士号",
+    "master_degree": "修士号"
+  },
+  "Eligibility": {
+    "heading": "出願資格",
+    "missingSummary": "不足: {items}"
+  },
+  "EligibilityOptions": {
+    "eligible_now": "現時点で出願資格あり",
+    "almost_eligible": "もう少しで出願資格あり",
+    "not_currently_eligible": "現時点では出願資格なし",
+    "unknown": "要件を確認中"
+  },
+  "UnlockSimulator": {
+    "heading": "何を変えればもっと選択肢が広がる?",
+    "subheading": "資格を変更した場合に、実際に確認済みのプログラムがいくつ新たに出願可能になるかを確認できます。確認済みの要件データがあるプログラムのみをカウントします。",
+    "credentialLabel": "資格情報",
+    "englishScoreOption": "英語試験スコア",
+    "gpaOption": "GPA",
+    "targetValueLabel": "新しい値",
+    "simulate": "シミュレーション実行",
+    "simulating": "計算中...",
+    "invalidValue": "数値を入力してください。",
+    "noVerifiedData": "シミュレーションに十分な確認済みプログラム要件データがまだありません。",
+    "noneUnlocked": "確認済み要件を持つ{count}件のプログラムを評価しましたが、この変更で新たに出願可能になるものはありません。",
+    "unlockedHeadline": "+{count}件のプログラムが新たに出願可能になる可能性があります"
   }
 }

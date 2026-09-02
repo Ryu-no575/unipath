@@ -26,9 +26,19 @@ export default function Modal({
     function handleKeyDown(event: KeyboardEvent) {
       if (event.key === "Escape") onClose();
     }
+    // Android hardware back button (dispatched by NativeShellSetup): close
+    // this modal instead of letting the WebView navigate/exit underneath it.
+    function handleHardwareBack(event: Event) {
+      event.preventDefault();
+      onClose();
+    }
     document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("unipath:hardwareBack", handleHardwareBack);
     panelRef.current?.focus();
-    return () => document.removeEventListener("keydown", handleKeyDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("unipath:hardwareBack", handleHardwareBack);
+    };
   }, [open, onClose]);
 
   if (!open) return null;
@@ -36,6 +46,12 @@ export default function Modal({
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-zinc-900/40 p-4"
+      style={{
+        paddingTop: "max(1rem, var(--safe-top))",
+        paddingBottom: "max(1rem, var(--safe-bottom))",
+        paddingLeft: "max(1rem, var(--safe-left))",
+        paddingRight: "max(1rem, var(--safe-right))",
+      }}
       onMouseDown={(event) => {
         if (event.target === event.currentTarget) onClose();
       }}
@@ -46,7 +62,7 @@ export default function Modal({
         aria-modal="true"
         aria-labelledby={title ? titleId : undefined}
         tabIndex={-1}
-        className="flex max-h-[85vh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-xl border border-zinc-200 bg-white p-6 shadow-lg focus:outline-none"
+        className="flex max-h-[85vh] w-full max-w-lg flex-col gap-4 overflow-y-auto rounded-2xl border border-zinc-200 bg-white p-6 shadow-elevated focus:outline-none"
       >
         {title && (
           <div className="flex items-center justify-between gap-3">

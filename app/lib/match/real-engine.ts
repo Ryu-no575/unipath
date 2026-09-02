@@ -131,6 +131,45 @@ const FIELD_WEIGHT = 0.5;
 const LOCATION_WEIGHT = 0.25;
 const TUITION_WEIGHT = 0.25;
 
+/**
+ * Scores a single candidate against a profile. Pulled out of
+ * `computeRealMatches` so a "What would improve this match" simulator can
+ * re-run the exact same scoring math against a hypothetical profile (e.g. a
+ * higher budget) for one already-fetched candidate, without shipping the
+ * whole catalog to the client or hand-writing a second scoring formula.
+ */
+export function scoreRealCandidate(
+  candidate: RealProgramCandidate,
+  profile: MatchProfileInputs,
+  destinationCountries: CountryCode[],
+): RealMatchResult {
+  const fieldScore = scoreFieldOfStudyFit(profile.fieldOfStudy, candidate);
+  const locationScore = scoreLocation(candidate, destinationCountries);
+  const tuition = scoreTuition(candidate, profile);
+
+  const finalScore = FIELD_WEIGHT * fieldScore + LOCATION_WEIGHT * locationScore + TUITION_WEIGHT * tuition.score;
+  const scorePercent = Math.round(clamp01(finalScore) * 100);
+
+  const isOutsideCountry =
+    destinationCountries.length > 0 && candidate.countryCode
+      ? !destinationCountries.includes(candidate.countryCode)
+      : null;
+
+  const reasons = buildReasons({
+    fieldScore,
+    hasApplicationType: profile.applicationType != null && candidate.degreeType === profile.applicationType,
+    isOutsideCountry,
+    tuition,
+  });
+
+  return {
+    candidate,
+    scorePercent,
+    tier: getMatchTier(scorePercent),
+    reasons,
+  };
+}
+
 export function computeRealMatches(input: {
   profile: MatchProfileInputs;
   destinationCountries: CountryCode[];
@@ -140,33 +179,7 @@ export function computeRealMatches(input: {
   const eligible = candidates.filter((c) => passesHardConstraints(c, profile.applicationType));
 
   const results: RealMatchResult[] = eligible
-    .map((candidate) => {
-      const fieldScore = scoreFieldOfStudyFit(profile.fieldOfStudy, candidate);
-      const locationScore = scoreLocation(candidate, destinationCountries);
-      const tuition = scoreTuition(candidate, profile);
-
-      const finalScore = FIELD_WEIGHT * fieldScore + LOCATION_WEIGHT * locationScore + TUITION_WEIGHT * tuition.score;
-      const scorePercent = Math.round(clamp01(finalScore) * 100);
-
-      const isOutsideCountry =
-        destinationCountries.length > 0 && candidate.countryCode
-          ? !destinationCountries.includes(candidate.countryCode)
-          : null;
-
-      const reasons = buildReasons({
-        fieldScore,
-        hasApplicationType: profile.applicationType != null && candidate.degreeType === profile.applicationType,
-        isOutsideCountry,
-        tuition,
-      });
-
-      return {
-        candidate,
-        scorePercent,
-        tier: getMatchTier(scorePercent),
-        reasons,
-      };
-    })
+    .map((candidate) => scoreRealCandidate(candidate, profile, destinationCountries))
     .sort((a, b) => b.scorePercent - a.scorePercent);
 
   return {

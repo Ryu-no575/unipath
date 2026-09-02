@@ -3,6 +3,9 @@
     "title": "UniPath",
     "description": "Manage your international university applications in one place."
   },
+  "Offline": {
+    "message": "You're offline. Some UniPath information may be unavailable."
+  },
   "Navigation": {
     "brand": "UniPath",
     "explore": "Explore",
@@ -93,6 +96,7 @@
     "fieldOfStudy": "Field of Study",
     "preferredCountries": "Preferred Countries",
     "educationLevel": "Current Education Level",
+    "qualificationType": "Qualification Type",
     "previousInstitution": "Current / Previous Institution",
     "gpaValue": "GPA",
     "gpaScale": "GPA Scale",
@@ -144,14 +148,18 @@
   },
   "Landing": {
     "eyebrow": "UniPath",
-    "titleLine1": "Your international applications,",
-    "titleLine2": "all in one place.",
+    "titleLine1": "Tell us where you want to go.",
+    "titleLine2": "UniPath shows you how to get there.",
     "subtitle": "Track deadlines, required documents, exams, English test scores, and application status across multiple universities abroad.",
     "cta": "Get Started",
     "footer": "© {year} UniPath",
-    "ctaTryUniPath": "Try UniPath",
+    "ctaTryUniPath": "Find My Match",
     "ctaExploreUniversities": "Explore Universities",
     "ctaContinueJourney": "Continue your journey",
+    "noLoginNote": "No login required to try Match.",
+    "heroJourneyOrigin": "Tokyo",
+    "heroJourneyDestination": "Milan",
+    "heroJourneyInstitution": "Politecnico di Milano",
     "howItWorksHeading": "How it works",
     "howItWorksStep1Title": "Explore & match",
     "howItWorksStep1Body": "Browse verified universities and answer a few quick questions to see your top matches.",
@@ -303,6 +311,9 @@
     "admissionsHeading": "Admissions requirements",
     "admissionsEmpty": "Official requirement data for this program isn't verified yet.",
     "admissionsSourceNote": "Requirement data is checked against the official source below.",
+    "requirementVerified": "Verified official requirement",
+    "requirementNeedsReview": "Needs review",
+    "requirementBeingVerified": "Being verified",
     "yourFitHeading": "Your fit",
     "yourFitSignedOutHeading": "See your match with this university",
     "yourFitSignedOutBody": "Take the Match quiz to see how well this university fits your goals.",
@@ -313,7 +324,12 @@
     "studentRealityBody": "Real questions and reports from students about this university.",
     "studentRealityEmpty": "No student reports here yet.",
     "studentRealityCta": "Ask the community",
-    "studentRealityViewAll": "View all discussions"
+    "studentRealityViewAll": "View all discussions",
+    "internationalStudentsHeading": "International students",
+    "internationalStudentsPercentOfBody": "{percent}% of student body",
+    "academicYear": "Academic year {year}",
+    "lastVerified": "Last verified {date}",
+    "beingVerified": "Being verified"
   },
   "ApplicationChecklist": {
     "heading": "Application Checklist",
@@ -526,6 +542,7 @@
     "heading": "Find My Match",
     "tagline": "A few quick questions to help us match you with universities and programs that fit — this uses what's already in your profile plus a handful of new questions.",
     "stepLabel": "Step {current} of {total}",
+    "timeEstimate": "About 45 seconds",
     "step1Title": "Your profile so far",
     "step2Title": "Campus environment",
     "step3Title": "Class size",
@@ -616,12 +633,17 @@
     "realExcludedNotice": "{excluded} of {total} verified programs have a different degree type and are hidden.",
     "devDemoLinkNote": "View fictional demo data (development only)",
     "communityLink": "Community",
-    "viewRoute": "View Route"
+    "viewRoute": "View Route",
+    "topMatchLabel": "Your #1 Match",
+    "whatIfHeading": "What Would Improve This Match",
+    "whatIfBudget": "If your budget were about 20% higher",
+    "whatIfCountry": "If you also considered {country}"
   },
   "Guest": {
     "quizHeading": "Find My Match",
     "quizTagline": "Answer a few quick questions — no account needed.",
     "stepLabel": "Step {current} of {total}",
+    "timeEstimate": "About 45 seconds",
     "step1Title": "Study goal",
     "step2Title": "Destinations",
     "step3Title": "Budget",
@@ -907,6 +929,9 @@
     "graduationDateLabel": "Graduation date",
     "gpaValueLabel": "GPA",
     "gpaScaleLabel": "GPA scale",
+    "qualificationTypeLabel": "Qualification type",
+    "qualificationTypeNone": "Select a qualification type",
+    "userReported": "User reported",
     "cancel": "Cancel",
     "saveChanges": "Save Changes",
     "saving": "Saving...",
@@ -926,9 +951,14 @@
     "empty": "No test scores added yet.",
     "testTypeLabel": "Test",
     "overallScoreLabel": "Overall score",
+    "cefrLevelLabel": "CEFR level (if reported)",
+    "cefrLevelNone": "Not reported as a CEFR level",
+    "customTestNameLabel": "Exam name",
+    "customTestNamePlaceholder": "e.g. ARCHED, TIL-A",
     "testDateLabel": "Test date",
     "expiresAtLabel": "Expires",
     "expired": "Expired",
+    "userReported": "User reported",
     "cancel": "Cancel",
     "saveChanges": "Save Changes",
     "saving": "Saving...",
@@ -981,10 +1011,17 @@
     "ielts": "IELTS",
     "toefl": "TOEFL",
     "cambridge": "Cambridge",
+    "duolingo": "Duolingo English Test",
     "sat": "SAT",
     "act": "ACT",
     "gre": "GRE",
     "gmat": "GMAT",
+    "ap": "AP",
+    "cils": "CILS",
+    "celi": "CELI",
+    "plida": "PLIDA",
+    "cert_it": "CERT.IT",
+    "university_specific": "University-specific exam",
     "other": "Other"
   },
   "DocumentStatusOptions": {
@@ -992,6 +1029,40 @@
     "ready": "Ready",
     "submitted": "Submitted",
     "expired": "Expired"
+  },
+  "QualificationTypeOptions": {
+    "national_secondary_diploma": "National secondary diploma",
+    "ib_diploma": "IB Diploma",
+    "a_levels": "A-Levels",
+    "abitur": "Abitur",
+    "french_baccalaureat": "French Baccalauréat",
+    "other_national_secondary": "Other national secondary qualification",
+    "bachelor_degree": "Bachelor's degree",
+    "master_degree": "Master's degree"
+  },
+  "Eligibility": {
+    "heading": "Eligibility",
+    "missingSummary": "Missing: {items}"
+  },
+  "EligibilityOptions": {
+    "eligible_now": "Eligible now",
+    "almost_eligible": "Almost eligible",
+    "not_currently_eligible": "Not currently eligible",
+    "unknown": "Requirements being verified"
+  },
+  "UnlockSimulator": {
+    "heading": "What would unlock more options?",
+    "subheading": "See how many real, verified programs a credential change could make you eligible for. Only counts programs with verified requirement data.",
+    "credentialLabel": "Credential",
+    "englishScoreOption": "English test score",
+    "gpaOption": "GPA",
+    "targetValueLabel": "New value",
+    "simulate": "Simulate",
+    "simulating": "Simulating...",
+    "invalidValue": "Enter a number.",
+    "noVerifiedData": "Not enough verified program requirement data exists yet to simulate this.",
+    "noneUnlocked": "Evaluated {count} programs with verified requirements — none would newly become eligible with this change.",
+    "unlockedHeadline": "+{count} programs potentially unlocked"
   },
   "Routes": {
     "heading": "Your Routes",
@@ -1018,6 +1089,8 @@
     "months": "{count, plural, one {# month} other {# months}}",
     "riskDisclaimer": "Risk reflects preparation strategy, not chance of admission.",
     "officialDate": "Official deadline",
+    "officialSource": "Official source",
+    "officialSourceUnavailable": "Source not linked yet — verifying",
     "suggestedDateUnipath": "UniPath suggested date",
     "suggestedDateTask": "Your planned date",
     "viewInCalendar": "View in Calendar",
@@ -1080,7 +1153,32 @@
     "compareCostFocus": "Cost focus",
     "scorecardHeading": "Scorecard",
     "workloadHeading": "Estimated weekly effort",
-    "capacityHeading": "Capacity check"
+    "capacityHeading": "Capacity check",
+    "dateConfidenceLabel_official": "Official",
+    "dateConfidenceLabel_suggested": "Suggested",
+    "dateConfidenceLabel_estimated_window": "Estimated",
+    "dateConfidenceLabel_unverified": "Being verified",
+    "dateConfidenceExplainer_official": "Confirmed by the university or government — a real, verified date.",
+    "dateConfidenceExplainer_suggested": "UniPath calculated this from a verified official date.",
+    "dateConfidenceExplainer_estimated_window": "Not yet a fixed date — a range calculated from official information.",
+    "dateConfidenceExplainer_unverified": "We don't have enough verified information to suggest a date yet.",
+    "estimatedWindowLabel": "Estimated window",
+    "dateBeingVerifiedBody": "We're still verifying the official information for this step.",
+    "whyThisDate": "Why this date?",
+    "whyLineFromTask": "You set this date yourself.",
+    "whyLineFromOfficialDeadline": "UniPath calculated this by working backward from the official deadline, using your route's own buffer.",
+    "whyLineEstimatedSourced": "Based on official information from {source}.",
+    "whyLineEstimatedUnsourced": "Estimated from your program's known schedule.",
+    "whyLineUnverifiedBody": "No verified official information is available for this yet.",
+    "whyLineLastChecked": "Last checked: {date}",
+    "viewSource": "View source",
+    "routePhaseHeading_prepare": "Prepare",
+    "routePhaseHeading_apply": "Apply",
+    "routePhaseHeading_decide": "Decide",
+    "routePhaseHeading_move": "Move",
+    "routePhaseHeading_arrive": "Arrive",
+    "futurePathHeading": "Your Future Path",
+    "futurePathToday": "Today"
   },
   "RouteTypeOptions": {
     "fastest": "Fastest",
@@ -1203,7 +1301,11 @@
     "essay_draft": "Draft",
     "essay_feedback": "Feedback",
     "essay_revise": "Revise",
-    "essay_final": "Final"
+    "essay_final": "Final",
+    "residence_permit_registration": "Register residence permit",
+    "local_registration": "Register with local municipality",
+    "student_card_registration": "Register for student card",
+    "health_registration": "Register for health insurance"
   },
   "RouteReasons": {
     "profile_ready": "Your profile is complete.",
@@ -1527,7 +1629,19 @@
     "unmarkBrokenPending": "Updating...",
     "retryButton": "Retry Validation",
     "retryPending": "Checking...",
-    "noSourceToAct": "This university has no official-website source to act on yet."
+    "noSourceToAct": "This university has no official-website source to act on yet.",
+    "studentStatsHeading": "International student statistics",
+    "studentStatsSubheading": "Admin-entered only -- no automated importer exists for this data. Leave a field blank to show \"Being verified\" instead of a number.",
+    "studentStatsTotalLabel": "Total students",
+    "studentStatsInternationalLabel": "International students",
+    "studentStatsPercentageLabel": "International student %",
+    "studentStatsAcademicYearLabel": "Academic year",
+    "studentStatsSourceNameLabel": "Source name",
+    "studentStatsSourceUrlLabel": "Source URL",
+    "studentStatsSave": "Save",
+    "studentStatsSaving": "Saving...",
+    "studentStatsSaved": "Saved.",
+    "studentStatsLastVerified": "Last verified {date}"
   },
   "AdminPriorities": {
     "heading": "Demand Priority Engine",
@@ -1610,7 +1724,11 @@
     "biometrics": "Biometrics",
     "submit_application": "Submit application",
     "receive_decision": "Receive decision",
-    "other": "Other"
+    "other": "Other",
+    "residence_permit_registration": "Register residence permit",
+    "local_registration": "Local municipality/address registration",
+    "student_card_registration": "Student card registration",
+    "health_registration": "Health insurance / national health service registration"
   },
   "AdminVisa": {
     "heading": "Visa Sources",
@@ -1656,7 +1774,15 @@
     "addSourceButton": "Add source",
     "rejectButton": "Reject",
     "unrejectButton": "Unreject",
-    "neverChecked": "Not yet checked"
+    "neverChecked": "Not yet checked",
+    "timingSectionHeading": "Date Engine timing (optional)",
+    "timingSectionHint": "Only fill these in once a real government/embassy source confirms the number — leave blank rather than guess.",
+    "earliestMonthsLabel": "Earliest application (months before course start)",
+    "latestSafeWeeksLabel": "Latest safe submission (weeks before course start)",
+    "processingWeeksMinLabel": "Processing time, minimum (weeks)",
+    "processingWeeksMaxLabel": "Processing time, maximum (weeks)",
+    "timingUnknownPlaceholder": "Unknown",
+    "deadlineDaysAfterArrivalLabel": "Deadline (days after arrival)"
   },
   "Housing": {
     "heading": "Housing",
@@ -1750,5 +1876,14 @@
     "guestLabel": "Guest",
     "reviewedLabel": "Reviewed",
     "markReviewedButton": "Mark reviewed"
+  },
+  "Share": {
+    "shareMyUniPath": "Share My UniPath",
+    "previewHeading": "Your UniPath card",
+    "previewAlt": "A shareable card showing your top university match",
+    "shareButton": "Share",
+    "sharing": "Preparing...",
+    "downloadButton": "Download",
+    "privacyNote": "Only your match and destination are shown — nothing personal."
   }
 }

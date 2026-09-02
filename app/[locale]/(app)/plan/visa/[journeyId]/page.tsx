@@ -50,6 +50,18 @@ export default async function VisaJourneyDetailPage({
     return new Date(iso).toLocaleDateString(locale, { year: "numeric", month: "short", day: "numeric" });
   }
 
+  /** Date Engine v2: Visa/Travel steps carry an estimated window rather than
+   * a single suggestedDate once real anchor data exists but no exact day is
+   * knowable (task brief item 17) -- shown here instead of a fabricated
+   * exact date. */
+  function stepDateLabel(step: (typeof route.steps)[number] | null): string {
+    if (step?.date?.suggestedDate) return formatDate(step.date.suggestedDate);
+    const window = step?.date?.estimatedWindow;
+    if (window?.qualitativeLabel) return window.qualitativeLabel;
+    if (window?.startISO && window?.endISO) return `${formatDate(window.startISO)} – ${formatDate(window.endISO)}`;
+    return step?.status === "done" ? t("timelineDone") : t("timelineDateUnknown");
+  }
+
   return (
     <div className="flex flex-col gap-8">
       <PageHeader
@@ -81,30 +93,9 @@ export default async function VisaJourneyDetailPage({
           <ol className="flex flex-col gap-4 sm:flex-row sm:gap-0">
             <TimelineNode label={t("timelineEnrollment")} date={t("timelineEnrollmentDone")} official />
             <TimelineConnector />
-            <TimelineNode
-              label={t("timelineVisaPreparation")}
-              date={
-                visaStep?.date?.suggestedDate
-                  ? formatDate(visaStep.date.suggestedDate)
-                  : visaStep?.status === "done"
-                    ? t("timelineDone")
-                    : t("timelineDateUnknown")
-              }
-              official={false}
-            />
+            <TimelineNode label={t("timelineVisaPreparation")} date={stepDateLabel(visaStep)} official={false} />
             <TimelineConnector />
-            <TimelineNode
-              label={t("timelineTravel")}
-              date={
-                travelStep?.date?.suggestedDate
-                  ? formatDate(travelStep.date.suggestedDate)
-                  : travelStep?.status === "done"
-                    ? t("timelineDone")
-                    : t("timelineDateUnknown")
-              }
-              official={false}
-              last
-            />
+            <TimelineNode label={t("timelineTravel")} date={stepDateLabel(travelStep)} official={false} last />
           </ol>
           <p className="mt-4 text-xs text-zinc-400">{t("timelineDisclaimer")}</p>
         </Card>

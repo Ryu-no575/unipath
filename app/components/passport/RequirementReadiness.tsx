@@ -1,21 +1,45 @@
 import { useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
 import type { ApplicationReadinessResult } from "@/app/lib/data/passport";
+import type { ProgramEligibility } from "@/app/lib/eligibility/types";
+import EligibilityBadge from "@/app/components/eligibility/EligibilityBadge";
 import Progress from "../ui/Progress";
 
 export default function RequirementReadiness({
   readiness,
+  eligibility,
   communityHref,
 }: {
   readiness: ApplicationReadinessResult;
+  /** Task item 4's Eligibility Engine result for the same application -- null
+   * when there isn't enough real requirement data to classify (same case as
+   * readiness.status === "limited"). Rendered as a badge + one-line "missing"
+   * summary above the existing ready/missing checklist below, never
+   * replacing it -- MATCH ≠ ELIGIBILITY stays visibly separate. */
+  eligibility?: ProgramEligibility | null;
   communityHref?: string | null;
 }) {
   const t = useTranslations("Readiness");
+  const eligibilityT = useTranslations("Eligibility");
+
+  const missingTitles = eligibility?.items.filter((i) => i.status === "missing").map((i) => i.title) ?? [];
+  const eligibilityBlock = eligibility && eligibility.tier !== "unknown" && (
+    <div className="flex flex-col gap-1.5 border-b border-zinc-100 pb-4">
+      <div className="flex items-center justify-between">
+        <h3 className="text-xs font-medium uppercase tracking-wide text-zinc-400">{eligibilityT("heading")}</h3>
+        <EligibilityBadge tier={eligibility.tier} />
+      </div>
+      {missingTitles.length > 0 && (
+        <p className="text-sm text-zinc-600">{eligibilityT("missingSummary", { items: missingTitles.join(", ") })}</p>
+      )}
+    </div>
+  );
 
   if (readiness.status === "limited") {
     const unknownItems = readiness.items.filter((i) => i.status === "unknown");
     return (
       <div className="flex flex-col gap-2 rounded-xl border border-zinc-200 bg-white p-6">
+        {eligibilityBlock}
         <h2 className="text-base font-semibold text-zinc-900">{t("heading")}</h2>
         <p className="text-sm font-medium text-zinc-500">{t("limitedData")}</p>
         <p className="text-sm text-zinc-400">{t("limitedDataDetail")}</p>
@@ -60,6 +84,7 @@ export default function RequirementReadiness({
 
   return (
     <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-6">
+      {eligibilityBlock}
       <div className="flex items-center justify-between">
         <h2 className="text-base font-semibold text-zinc-900">{t("heading")}</h2>
         <span className="text-lg font-semibold text-zinc-900">{readiness.scorePercent}%</span>

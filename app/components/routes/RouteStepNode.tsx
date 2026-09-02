@@ -1,11 +1,13 @@
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import type { RouteStep } from "@/app/lib/routes/types";
+import type { RouteStep, RouteStepDate } from "@/app/lib/routes/types";
 import { routeStepLabel, routeSubStepLabel } from "@/app/lib/routes/labels";
 import { ROUTE_STEP_STYLES } from "@/app/lib/routes/step-style";
 import DeadlineTime from "@/app/components/DeadlineTime";
 import RouteStepIcon from "./RouteStepIcon";
 import RouteSubSteps from "./RouteSubSteps";
+import DateTrustBadge from "./DateTrustBadge";
+import WhyThisDate from "./WhyThisDate";
 
 const NODE_STATUS_CLASSES: Record<RouteStep["status"], string> = {
   done: "bg-emerald-100 text-emerald-700 ring-4 ring-emerald-50",
@@ -24,6 +26,47 @@ const LINE_STATUS_CLASSES: Record<RouteStep["status"], string> = {
   current: "bg-zinc-200",
   upcoming: "bg-zinc-200",
 };
+
+type Formatter = ReturnType<typeof useFormatter>;
+
+/** Renders an EstimatedWindow without false precision (task brief item 17):
+ * a qualitative label always wins when present; a real bounded window is
+ * shown to day-level granularity only, never a fake exact instant. */
+function formatEstimatedWindow(date: RouteStepDate, format: Formatter): string | null {
+  const window = date.estimatedWindow;
+  if (!window) return null;
+  if (window.qualitativeLabel) return window.qualitativeLabel;
+  if (window.startISO && window.endISO) {
+    const start = format.dateTime(new Date(window.startISO), { month: "short", day: "numeric" });
+    const end = format.dateTime(new Date(window.endISO), { month: "short", day: "numeric", year: "numeric" });
+    return `${start} – ${end}`;
+  }
+  return null;
+}
+
+/** Task brief item 15's "Why this date?" -- the literal chain this specific
+ * date came from, built only from what's already on RouteStepDate (never a
+ * hand-authored explanation that could drift from the real computation). */
+function buildWhyThisDateLines(
+  date: RouteStepDate,
+  t: ReturnType<typeof useTranslations<"Routes">>,
+  format: Formatter,
+): string[] {
+  const lines: string[] = [];
+  if (date.suggestedSource === "task") {
+    lines.push(t("whyLineFromTask"));
+  } else if (date.suggestedSource === "unipath" && date.officialDate) {
+    lines.push(t("whyLineFromOfficialDeadline"));
+  } else if (date.confidence === "estimated_window") {
+    lines.push(date.officialSource ? t("whyLineEstimatedSourced", { source: date.officialSource.label }) : t("whyLineEstimatedUnsourced"));
+  } else if (date.confidence === "unverified") {
+    lines.push(t("whyLineUnverifiedBody"));
+  }
+  if (date.officialSource?.lastCheckedAt) {
+    lines.push(t("whyLineLastChecked", { date: format.dateTime(new Date(date.officialSource.lastCheckedAt), "short") }));
+  }
+  return lines;
+}
 
 export default function RouteStepNode({
   step,
@@ -50,7 +93,11 @@ export default function RouteStepNode({
   const subStepViews = step.subSteps.map((sub) => ({
     key: sub.key,
     title: routeSubStepLabel(sub, subStepTypes),
-    dateText: sub.date?.suggestedDate ? format.dateTime(new Date(sub.date.suggestedDate), "long") : null,
+    dateText: sub.date?.suggestedDate
+      ? format.dateTime(new Date(sub.date.suggestedDate), "long")
+      : sub.date
+        ? formatEstimatedWindow(sub.date, format)
+        : null,
     done: sub.done,
   }));
 
@@ -85,8 +132,9 @@ export default function RouteStepNode({
         </div>
         <p className="text-sm text-zinc-500">{label.detail}</p>
 
-        {step.date && (step.date.officialDate || step.date.suggestedDate) && (
+        {step.date && (
           <div className="mt-1 flex flex-col gap-1.5 rounded-md border border-zinc-100 bg-zinc-50 px-3 py-2">
+            <DateTrustBadge confidence={step.date.confidence} />
             {step.date.officialDate && (
               <div className="flex flex-col gap-0.5">
                 <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
@@ -97,6 +145,25 @@ export default function RouteStepNode({
                   sourceTimezone={step.date.officialTimezone ?? "UTC"}
                   userTimezone={userTimezone}
                 />
+                <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+                  {t("officialSource")}
+                </span>
+                {step.date.officialSource ? (
+                  step.date.officialSource.url ? (
+                    <a
+                      href={step.date.officialSource.url}
+                      target="_blank"
+                      rel="noopener noreferrer nofollow"
+                      className="w-fit text-sm font-medium text-blue-700 underline underline-offset-2 hover:text-blue-900"
+                    >
+                      {step.date.officialSource.label}
+                    </a>
+                  ) : (
+                    <span className="text-sm text-zinc-700">{step.date.officialSource.label}</span>
+                  )
+                ) : (
+                  <span className="text-sm text-zinc-500">{t("officialSourceUnavailable")}</span>
+                )}
               </div>
             )}
             {step.date.suggestedDate && (
@@ -109,6 +176,24 @@ export default function RouteStepNode({
                 </span>
               </div>
             )}
+            {step.date.estimatedWindow && (
+              <div className="flex flex-col gap-0.5">
+                <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">
+                  {t("estimatedWindowLabel")}
+                </span>
+                <span className="text-sm text-zinc-700">{formatEstimatedWindow(step.date, format)}</span>
+              </div>
+            )}
+            {step.date.confidence === "unverified" && (
+              <p className="text-sm text-zinc-500">{t("dateBeingVerifiedBody")}</p>
+            )}
+            <WhyThisDate
+              lines={buildWhyThisDateLines(step.date, t, format)}
+              toggleLabel={t("whyThisDate")}
+              explainer={t(`dateConfidenceExplainer_${step.date.confidence}`)}
+              sourceUrl={step.date.officialSource?.url ?? null}
+              sourceLabel={t("viewSource")}
+            />
           </div>
         )}
 

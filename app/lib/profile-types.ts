@@ -5,6 +5,7 @@ import type {
   IntakeSeason,
   JourneyStage,
   PriorityType,
+  SecondaryQualificationType,
 } from "./supabase/database.types";
 
 /** The onboarding question "Where are you in your study abroad journey?"
@@ -75,6 +76,17 @@ export const ENGLISH_TEST_TYPES: EnglishTestType[] = [
   "other",
 ];
 
+export const QUALIFICATION_TYPES: SecondaryQualificationType[] = [
+  "national_secondary_diploma",
+  "ib_diploma",
+  "a_levels",
+  "abitur",
+  "french_baccalaureat",
+  "other_national_secondary",
+  "bachelor_degree",
+  "master_degree",
+];
+
 /** Client-side form state — everything is a string/array so it maps 1:1 onto
  * <input>/<select> values; converted to typed DB values in the Server Action. */
 export interface ProfileFormValues {
@@ -89,6 +101,7 @@ export interface ProfileFormValues {
   fieldOfStudy: string;
   destinationCountries: string[];
   educationLevel: string;
+  qualificationType: SecondaryQualificationType | "";
   previousInstitution: string;
   gpaValue: string;
   gpaScale: string;
@@ -114,6 +127,7 @@ export function emptyProfileFormValues(): ProfileFormValues {
     fieldOfStudy: "",
     destinationCountries: [],
     educationLevel: "",
+    qualificationType: "",
     previousInstitution: "",
     gpaValue: "",
     gpaScale: "",
@@ -163,6 +177,7 @@ export function profileToFormValues(
     fieldOfStudy: profile.field_of_study ?? "",
     destinationCountries: destinations.map((d) => d.country_code),
     educationLevel: profile.education_level ?? "",
+    qualificationType: profile.qualification_type ?? "",
     previousInstitution: profile.previous_institution ?? "",
     gpaValue: profile.gpa_value != null ? String(profile.gpa_value) : "",
     gpaScale: profile.gpa_scale != null ? String(profile.gpa_scale) : "",

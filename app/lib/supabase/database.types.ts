@@ -95,7 +95,42 @@ export type CommunityPostType =
   | "city_life"
   | "other";
 export type CommunityReportStatus = "pending" | "reviewed" | "resolved" | "dismissed";
-export type TestType = "ielts" | "toefl" | "cambridge" | "sat" | "act" | "gre" | "gmat" | "other";
+export type TestType =
+  | "ielts"
+  | "toefl"
+  | "cambridge"
+  | "sat"
+  | "act"
+  | "gre"
+  | "gmat"
+  | "duolingo"
+  | "cils"
+  | "celi"
+  | "plida"
+  | "cert_it"
+  | "ap"
+  /** Institution-specific entrance exam (e.g. Politecnico di Milano's
+   * ARCHED, Politecnico di Torino's TIL-A) -- pair with
+   * test_scores.custom_test_name rather than enumerating every university's
+   * own exam name here. */
+  | "university_specific"
+  | "other";
+/** CEFR band -- only set when the test itself reports one (PLIDA/CELI/
+ * Cambridge do; IELTS/TOEFL do not) -- never derived from a numeric score. */
+export type CefrLevel = "a1" | "a2" | "b1" | "b2" | "c1" | "c2";
+/** Structured secondary/tertiary qualification vocabulary (Personalized
+ * Planning Phase 1). `education_level` (free text, on both `profiles` and
+ * `education_history`) stays as the human-readable label/supplement -- e.g.
+ * the specific diploma name when this is "other_national_secondary". */
+export type SecondaryQualificationType =
+  | "national_secondary_diploma"
+  | "ib_diploma"
+  | "a_levels"
+  | "abitur"
+  | "french_baccalaureat"
+  | "other_national_secondary"
+  | "bachelor_degree"
+  | "master_degree";
 export type DocumentType =
   | "cv"
   | "transcript"
@@ -137,6 +172,12 @@ export type VisaItemKey =
   | "biometrics"
   | "submit_application"
   | "receive_decision"
+  // Post-arrival legal items (Date Engine v2 Arrival domain) -- dated only via
+  // `deadline_days_after_arrival` when a real government source confirms it.
+  | "residence_permit_registration"
+  | "local_registration"
+  | "student_card_registration"
+  | "health_registration"
   | "other";
 export type UserVisaJourneyStatus = "not_started" | "in_progress" | "submitted" | "decision_received";
 /** Public Beta feedback categories (AGENTS.md section 18). */
@@ -198,6 +239,10 @@ export interface Database {
           weekly_study_hours_available: number | null;
           /** The onboarding stage-selection question -- see JourneyStage. */
           self_reported_stage: JourneyStage | null;
+          /** The user's primary/current secondary or tertiary qualification
+           * type. Structured companion to the free-text `education_level`
+           * above -- see SecondaryQualificationType. */
+          qualification_type: SecondaryQualificationType | null;
           created_at: string;
           updated_at: string;
         };
@@ -275,6 +320,19 @@ export interface Database {
           /** The record page this data was synced from (e.g. https://ror.org/<id>). */
           source_url: string | null;
           last_synced_at: string | null;
+          /** International student statistics -- all null until an admin
+           * enters real, sourced figures (no automated importer exists for
+           * this data). Null renders as "Being verified" in the UI, never an
+           * estimate -- see app/lib/eligibility and the student-reality page. */
+          total_students: number | null;
+          international_students: number | null;
+          international_student_percentage: number | null;
+          /** Free text (e.g. "2025/26") -- academic-year conventions differ
+           * by country, so this is never parsed into a structured date. */
+          student_stats_academic_year: string | null;
+          student_stats_source_name: string | null;
+          student_stats_source_url: string | null;
+          student_stats_last_verified_at: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -374,6 +432,14 @@ export interface Database {
           application_fee_currency: string | null;
           tuition: number | null;
           tuition_currency: string | null;
+          /** Real program logistics dates -- Date Engine v2's anchors for
+           * Visa/Housing/Travel (never the application_deadline above). Nullable;
+           * populated the same curator-direct-edit way application_deadline
+           * already is -- see 20260901000200_date_engine_v2.sql. */
+          program_start_date: string | null;
+          orientation_date: string | null;
+          housing_deadline: string | null;
+          housing_move_in_date: string | null;
           created_at: string;
           updated_at: string;
         };
@@ -550,6 +616,15 @@ export interface Database {
           summary: string | null;
           status: VisaRequirementStatus;
           last_checked_at: string | null;
+          /** Date Engine v2 timing fields -- how many months before
+           * program_start_date the visa application window opens, and the
+           * government's own published processing time range. Nullable:
+           * populated by an admin via AdminVisaForms once a real official
+           * source confirms the number -- never a guessed default. */
+          earliest_application_months_before_start: number | null;
+          processing_weeks_min: number | null;
+          processing_weeks_max: number | null;
+          latest_safe_submission_weeks_before_start: number | null;
           created_at: string;
           updated_at: string;
         };
@@ -571,6 +646,10 @@ export interface Database {
           required: boolean;
           order_index: number;
           source_id: string | null;
+          /** Post-arrival legal deadline, in days after arrival -- e.g. residence
+           * permit registration. Nullable; set only when a real government
+           * source confirms it (Date Engine v2 Arrival domain). */
+          deadline_days_after_arrival: number | null;
           created_at: string;
         };
         Insert: Partial<Omit<Database["public"]["Tables"]["visa_requirement_items"]["Row"], "id" | "created_at">> & {
@@ -803,6 +882,8 @@ export interface Database {
           institution_name: string;
           country_code: string | null;
           education_level: string | null;
+          /** Structured companion to education_level -- see SecondaryQualificationType. */
+          qualification_type: SecondaryQualificationType | null;
           field_of_study: string | null;
           start_date: string | null;
           end_date: string | null;
@@ -826,6 +907,11 @@ export interface Database {
           test_type: TestType;
           overall_score: string | null;
           component_scores: Record<string, unknown> | null;
+          /** Only set when this test itself reports a CEFR band. */
+          cefr_level: CefrLevel | null;
+          /** Free-text name, only meaningful when test_type is
+           * "university_specific" or "other" (e.g. "ARCHED", "TIL-A"). */
+          custom_test_name: string | null;
           test_date: string | null;
           expires_at: string | null;
           created_at: string;
@@ -908,6 +994,8 @@ export interface Database {
       test_type: TestType;
       document_type: DocumentType;
       document_status: DocumentStatus;
+      cefr_level: CefrLevel;
+      secondary_qualification_type: SecondaryQualificationType;
     };
   };
 }

@@ -124,7 +124,7 @@ export default function MatchCard({ result }: { result: MatchResult }) {
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
         <div className="flex items-center justify-between gap-2">
           <span className="text-zinc-400">{t("tuitionValueLabel")}</span>
           <span className="font-medium text-zinc-900">

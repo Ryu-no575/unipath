@@ -18,6 +18,7 @@ import { getRouteEngineInput } from "@/app/lib/data/routes";
 import { generateRoute } from "@/app/lib/routes/generateRoute";
 import { getActiveRouteType } from "@/app/lib/routes/activeRoute";
 import { routeStepHref, routeStepLabel } from "@/app/lib/routes/labels";
+import { effectiveSequencingDate } from "@/app/lib/routes/dateConfidence";
 import type { JourneyStep } from "@/app/components/JourneyProgress";
 import NextActionCard from "@/app/components/NextActionCard";
 import UpcomingDeadlines from "@/app/components/UpcomingDeadlines";
@@ -176,7 +177,7 @@ export default async function DashboardPage({
             title: currentStepLabel!.title,
             detail: currentStepLabel!.detail,
             href: routeStepHref(activeRoute.currentStep.type),
-            dueAt: activeRoute.currentStep.date?.suggestedDate ?? activeRoute.currentStep.date?.officialDate ?? null,
+            dueAt: activeRoute.currentStep.date?.officialDate ?? effectiveSequencingDate(activeRoute.currentStep.date),
           }
         : null;
 

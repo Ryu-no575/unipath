@@ -3,8 +3,11 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import type { AppLocale } from "@/i18n/routing";
-import type { Database, TestType } from "@/app/lib/supabase/database.types";
+import type { CefrLevel, Database, TestType } from "@/app/lib/supabase/database.types";
 import { TEST_TYPES } from "@/app/lib/passport/readiness";
+
+const CEFR_LEVELS: CefrLevel[] = ["a1", "a2", "b1", "b2", "c1", "c2"];
+const CUSTOM_NAME_TEST_TYPES: TestType[] = ["university_specific", "other"];
 import {
   createTestScoreAction,
   updateTestScoreAction,
@@ -21,6 +24,8 @@ function toFormValues(entry?: TestScoreRowData): TestScoreFormInput {
   return {
     testType: entry?.test_type ?? "ielts",
     overallScore: entry?.overall_score ?? "",
+    cefrLevel: entry?.cefr_level ?? "",
+    customTestName: entry?.custom_test_name ?? "",
     testDate: entry?.test_date ?? "",
     expiresAt: entry?.expires_at ?? "",
   };
@@ -90,6 +95,35 @@ export default function TestScoreForm({
             className={fieldClasses}
           />
         </label>
+
+        <label className="flex flex-col gap-1">
+          <span className={labelClasses}>{t("cefrLevelLabel")}</span>
+          <select
+            value={values.cefrLevel}
+            onChange={(e) => set("cefrLevel", e.target.value as CefrLevel | "")}
+            className={fieldClasses}
+          >
+            <option value="">{t("cefrLevelNone")}</option>
+            {CEFR_LEVELS.map((level) => (
+              <option key={level} value={level}>
+                {level.toUpperCase()}
+              </option>
+            ))}
+          </select>
+        </label>
+
+        {CUSTOM_NAME_TEST_TYPES.includes(values.testType) && (
+          <label className="flex flex-col gap-1 sm:col-span-2">
+            <span className={labelClasses}>{t("customTestNameLabel")}</span>
+            <input
+              type="text"
+              value={values.customTestName}
+              onChange={(e) => set("customTestName", e.target.value)}
+              placeholder={t("customTestNamePlaceholder")}
+              className={fieldClasses}
+            />
+          </label>
+        )}
 
         <label className="flex flex-col gap-1">
           <span className={labelClasses}>{t("testDateLabel")}</span>

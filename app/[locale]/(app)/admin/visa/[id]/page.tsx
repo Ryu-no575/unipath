@@ -56,6 +56,10 @@ export default async function AdminVisaProfileDetailPage({
             initialVisaType={profile.visaType ?? ""}
             initialSummary={profile.summary ?? ""}
             initialStatus={profile.status}
+            initialEarliestApplicationMonthsBeforeStart={profile.earliestApplicationMonthsBeforeStart}
+            initialProcessingWeeksMin={profile.processingWeeksMin}
+            initialProcessingWeeksMax={profile.processingWeeksMax}
+            initialLatestSafeSubmissionWeeksBeforeStart={profile.latestSafeSubmissionWeeksBeforeStart}
           />
         </div>
       </Card>

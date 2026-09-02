@@ -3,11 +3,13 @@
 import { revalidatePath } from "next/cache";
 import type { AppLocale } from "@/i18n/routing";
 import { createClient } from "@/app/lib/supabase/server";
+import type { SecondaryQualificationType } from "@/app/lib/supabase/database.types";
 
 export interface EducationFormInput {
   institutionName: string;
   countryCode: string;
   educationLevel: string;
+  qualificationType: SecondaryQualificationType | "";
   fieldOfStudy: string;
   startDate: string;
   endDate: string;
@@ -54,6 +56,7 @@ export async function createEducationAction(
     institution_name: institutionName,
     country_code: toNullableString(input.countryCode),
     education_level: toNullableString(input.educationLevel),
+    qualification_type: input.qualificationType || null,
     field_of_study: toNullableString(input.fieldOfStudy),
     start_date: toNullableString(input.startDate),
     end_date: toNullableString(input.endDate),
@@ -87,6 +90,7 @@ export async function updateEducationAction(
       institution_name: institutionName,
       country_code: toNullableString(input.countryCode),
       education_level: toNullableString(input.educationLevel),
+      qualification_type: input.qualificationType || null,
       field_of_study: toNullableString(input.fieldOfStudy),
       start_date: toNullableString(input.startDate),
       end_date: toNullableString(input.endDate),

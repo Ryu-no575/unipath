@@ -18,7 +18,7 @@ export default function RoutePortfolioStrategy({ portfolio }: { portfolio: Portf
   return (
     <div className="flex flex-col gap-2">
       <h3 className="text-sm font-semibold text-zinc-900">{t("portfolioHeading")}</h3>
-      <div className="grid grid-cols-3 gap-3">
+      <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
         {rows.map((row) => (
           <div key={row.key} className="flex flex-col gap-1 rounded-lg border border-zinc-200 px-3 py-2">
             <span className="text-[11px] font-medium uppercase tracking-wide text-zinc-400">{row.label}</span>

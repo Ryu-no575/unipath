@@ -175,3 +175,40 @@ export const ROUTE_STEP_STYLES: Record<RouteStepType, RouteStepStyle> = {
     taskIconType: "enrollment",
   },
 };
+
+/** Task brief PART A item 14: the Route Map groups steps into these 5 phases
+ * instead of one long undifferentiated list, so a first-time user can see at
+ * a glance which broad stage they're in. */
+export type RoutePhase = "prepare" | "apply" | "decide" | "move" | "arrive";
+
+export const ROUTE_PHASES: RoutePhase[] = ["prepare", "apply", "decide", "move", "arrive"];
+
+export const ROUTE_STEP_PHASE: Record<RouteStepType, RoutePhase> = {
+  profile: "prepare",
+  academic_improvement: "prepare",
+  language_test: "prepare",
+  entrance_exam: "prepare",
+  university_search: "prepare",
+  shortlist: "prepare",
+  backup_universities: "prepare",
+  document: "prepare",
+  document_verification: "prepare",
+  portfolio: "prepare",
+  scholarship_research: "prepare",
+  tuition_comparison: "prepare",
+  cost_of_living: "prepare",
+  affordable_housing: "prepare",
+  flight_monitoring: "prepare",
+  application: "apply",
+  early_submission: "apply",
+  interview: "apply",
+  scholarship: "apply",
+  admission: "decide",
+  payment: "decide",
+  visa: "move",
+  backup_visa: "move",
+  housing: "move",
+  multiple_housing: "move",
+  travel: "move",
+  arrival: "arrive",
+};

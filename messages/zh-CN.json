@@ -3,6 +3,9 @@
     "title": "UniPath",
     "description": "在一个平台管理你的海外大学申请。"
   },
+  "Offline": {
+    "message": "您已离线。部分UniPath信息可能无法使用。"
+  },
   "Navigation": {
     "brand": "UniPath",
     "explore": "探索大学",
@@ -102,7 +105,8 @@
     "tuitionCurrency": "学费货币",
     "maxLivingCost": "年度生活费上限",
     "livingCostCurrency": "生活费货币",
-    "timezone": "时区"
+    "timezone": "时区",
+    "qualificationType": "学历类型"
   },
   "ApplicationTypeOptions": {
     "bachelor": "本科",
@@ -144,14 +148,18 @@
   },
   "Landing": {
     "eyebrow": "UniPath",
-    "titleLine1": "海外大学申请，",
-    "titleLine2": "一站式管理。",
+    "titleLine1": "告诉我们你想去哪里。",
+    "titleLine2": "UniPath 为你规划到达的路径。",
     "subtitle": "集中管理多所海外大学的截止日期、所需材料、考试、英语成绩和申请状态。",
     "cta": "开始使用",
     "footer": "© {year} UniPath",
-    "ctaTryUniPath": "试用 UniPath",
+    "ctaTryUniPath": "开始匹配",
     "ctaExploreUniversities": "探索大学",
     "ctaContinueJourney": "继续你的旅程",
+    "noLoginNote": "无需登录即可体验匹配功能。",
+    "heroJourneyOrigin": "东京",
+    "heroJourneyDestination": "米兰",
+    "heroJourneyInstitution": "Politecnico di Milano",
     "howItWorksHeading": "使用方法",
     "howItWorksStep1Title": "探索与匹配",
     "howItWorksStep1Body": "浏览经过验证的大学，回答几个简单问题即可查看最适合你的匹配结果。",
@@ -313,7 +321,15 @@
     "studentRealityBody": "关于这所大学的真实学生提问与体验分享。",
     "studentRealityEmpty": "这里还没有学生发布的内容。",
     "studentRealityCta": "向社区提问",
-    "studentRealityViewAll": "查看全部讨论"
+    "studentRealityViewAll": "查看全部讨论",
+    "requirementVerified": "已验证的官方要求",
+    "requirementNeedsReview": "待审核",
+    "requirementBeingVerified": "核实中",
+    "internationalStudentsHeading": "国际学生",
+    "internationalStudentsPercentOfBody": "占学生总数的 {percent}%",
+    "academicYear": "{year} 学年",
+    "lastVerified": "最近核实:{date}",
+    "beingVerified": "核实中"
   },
   "ApplicationChecklist": {
     "heading": "申请清单",
@@ -526,6 +542,7 @@
     "heading": "寻找匹配",
     "tagline": "几个简单的问题,帮助我们为你匹配合适的大学和专业——我们会使用你个人资料中已有的信息,再加上几个新问题。",
     "stepLabel": "第 {current} 步,共 {total} 步",
+    "timeEstimate": "大约需要45秒",
     "step1Title": "你目前的资料",
     "step2Title": "校园环境",
     "step3Title": "学校规模",
@@ -616,12 +633,17 @@
     "realExcludedNotice": "已核实的 {total} 个项目中有 {excluded} 个学位类型不同，已隐藏。",
     "devDemoLinkNote": "查看虚构演示数据（仅限开发环境）",
     "communityLink": "社区",
-    "viewRoute": "查看路线"
+    "viewRoute": "查看路线",
+    "topMatchLabel": "你的第一匹配",
+    "whatIfHeading": "如何提升匹配度",
+    "whatIfBudget": "如果预算提高约20%",
+    "whatIfCountry": "如果也考虑{country}"
   },
   "Guest": {
     "quizHeading": "寻找你的匹配",
     "quizTagline": "回答几个简单问题——无需注册账号。",
     "stepLabel": "第 {current}/{total} 步",
+    "timeEstimate": "大约需要45秒",
     "step1Title": "学习目标",
     "step2Title": "目标国家/地区",
     "step3Title": "预算",
@@ -912,7 +934,10 @@
     "saving": "保存中...",
     "edit": "编辑",
     "delete": "删除",
-    "confirmDelete": "确定要删除这条教育经历吗？"
+    "confirmDelete": "确定要删除这条教育经历吗？",
+    "qualificationTypeLabel": "学历类型",
+    "qualificationTypeNone": "选择学历类型",
+    "userReported": "用户自报"
   },
   "PassportTests": {
     "back": "← 返回 Passport",
@@ -934,7 +959,12 @@
     "saving": "保存中...",
     "edit": "编辑",
     "delete": "删除",
-    "confirmDelete": "确定要删除这项考试成绩吗？"
+    "confirmDelete": "确定要删除这项考试成绩吗？",
+    "cefrLevelLabel": "CEFR 等级(如有报告)",
+    "cefrLevelNone": "未按 CEFR 等级报告",
+    "customTestNameLabel": "考试名称",
+    "customTestNamePlaceholder": "例如:ARCHED、TIL-A",
+    "userReported": "用户自报"
   },
   "PassportDocuments": {
     "back": "← 返回 Passport",
@@ -985,7 +1015,14 @@
     "act": "ACT",
     "gre": "GRE",
     "gmat": "GMAT",
-    "other": "其他"
+    "other": "其他",
+    "duolingo": "多邻国英语测试",
+    "ap": "AP",
+    "cils": "CILS",
+    "celi": "CELI",
+    "plida": "PLIDA",
+    "cert_it": "CERT.IT",
+    "university_specific": "院校专属入学考试"
   },
   "DocumentStatusOptions": {
     "draft": "草稿",
@@ -1014,6 +1051,8 @@
     "months": "{count}个月",
     "riskDisclaimer": "风险反映的是准备策略,而非录取概率。",
     "officialDate": "官方截止日期",
+    "officialSource": "官方来源",
+    "officialSourceUnavailable": "来源尚未关联 — 核实中",
     "suggestedDateUnipath": "UniPath建议日期",
     "suggestedDateTask": "你设定的计划日期",
     "viewInCalendar": "在日历中查看",
@@ -1080,7 +1119,32 @@
     "compareCostFocus": "成本关注度",
     "scorecardHeading": "评分卡",
     "workloadHeading": "预估每周投入",
-    "capacityHeading": "容量检查"
+    "capacityHeading": "容量检查",
+    "dateConfidenceLabel_official": "官方",
+    "dateConfidenceLabel_suggested": "建议日期",
+    "dateConfidenceLabel_estimated_window": "预估",
+    "dateConfidenceLabel_unverified": "确认中",
+    "dateConfidenceExplainer_official": "由大学或政府确认的真实、已核实的日期。",
+    "dateConfidenceExplainer_suggested": "UniPath 根据已核实的官方日期计算得出。",
+    "dateConfidenceExplainer_estimated_window": "尚无固定日期——这是根据官方信息计算出的区间。",
+    "dateConfidenceExplainer_unverified": "目前尚无足够的官方信息来给出日期。",
+    "estimatedWindowLabel": "预估区间",
+    "dateBeingVerifiedBody": "此步骤的官方信息仍在核实中。",
+    "whyThisDate": "此日期的依据",
+    "whyLineFromTask": "这是您自己设置的日期。",
+    "whyLineFromOfficialDeadline": "UniPath 根据您所选路线的缓冲时间，从官方截止日期向前推算得出。",
+    "whyLineEstimatedSourced": "基于来自{source}的官方信息。",
+    "whyLineEstimatedUnsourced": "根据您项目的已知日程估算得出。",
+    "whyLineUnverifiedBody": "目前尚无已核实的官方信息。",
+    "whyLineLastChecked": "最近核实时间：{date}",
+    "viewSource": "查看来源",
+    "routePhaseHeading_prepare": "准备",
+    "routePhaseHeading_apply": "申请",
+    "routePhaseHeading_decide": "录取决定",
+    "routePhaseHeading_move": "行前准备",
+    "routePhaseHeading_arrive": "抵达",
+    "futurePathHeading": "你的未来之路",
+    "futurePathToday": "今天"
   },
   "RouteTypeOptions": {
     "fastest": "最快",
@@ -1203,7 +1267,11 @@
     "essay_draft": "初稿",
     "essay_feedback": "反馈",
     "essay_revise": "修改",
-    "essay_final": "定稿"
+    "essay_final": "定稿",
+    "residence_permit_registration": "登记居留许可",
+    "local_registration": "当地市政登记",
+    "student_card_registration": "学生证登记",
+    "health_registration": "医疗保险登记"
   },
   "RouteReasons": {
     "profile_ready": "你的个人资料已完善。",
@@ -1527,7 +1595,19 @@
     "unmarkBrokenPending": "更新中...",
     "retryButton": "重新验证",
     "retryPending": "检查中...",
-    "noSourceToAct": "该大学暂无可操作的官方网站来源。"
+    "noSourceToAct": "该大学暂无可操作的官方网站来源。",
+    "studentStatsHeading": "国际学生统计",
+    "studentStatsSubheading": "仅由管理员手动录入——目前没有此数据的自动导入方式。留空字段将显示“核实中”而非具体数字。",
+    "studentStatsTotalLabel": "学生总数",
+    "studentStatsInternationalLabel": "国际学生人数",
+    "studentStatsPercentageLabel": "国际学生占比(%)",
+    "studentStatsAcademicYearLabel": "学年",
+    "studentStatsSourceNameLabel": "来源名称",
+    "studentStatsSourceUrlLabel": "来源链接",
+    "studentStatsSave": "保存",
+    "studentStatsSaving": "保存中...",
+    "studentStatsSaved": "已保存。",
+    "studentStatsLastVerified": "最近核实:{date}"
   },
   "AdminPriorities": {
     "heading": "需求优先级引擎",
@@ -1610,7 +1690,11 @@
     "biometrics": "生物识别信息采集",
     "submit_application": "提交申请",
     "receive_decision": "获取审批结果",
-    "other": "其他"
+    "other": "其他",
+    "residence_permit_registration": "登记居留许可",
+    "local_registration": "当地市政/地址登记",
+    "student_card_registration": "学生证登记",
+    "health_registration": "医疗保险/国家医疗系统登记"
   },
   "AdminVisa": {
     "heading": "签证来源",
@@ -1656,7 +1740,15 @@
     "addSourceButton": "添加来源",
     "rejectButton": "拒绝",
     "unrejectButton": "取消拒绝",
-    "neverChecked": "尚未核实"
+    "neverChecked": "尚未核实",
+    "timingSectionHeading": "日期引擎时间信息（可选）",
+    "timingSectionHint": "仅在政府/使领馆等官方来源确认后再填写；不确定时请留空，不要猜测。",
+    "earliestMonthsLabel": "最早可申请时间（课程开始前几个月）",
+    "latestSafeWeeksLabel": "最迟安全提交时间（课程开始前几周）",
+    "processingWeeksMinLabel": "处理时间下限（周）",
+    "processingWeeksMaxLabel": "处理时间上限（周）",
+    "timingUnknownPlaceholder": "未知",
+    "deadlineDaysAfterArrivalLabel": "截止日期（抵达后几天内）"
   },
   "Housing": {
     "heading": "住宿",
@@ -1750,5 +1842,48 @@
     "guestLabel": "访客",
     "reviewedLabel": "已查看",
     "markReviewedButton": "标记为已查看"
+  },
+  "Share": {
+    "shareMyUniPath": "分享我的 UniPath",
+    "previewHeading": "你的 UniPath 卡片",
+    "previewAlt": "展示你的第一匹配大学的可分享卡片",
+    "shareButton": "分享",
+    "sharing": "准备中...",
+    "downloadButton": "下载",
+    "privacyNote": "仅显示匹配结果与目的地 — 不含任何个人信息。"
+  },
+  "QualificationTypeOptions": {
+    "national_secondary_diploma": "本国中学毕业文凭",
+    "ib_diploma": "IB 文凭",
+    "a_levels": "A-Level",
+    "abitur": "德国高中毕业考试(Abitur)",
+    "french_baccalaureat": "法国高中会考(Baccalauréat)",
+    "other_national_secondary": "其他国家中学学历",
+    "bachelor_degree": "学士学位",
+    "master_degree": "硕士学位"
+  },
+  "Eligibility": {
+    "heading": "申请资格",
+    "missingSummary": "缺少:{items}"
+  },
+  "EligibilityOptions": {
+    "eligible_now": "目前符合资格",
+    "almost_eligible": "接近符合资格",
+    "not_currently_eligible": "目前不符合资格",
+    "unknown": "要求正在核实中"
+  },
+  "UnlockSimulator": {
+    "heading": "怎样才能解锁更多选择?",
+    "subheading": "查看资格变化后,有多少真实、已验证的项目会新增可申请资格。仅统计有已验证要求数据的项目。",
+    "credentialLabel": "资格条件",
+    "englishScoreOption": "英语考试成绩",
+    "gpaOption": "GPA",
+    "targetValueLabel": "新数值",
+    "simulate": "模拟",
+    "simulating": "计算中...",
+    "invalidValue": "请输入一个数字。",
+    "noVerifiedData": "目前尚无足够的已验证项目要求数据来进行模拟。",
+    "noneUnlocked": "已评估 {count} 个具有已验证要求的项目——此变化不会使任何项目新增可申请资格。",
+    "unlockedHeadline": "可能新增 {count} 个可申请项目"
   }
 }

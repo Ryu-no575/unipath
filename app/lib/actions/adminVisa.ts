@@ -59,7 +59,18 @@ export async function createVisaProfileAction(
 export async function updateVisaProfileAction(
   locale: AppLocale,
   profileId: string,
-  params: { visaType: string; summary: string; status: "verified" | "being_verified" },
+  params: {
+    visaType: string;
+    summary: string;
+    status: "verified" | "being_verified";
+    /** Date Engine v2 timing fields (task brief PART B item 6/7) -- null
+     * unless an admin has confirmed the number against a real official
+     * source; never defaulted to a guessed value here. */
+    earliestApplicationMonthsBeforeStart: number | null;
+    processingWeeksMin: number | null;
+    processingWeeksMax: number | null;
+    latestSafeSubmissionWeeksBeforeStart: number | null;
+  },
 ): Promise<AdminVisaActionResult> {
   const result = await withAdmin(async (adminUserId) => {
     const admin = createAdminClient();
@@ -69,6 +80,10 @@ export async function updateVisaProfileAction(
         visa_type: params.visaType.trim() || null,
         summary: params.summary.trim() || null,
         status: params.status,
+        earliest_application_months_before_start: params.earliestApplicationMonthsBeforeStart,
+        processing_weeks_min: params.processingWeeksMin,
+        processing_weeks_max: params.processingWeeksMax,
+        latest_safe_submission_weeks_before_start: params.latestSafeSubmissionWeeksBeforeStart,
         last_checked_at: new Date().toISOString(),
       })
       .eq("id", profileId);
@@ -85,7 +100,16 @@ export async function updateVisaProfileAction(
 export async function addVisaItemAction(
   locale: AppLocale,
   profileId: string,
-  params: { itemKey: VisaItemKey; title: string; description: string; required: boolean; orderIndex: number },
+  params: {
+    itemKey: VisaItemKey;
+    title: string;
+    description: string;
+    required: boolean;
+    orderIndex: number;
+    /** Post-arrival legal deadline, in days after arrival (Date Engine v2
+     * Arrival domain) -- null for every non-post-arrival item key. */
+    deadlineDaysAfterArrival?: number | null;
+  },
 ): Promise<AdminVisaActionResult> {
   const result = await withAdmin(async (adminUserId) => {
     const admin = createAdminClient();
@@ -96,6 +120,7 @@ export async function addVisaItemAction(
       description: params.description.trim() || null,
       required: params.required,
       order_index: params.orderIndex,
+      deadline_days_after_arrival: params.deadlineDaysAfterArrival ?? null,
     });
     if (error) return { error: error.message };
 

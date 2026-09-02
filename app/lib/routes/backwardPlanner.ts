@@ -1,7 +1,37 @@
 import type { LeadTimeRange } from "./routePolicies";
-import type { RouteFeasibility, RouteStepDate } from "./types";
+import type { DateConfidence, DateSourceInfo, EstimatedWindow, RouteFeasibility, RouteStepDate } from "./types";
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+/** The one place RouteStepDate.confidence is derived -- every constructor in
+ * this codebase (here and steps.ts) must build a date through this, never by
+ * hand-rolling the official > suggested > estimated_window > unverified
+ * precedence itself (task brief items 3/16/17). */
+export function makeRouteStepDate(params: {
+  officialDate?: string | null;
+  officialTimezone?: string | null;
+  officialSource?: DateSourceInfo | null;
+  suggestedDate?: string | null;
+  suggestedSource?: RouteStepDate["suggestedSource"];
+  estimatedWindow?: EstimatedWindow | null;
+}): RouteStepDate {
+  const confidence: DateConfidence = params.officialDate
+    ? "official"
+    : params.suggestedDate
+      ? "suggested"
+      : params.estimatedWindow
+        ? "estimated_window"
+        : "unverified";
+  return {
+    officialDate: params.officialDate ?? null,
+    officialTimezone: params.officialTimezone ?? null,
+    officialSource: params.officialSource ?? null,
+    suggestedDate: params.suggestedDate ?? null,
+    suggestedSource: params.suggestedSource ?? null,
+    estimatedWindow: params.estimatedWindow ?? null,
+    confidence,
+  };
+}
 
 function clamp01(value: number): number {
   return Math.max(0, Math.min(1, value));
@@ -47,18 +77,20 @@ export function backwardPlannedStepDate(params: {
   today: string;
   deadlineISO: string | null;
   timezone: string | null;
+  officialSource?: DateSourceInfo | null;
   range: LeadTimeRange;
   aggressiveness: number;
   bufferDays?: number;
 }): RouteStepDate | null {
   const suggestedDate = planBackwardDate(params);
   if (!suggestedDate) return null;
-  return {
+  return makeRouteStepDate({
     officialDate: params.deadlineISO,
     officialTimezone: params.timezone,
+    officialSource: params.officialSource ?? null,
     suggestedDate,
     suggestedSource: "unipath",
-  };
+  });
 }
 
 /** Places `count` evenly-spaced milestones between two anchor dates -- used

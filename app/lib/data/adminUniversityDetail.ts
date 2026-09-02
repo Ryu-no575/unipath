@@ -43,12 +43,23 @@ export interface AdminUniversityDetail {
   reviewReasons: string[];
   institutionNamePattern: "qualifies" | "disqualifies" | "ambiguous";
   updatedAt: string;
+  studentStats: {
+    totalStudents: number | null;
+    internationalStudents: number | null;
+    internationalStudentPercentage: number | null;
+    academicYear: string | null;
+    sourceName: string | null;
+    sourceUrl: string | null;
+    lastVerifiedAt: string | null;
+  };
 }
 
 export async function getAdminUniversityDetail(supabase: Client, universityId: string): Promise<AdminUniversityDetail | null> {
   const { data: university } = await supabase
     .from("universities")
-    .select("id, official_name, country_code, city, official_website, ror_id, data_source, updated_at")
+    .select(
+      "id, official_name, country_code, city, official_website, ror_id, data_source, updated_at, total_students, international_students, international_student_percentage, student_stats_academic_year, student_stats_source_name, student_stats_source_url, student_stats_last_verified_at",
+    )
     .eq("id", universityId)
     .maybeSingle();
   if (!university) return null;
@@ -120,5 +131,14 @@ export async function getAdminUniversityDetail(supabase: Client, universityId: s
     }),
     institutionNamePattern: namePattern,
     updatedAt: university.updated_at,
+    studentStats: {
+      totalStudents: university.total_students,
+      internationalStudents: university.international_students,
+      internationalStudentPercentage: university.international_student_percentage,
+      academicYear: university.student_stats_academic_year,
+      sourceName: university.student_stats_source_name,
+      sourceUrl: university.student_stats_source_url,
+      lastVerifiedAt: university.student_stats_last_verified_at,
+    },
   };
 }

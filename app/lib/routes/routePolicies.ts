@@ -28,8 +28,28 @@ export interface RouteLeadTimes {
   document: LeadTimeRange;
   application: LeadTimeRange;
   scholarship: LeadTimeRange;
-  visa: LeadTimeRange;
-  housing: LeadTimeRange;
+}
+
+/** Date Engine v2: Visa/Housing/Travel are no longer backward-planned from the
+ * application deadline via RouteLeadTimes (that was task brief PART B's core
+ * bug -- see visaDates.ts/housingDates.ts/travelDates.ts). Each route's own
+ * position within the *real* official window/anchor is expressed here
+ * instead. Ambitious/Balanced intentionally share the same defaults for
+ * visa/travel -- task brief item 13 explicitly forbids shifting these just
+ * because a route is more academically aggressive. */
+export interface RouteLogisticsPolicy {
+  /** 0..1 within the real official visa window: 0 = latest safe submission
+   * date, 1 = earliest allowed date. Interpolated the same way
+   * backwardPlanner.interpolateLeadDays already interpolates lead times. */
+  visaWindowPosition: number;
+  /** Extra safety-buffer days subtracted on top of visaWindowPosition --
+   * meaningful only for Safest (task item 13's "Visa -> earliest safe time"). */
+  visaBufferDays: number;
+  /** Weeks before the official housing deadline/move-in date this route
+   * starts housing research. */
+  housingLeadWeeks: number;
+  /** Extra days of arrival buffer before orientation/program start. */
+  travelBufferDays: number;
 }
 
 /** Which optional steps this route's policy turns on -- task brief item 5:
@@ -85,6 +105,7 @@ export interface RoutePolicy {
    * per-activity start dates (task brief item 3). */
   aggressiveness: number;
   leadTime: RouteLeadTimes;
+  logistics: RouteLogisticsPolicy;
   includeShortlistClassification: boolean;
   steps: RouteStepSet;
 }

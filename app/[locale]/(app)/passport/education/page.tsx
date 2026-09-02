@@ -29,6 +29,7 @@ export default async function PassportEducationPage({
   const education = await getEducationHistory(supabase, user.id);
 
   const t = await getTranslations("PassportEducation");
+  const qualificationTypeT = await getTranslations("QualificationTypeOptions");
 
   const hasPrimary = Boolean(profile.previous_institution || profile.education_level);
 
@@ -52,13 +53,18 @@ export default async function PassportEducationPage({
         {hasPrimary ? (
           <div className="grid grid-cols-1 gap-2 text-sm text-zinc-700 sm:grid-cols-2">
             <p>{profile.previous_institution}</p>
-            <p>{profile.education_level}</p>
+            <p>{profile.qualification_type ? qualificationTypeT(profile.qualification_type) : profile.education_level}</p>
             {profile.gpa_value != null && (
               <p>
                 GPA {profile.gpa_value}
                 {profile.gpa_scale != null ? ` / ${profile.gpa_scale}` : ""}
               </p>
             )}
+            <p>
+              <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
+                {t("userReported")}
+              </span>
+            </p>
           </div>
         ) : (
           <p className="text-sm text-zinc-400">{t("primaryEmpty")}</p>

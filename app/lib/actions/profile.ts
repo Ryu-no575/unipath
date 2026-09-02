@@ -42,6 +42,7 @@ async function saveProfile(values: ProfileFormValues) {
       intake_season: values.intakeSeason || null,
       field_of_study: toNullableString(values.fieldOfStudy),
       education_level: toNullableString(values.educationLevel),
+      qualification_type: values.qualificationType || null,
       previous_institution: toNullableString(values.previousInstitution),
       gpa_value: toNullableNumber(values.gpaValue),
       gpa_scale: toNullableNumber(values.gpaScale),

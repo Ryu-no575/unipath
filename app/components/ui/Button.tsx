@@ -5,7 +5,7 @@ type Variant = "primary" | "secondary" | "ghost" | "danger";
 type Size = "sm" | "md";
 
 const VARIANT_CLASSES: Record<Variant, string> = {
-  primary: "bg-zinc-900 text-white hover:bg-zinc-700 disabled:hover:bg-zinc-900",
+  primary: "bg-primary text-white hover:bg-primary-dark disabled:hover:bg-primary shadow-soft",
   secondary:
     "border border-zinc-300 bg-white text-zinc-700 hover:bg-zinc-100 disabled:hover:bg-white",
   ghost: "text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 disabled:hover:bg-transparent",
@@ -18,7 +18,7 @@ const SIZE_CLASSES: Record<Size, string> = {
 };
 
 const BASE =
-  "inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-900 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
+  "inline-flex items-center justify-center gap-1.5 rounded-md font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50";
 
 interface CommonProps {
   variant?: Variant;

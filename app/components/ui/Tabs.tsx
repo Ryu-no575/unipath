@@ -21,7 +21,7 @@ export default function Tabs({ items }: { items: TabItem[] }) {
           aria-current={item.active ? "page" : undefined}
           className={`shrink-0 rounded-md px-3 py-2 text-sm font-medium transition-colors ${
             item.active
-              ? "bg-zinc-100 text-zinc-900"
+              ? "bg-primary/10 text-primary"
               : "text-zinc-500 hover:bg-zinc-100 hover:text-zinc-900"
           }`}
         >

@@ -27,8 +27,12 @@ export function getBalancedPolicy(scholarshipNeed: boolean): RoutePolicy {
       document: { min: 14, max: 21 },
       application: { min: 7, max: 14 },
       scholarship: { min: 30, max: 45 },
-      visa: { min: 21, max: 30 },
-      housing: { min: 21, max: 30 },
+    },
+    logistics: {
+      visaWindowPosition: 0.5,
+      visaBufferDays: 0,
+      housingLeadWeeks: 4,
+      travelBufferDays: 2,
     },
     includeShortlistClassification: false,
     steps: {

@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useFormatter, useTranslations } from "next-intl";
 import { Link } from "@/i18n/navigation";
-import { getCountryOptions } from "@/app/lib/countries";
+import { getCountryOptions, type CountryCode } from "@/app/lib/countries";
 import type { RealMatchReason, RealMatchResult } from "@/app/lib/match/real-types";
-import type { MatchTier } from "@/app/lib/match/types";
+import type { MatchProfileInputs, MatchTier } from "@/app/lib/match/types";
+import CountUpPercent from "./CountUpPercent";
+import WhatIfPanel from "./WhatIfPanel";
 
 const TIER_BADGE_CLASSES: Record<MatchTier, string> = {
   strong: "bg-emerald-600",
@@ -48,6 +50,9 @@ export default function RealMatchCard({
   result,
   locale,
   guest = false,
+  variant = "default",
+  profile,
+  destinationCountries,
 }: {
   result: RealMatchResult;
   locale: string;
@@ -56,6 +61,12 @@ export default function RealMatchCard({
    * compute anything from yet. Guests get a Route Preview via the page-level
    * "See Route Preview" CTA instead (see explore/match/results/page.tsx). */
   guest?: boolean;
+  /** "hero" is used once, for the #1 result: bigger score, reasons shown
+   * without a toggle, and (when profile/destinationCountries are passed) a
+   * "What would improve this match" panel. */
+  variant?: "default" | "hero";
+  profile?: MatchProfileInputs;
+  destinationCountries?: CountryCode[];
 }) {
   const [expanded, setExpanded] = useState(false);
   const t = useTranslations("MatchResults");
@@ -64,6 +75,7 @@ export default function RealMatchCard({
   const applicationTypeLabels = useTranslations("ApplicationTypeOptions");
   const format = useFormatter();
   const { candidate, scorePercent, tier, reasons } = result;
+  const isHero = variant === "hero";
 
   const countryLabel = candidate.countryCode
     ? (getCountryOptions(locale).find((c) => c.code === candidate.countryCode)?.label ?? candidate.countryCode)
@@ -71,13 +83,28 @@ export default function RealMatchCard({
   const location = [candidate.city, countryLabel].filter(Boolean).join(", ");
 
   return (
-    <div className="flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5">
+    <div
+      className={
+        isHero
+          ? "flex flex-col gap-4 rounded-2xl border-2 border-gold/50 bg-white p-6 shadow-elevated sm:p-8"
+          : "flex flex-col gap-4 rounded-xl border border-zinc-200 bg-white p-5"
+      }
+    >
+      {isHero && (
+        <span className="inline-flex w-fit items-center gap-1.5 rounded-full bg-navy-900 px-3 py-1 text-[11px] font-semibold tracking-wide text-gold-soft uppercase">
+          {t("topMatchLabel")}
+        </span>
+      )}
       <div className="flex items-start justify-between gap-4">
         <div className="flex flex-col gap-1">
           <div className="flex flex-wrap items-center gap-2">
             <Link
               href={`/universities/${candidate.universityId}`}
-              className="text-base font-semibold text-zinc-900 underline-offset-2 hover:underline"
+              className={
+                isHero
+                  ? "text-xl font-semibold text-navy-900 underline-offset-2 hover:underline sm:text-2xl"
+                  : "text-base font-semibold text-zinc-900 underline-offset-2 hover:underline"
+              }
             >
               {candidate.universityName}
             </Link>
@@ -87,15 +114,19 @@ export default function RealMatchCard({
               </span>
             )}
           </div>
-          <p className="text-sm text-zinc-500">
+          <p className={isHero ? "text-sm text-zinc-600" : "text-sm text-zinc-500"}>
             {candidate.programName}
             {location ? ` · ${location}` : ""}
           </p>
         </div>
         <div className="flex shrink-0 flex-col items-end gap-1">
-          <span className={`rounded-full px-3 py-1 text-sm font-semibold text-white ${TIER_BADGE_CLASSES[tier]}`}>
-            {t("matchLabel", { percent: scorePercent })}
-          </span>
+          {isHero ? (
+            <CountUpPercent value={scorePercent} className="text-4xl font-bold text-primary sm:text-5xl" />
+          ) : (
+            <span className={`rounded-full px-3 py-1 text-sm font-semibold text-white ${TIER_BADGE_CLASSES[tier]}`}>
+              {t("matchLabel", { percent: scorePercent })}
+            </span>
+          )}
           <span className="text-xs font-medium text-zinc-500">{t(TIER_LABEL_KEYS[tier])}</span>
         </div>
       </div>
@@ -110,7 +141,7 @@ export default function RealMatchCard({
         {candidate.duration && <span className="rounded-full border border-zinc-200 px-2.5 py-1">{candidate.duration}</span>}
       </div>
 
-      <div className="grid grid-cols-2 gap-x-6 gap-y-1 text-sm">
+      <div className="grid grid-cols-1 gap-x-6 gap-y-1 text-sm sm:grid-cols-2">
         <div className="flex items-center justify-between gap-2">
           <span className="text-zinc-400">{t("tuitionValueLabel")}</span>
           <span className="font-medium text-zinc-900">
@@ -129,16 +160,9 @@ export default function RealMatchCard({
         </div>
       </div>
 
-      <button
-        type="button"
-        onClick={() => setExpanded((v) => !v)}
-        className="self-start border-t border-zinc-100 pt-4 text-sm font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
-      >
-        {expanded ? t("hideButton") : t("whyButton", { percent: scorePercent })}
-      </button>
-
-      {expanded && (
-        <div className="flex flex-col gap-1.5">
+      {isHero ? (
+        <div className="flex flex-col gap-1.5 border-t border-zinc-100 pt-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-zinc-400">{t("whyButton", { percent: scorePercent })}</p>
           {reasons.map((reason, i) => (
             <div key={i} className="flex items-start gap-2 text-sm">
               <span className={reason.marker === "positive" ? "text-emerald-600" : "text-amber-600"} aria-hidden>
@@ -148,6 +172,39 @@ export default function RealMatchCard({
             </div>
           ))}
         </div>
+      ) : (
+        <>
+          <button
+            type="button"
+            onClick={() => setExpanded((v) => !v)}
+            className="self-start border-t border-zinc-100 pt-4 text-sm font-medium text-zinc-700 underline underline-offset-2 hover:text-zinc-900"
+          >
+            {expanded ? t("hideButton") : t("whyButton", { percent: scorePercent })}
+          </button>
+
+          {expanded && (
+            <div className="flex flex-col gap-1.5">
+              {reasons.map((reason, i) => (
+                <div key={i} className="flex items-start gap-2 text-sm">
+                  <span className={reason.marker === "positive" ? "text-emerald-600" : "text-amber-600"} aria-hidden>
+                    {reason.marker === "positive" ? "✓" : "△"}
+                  </span>
+                  <span className="text-zinc-700">{t(reasonKey(reason.kind) as "realWhyFieldPositive")}</span>
+                </div>
+              ))}
+            </div>
+          )}
+        </>
+      )}
+
+      {isHero && profile && destinationCountries && (
+        <WhatIfPanel
+          candidate={candidate}
+          profile={profile}
+          destinationCountries={destinationCountries}
+          scorePercent={scorePercent}
+          locale={locale}
+        />
       )}
 
       <div className="flex flex-wrap items-center justify-between gap-2 border-t border-zinc-100 pt-4 text-xs text-zinc-400">

@@ -5,6 +5,8 @@ import { useTranslations } from "next-intl";
 import { useRouter } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
 import { emptyProfileFormValues, type ProfileFormValues } from "@/app/lib/profile-types";
+import { getCountryOptions } from "@/app/lib/countries";
+import { flagEmoji } from "@/app/lib/countryFlag";
 import { encodeGuestMatchQuery } from "@/app/lib/match/guestQuery";
 import { writeGuestProfileToSession } from "@/app/lib/match/guestSession";
 import {
@@ -14,6 +16,7 @@ import {
   type ProfileFieldPatch,
 } from "@/app/components/profile/ProfileFieldSections";
 import GuestQuizReviewStep from "./GuestQuizReviewStep";
+import QuizShell from "./QuizShell";
 
 const STEPS = ["step1Title", "step2Title", "step3Title", "step4Title"] as const;
 
@@ -53,50 +56,36 @@ export default function GuestMatchQuizWizard({ locale }: { locale: AppLocale }) 
 
   const isLastStep = step === STEPS.length - 1;
 
+  const countryOptions = getCountryOptions(locale);
+  const destinationLabels = values.destinationCountries
+    .map((code) => countryOptions.find((c) => c.code === code))
+    .filter((c): c is NonNullable<typeof c> => Boolean(c))
+    .slice(0, 3)
+    .map((c) => `${flagEmoji(c.code)} ${c.label}`);
+  const narrowingPath: string[] = [];
+  if (step >= 1 && values.fieldOfStudy) narrowingPath.push(values.fieldOfStudy);
+  if (step >= 2 && destinationLabels.length > 0) narrowingPath.push(...destinationLabels);
+
   return (
-    <div className="flex flex-col gap-8">
-      <div className="flex flex-col gap-2">
-        <h1 className="text-2xl font-semibold tracking-tight text-zinc-900">{t("quizHeading")}</h1>
-        <p className="text-sm text-zinc-500">{t("quizTagline")}</p>
-      </div>
-
-      <div className="flex flex-col gap-3">
-        <div className="flex items-center justify-between text-xs font-medium text-zinc-500">
-          <span>{t("stepLabel", { current: step + 1, total: STEPS.length })}</span>
-          <span>{t(STEPS[step])}</span>
-        </div>
-        <div className="h-1.5 w-full rounded-full bg-zinc-100">
-          <div
-            className="h-1.5 rounded-full bg-zinc-900 transition-all"
-            style={{ width: `${((step + 1) / STEPS.length) * 100}%` }}
-          />
-        </div>
-      </div>
-
-      <div className="rounded-xl border border-zinc-200 bg-white p-6 sm:p-8">
-        {step === 0 && <StudyGoalSection values={values} onChange={handleChange} />}
-        {step === 1 && <DestinationSection values={values} onChange={handleChange} />}
-        {step === 2 && <BudgetSection values={values} onChange={handleChange} />}
-        {step === 3 && <GuestQuizReviewStep values={values} locale={locale} />}
-      </div>
-
-      <div className="flex items-center justify-between">
-        <button
-          type="button"
-          onClick={goBack}
-          disabled={step === 0}
-          className="rounded-md px-4 py-2 text-sm font-medium text-zinc-600 transition-colors hover:bg-zinc-100 hover:text-zinc-900 disabled:opacity-0"
-        >
-          {t("back")}
-        </button>
-        <button
-          type="button"
-          onClick={goNext}
-          className="inline-flex items-center justify-center rounded-md bg-zinc-900 px-6 py-2.5 text-sm font-medium text-white transition-colors hover:bg-zinc-700"
-        >
-          {isLastStep ? t("submit") : t("next")}
-        </button>
-      </div>
-    </div>
+    <QuizShell
+      heading={t("quizHeading")}
+      tagline={t("quizTagline")}
+      timeEstimate={t("timeEstimate")}
+      stepLabel={t("stepLabel", { current: step + 1, total: STEPS.length })}
+      stepTitle={t(STEPS[step])}
+      stepIndex={step}
+      totalSteps={STEPS.length}
+      narrowingPath={narrowingPath}
+      backLabel={t("back")}
+      nextLabel={isLastStep ? t("submit") : t("next")}
+      onBack={goBack}
+      onNext={goNext}
+      backDisabled={step === 0}
+    >
+      {step === 0 && <StudyGoalSection values={values} onChange={handleChange} />}
+      {step === 1 && <DestinationSection values={values} onChange={handleChange} />}
+      {step === 2 && <BudgetSection values={values} onChange={handleChange} />}
+      {step === 3 && <GuestQuizReviewStep values={values} locale={locale} />}
+    </QuizShell>
   );
 }

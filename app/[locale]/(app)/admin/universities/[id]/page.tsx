@@ -17,6 +17,7 @@ import {
 import Card from "@/app/components/ui/Card";
 import Badge, { type BadgeTone } from "@/app/components/ui/Badge";
 import AdminActionButton from "@/app/components/admin/AdminActionButton";
+import UniversityStudentStatsForm from "@/app/components/admin/UniversityStudentStatsForm";
 
 function Field({ label, value }: { label: string; value: React.ReactNode }) {
   return (
@@ -215,6 +216,12 @@ export default async function AdminUniversityDetailPage({
           )}
         </div>
         {!src && <p className="text-xs text-zinc-400">{t("noSourceToAct")}</p>}
+      </Card>
+
+      <Card>
+        <h3 className="mb-1 text-sm font-semibold text-zinc-900">{t("studentStatsHeading")}</h3>
+        <p className="mb-3 text-xs text-zinc-400">{t("studentStatsSubheading")}</p>
+        <UniversityStudentStatsForm universityId={detail.id} studentStats={detail.studentStats} />
       </Card>
     </div>
   );

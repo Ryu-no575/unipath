@@ -11,7 +11,7 @@ import {
   type ApplicationReadiness,
 } from "@/app/lib/passport/readiness";
 import { assessEligibility, type EligibilityTier } from "./eligibility";
-import { APPLICATION_ACTIVE_STATUSES, type RouteEngineInput } from "./types";
+import { APPLICATION_ACTIVE_STATUSES, type DateSourceInfo, type RouteEngineInput } from "./types";
 
 type AdmissionRequirementRow = Database["public"]["Tables"]["admission_requirements"]["Row"];
 type TaskRow = Database["public"]["Tables"]["tasks"]["Row"];
@@ -24,11 +24,45 @@ export interface ScopeItem {
   status: ApplicationStatus | null;
   applicationDeadline: string | null;
   deadlineTimezone: string | null;
+  /** Task brief item 6/16: the real `sources` row backing applicationDeadline,
+   * when one is linked -- null for a custom university or an unlinked cycle,
+   * never fabricated. */
+  applicationDeadlineSource: DateSourceInfo | null;
   requirements: AdmissionRequirementRow[];
   readiness: ApplicationReadiness;
   eligibilityTier: EligibilityTier;
   tuitionAmount: number | null;
   tuitionCurrency: string | null;
+  // Date Engine v2 anchors -- real program logistics, never the application
+  // deadline above (see visaDates.ts/housingDates.ts/travelDates.ts).
+  destinationCountryCode: string | null;
+  programStartDate: string | null;
+  orientationDate: string | null;
+  housingDeadline: string | null;
+  housingMoveInDate: string | null;
+}
+
+/** The single ScopeItem Visa/Housing/Travel/Arrival anchor off of -- the
+ * user's accepted offer once one exists (a real destination is fixed), else
+ * whichever item is driving `earliestDeadline` (a reasonable preview target),
+ * else null when there's nothing to anchor to yet (task brief item 3: never
+ * borrow the Application deadline for these domains). */
+export interface LogisticsAnchor {
+  destinationCountryCode: string | null;
+  programStartDate: string | null;
+  orientationDate: string | null;
+  housingDeadline: string | null;
+  housingMoveInDate: string | null;
+  /** Task brief item 6/16: same `sources` row backing this item's
+   * applicationDeadline -- the university's own admission-cycle page
+   * typically lists housing/logistics info alongside the deadline, so
+   * housingDates.ts's own officialDate reuses it rather than going
+   * unsourced. Null when nothing is linked yet. */
+  source: DateSourceInfo | null;
+  timezone: string | null;
+  /** True once the user has a real accepted offer -- travelDates.ts uses this
+   * to decide whether "confirmed" travel language is even appropriate yet. */
+  isAccepted: boolean;
 }
 
 export interface RouteContext {
@@ -42,7 +76,8 @@ export interface RouteContext {
   activeCount: number;
   submittedCount: number;
   acceptedCount: number;
-  earliestDeadline: { date: string; timezone: string } | null;
+  earliestDeadline: { date: string; timezone: string; source: DateSourceInfo | null } | null;
+  logistics: LogisticsAnchor | null;
   missingDocumentTypes: Map<DocumentType, string[]>;
   portfolioRequired: boolean;
   portfolioReady: boolean;
@@ -71,7 +106,10 @@ const SUBMITTED_STATUSES: ApplicationStatus[] = ["applied", "interview", "accept
  * program has an entrance exam. Never inferred from anything else. */
 const ENTRANCE_EXAM_TEST_TYPES: TestType[] = ["sat", "act", "gre", "gmat"];
 
-function parseEnglishScore(scoreText: string | null): number | null {
+/** Shared with app/lib/eligibility/programEligibility.ts -- keeps "what
+ * counts as the user's current English score" identical between the Route
+ * engine's gap analysis and the Eligibility Engine. */
+export function parseEnglishScore(scoreText: string | null): number | null {
   if (!scoreText) return null;
   const match = scoreText.match(/\d+(\.\d+)?/);
   if (!match) return null;
@@ -102,6 +140,7 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
           status: null,
           applicationDeadline: input.target!.admissionCycle?.applicationDeadline ?? null,
           deadlineTimezone: input.target!.admissionCycle?.deadlineTimezone ?? null,
+          applicationDeadlineSource: input.target!.admissionCycle?.applicationDeadlineSource ?? null,
           requirements: input.target!.requirements,
           readiness: computeApplicationReadiness({
             requirements: input.target!.requirements,
@@ -114,6 +153,11 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
           eligibilityTier: assessEligibility({ requirements: input.target!.requirements, englishScore }).tier,
           tuitionAmount: input.target!.tuitionAmount,
           tuitionCurrency: input.target!.tuitionCurrency,
+          destinationCountryCode: input.target!.destinationCountryCode,
+          programStartDate: input.target!.admissionCycle?.programStartDate ?? null,
+          orientationDate: input.target!.admissionCycle?.orientationDate ?? null,
+          housingDeadline: input.target!.admissionCycle?.housingDeadline ?? null,
+          housingMoveInDate: input.target!.admissionCycle?.housingMoveInDate ?? null,
         },
       ]
     : input.applications.map((routeApp) => ({
@@ -122,11 +166,17 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
         status: routeApp.application.status,
         applicationDeadline: routeApp.application.admissionCycle?.applicationDeadline ?? null,
         deadlineTimezone: routeApp.application.admissionCycle?.deadlineTimezone ?? null,
+        applicationDeadlineSource: routeApp.application.admissionCycle?.applicationDeadlineSource ?? null,
         requirements: routeApp.requirements,
         readiness: routeApp.readiness,
         eligibilityTier: assessEligibility({ requirements: routeApp.requirements, englishScore }).tier,
         tuitionAmount: routeApp.tuitionAmount,
         tuitionCurrency: routeApp.tuitionCurrency,
+        destinationCountryCode: routeApp.application.university?.countryCode ?? null,
+        programStartDate: routeApp.application.admissionCycle?.programStartDate ?? null,
+        orientationDate: routeApp.application.admissionCycle?.orientationDate ?? null,
+        housingDeadline: routeApp.application.admissionCycle?.housingDeadline ?? null,
+        housingMoveInDate: routeApp.application.admissionCycle?.housingMoveInDate ?? null,
       }));
 
   const scopedUniversityName = isTargetMode ? input.target!.universityName : null;
@@ -138,13 +188,39 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
     (s) => s.status === "interview" || s.status === "accepted" || s.status === "rejected",
   );
 
-  let earliestDeadline: { date: string; timezone: string } | null = null;
+  let earliestDeadline: { date: string; timezone: string; source: DateSourceInfo | null } | null = null;
+  let earliestDeadlineItem: ScopeItem | null = null;
   for (const item of scope) {
     if (!item.applicationDeadline) continue;
     if (!earliestDeadline || item.applicationDeadline < earliestDeadline.date) {
-      earliestDeadline = { date: item.applicationDeadline, timezone: item.deadlineTimezone ?? "UTC" };
+      earliestDeadline = {
+        date: item.applicationDeadline,
+        timezone: item.deadlineTimezone ?? "UTC",
+        source: item.applicationDeadlineSource,
+      };
+      earliestDeadlineItem = item;
     }
   }
+
+  // Date Engine v2's anchor for Visa/Housing/Travel/Arrival -- prefer a real
+  // accepted offer (the destination is fixed); otherwise the same item
+  // Application dates are already previewing off of; otherwise nothing to
+  // anchor to yet (task brief item 3: never fall back to the application
+  // deadline for these domains).
+  const acceptedItem = scope.find((s) => s.status === "accepted") ?? null;
+  const logisticsSource = acceptedItem ?? earliestDeadlineItem ?? scope[0] ?? null;
+  const logistics: LogisticsAnchor | null = logisticsSource
+    ? {
+        destinationCountryCode: logisticsSource.destinationCountryCode,
+        programStartDate: logisticsSource.programStartDate,
+        orientationDate: logisticsSource.orientationDate,
+        housingDeadline: logisticsSource.housingDeadline,
+        housingMoveInDate: logisticsSource.housingMoveInDate,
+        source: logisticsSource.applicationDeadlineSource,
+        timezone: logisticsSource.deadlineTimezone,
+        isAccepted: acceptedItem != null,
+      }
+    : null;
 
   const missingDocumentTypes = new Map<DocumentType, string[]>();
   let portfolioRequired = false;
@@ -227,6 +303,7 @@ export function buildRouteContext(input: RouteEngineInput): RouteContext {
     submittedCount,
     acceptedCount,
     earliestDeadline,
+    logistics,
     missingDocumentTypes,
     portfolioRequired,
     portfolioReady,

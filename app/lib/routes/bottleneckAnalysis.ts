@@ -54,10 +54,14 @@ export function computeBottlenecks(
     });
   }
 
-  if (feasibility.daysUntilDeadline != null && feasibility.daysUntilDeadline < policy.leadTime.visa.min) {
+  // Date Engine v2: Visa no longer has its own application-deadline-anchored
+  // lead time (see visaDates.ts) -- this bottleneck is about the Application
+  // deadline's own runway, so it uses Application's minimum lead time as the
+  // baseline instead.
+  if (feasibility.daysUntilDeadline != null && feasibility.daysUntilDeadline < policy.leadTime.application.min) {
     bottlenecks.push({
       kind: "short_lead_time",
-      severity: feasibility.daysUntilDeadline < policy.leadTime.visa.min / 2 ? "critical" : "high",
+      severity: feasibility.daysUntilDeadline < policy.leadTime.application.min / 2 ? "critical" : "high",
       params: { daysRemaining: feasibility.daysUntilDeadline },
     });
   }

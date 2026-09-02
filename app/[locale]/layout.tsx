@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Analytics } from "@vercel/analytics/next";
 import { Geist, Geist_Mono } from "next/font/google";
 import { hasLocale, NextIntlClientProvider } from "next-intl";
@@ -6,7 +6,19 @@ import { getMessages, getTranslations, setRequestLocale } from "next-intl/server
 import { notFound } from "next/navigation";
 import { isRtlLocale, routing } from "@/i18n/routing";
 import { ToastProvider } from "@/app/components/ui/Toast";
+import NativeShellSetup from "@/app/lib/platform/NativeShellSetup";
+import NetworkStatusBanner from "@/app/components/NetworkStatusBanner";
 import "../globals.css";
+
+// viewportFit: "cover" lets the web app draw edge-to-edge under the notch /
+// Dynamic Island / home indicator (and Android system bars in the native
+// shell) so app/globals.css's --safe-* variables actually have insets to
+// read -- without it env(safe-area-inset-*) always resolves to 0.
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -57,7 +69,9 @@ export default async function RootLayout({
     >
       <body className="min-h-full flex flex-col">
         <NextIntlClientProvider messages={messages}>
+          <NetworkStatusBanner />
           <ToastProvider>{children}</ToastProvider>
+          <NativeShellSetup />
         </NextIntlClientProvider>
         <Analytics />
       </body>

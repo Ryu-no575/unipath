@@ -26,8 +26,12 @@ export const FASTEST_POLICY: RoutePolicy = {
     document: { min: 3, max: 7 },
     application: { min: 0, max: 3 },
     scholarship: { min: 0, max: 7 },
-    visa: { min: 14, max: 21 },
-    housing: { min: 14, max: 21 },
+  },
+  logistics: {
+    visaWindowPosition: 0,
+    visaBufferDays: 0,
+    housingLeadWeeks: 2,
+    travelBufferDays: 1,
   },
   includeShortlistClassification: false,
   steps: {

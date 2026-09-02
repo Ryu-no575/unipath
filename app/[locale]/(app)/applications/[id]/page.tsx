@@ -9,6 +9,7 @@ import { getApplicationWithDetails } from "@/app/lib/data/applications";
 import { getSourcesForEntities, getVerifiedFieldsForSources } from "@/app/lib/data/sources";
 import {
   getApplicationDocuments,
+  getApplicationEligibility,
   getApplicationReadiness,
   getDocumentLinksForUser,
   getTestScores,
@@ -71,13 +72,29 @@ export default async function ApplicationDetailPage({
   const linkedDocumentIds = new Set(
     allLinks.filter((l) => l.applicationId === application.id).map((l) => l.documentId),
   );
-  const readiness = await getApplicationReadiness(supabase, {
-    application,
-    documents,
-    testScores,
-    linkedDocumentIds,
-    profile: { english_test_type: profile.english_test_type, english_test_score: profile.english_test_score },
-  });
+  const eligibilityProfile = {
+    english_test_type: profile.english_test_type,
+    english_test_score: profile.english_test_score,
+    gpa_value: profile.gpa_value,
+    gpa_scale: profile.gpa_scale,
+    qualification_type: profile.qualification_type,
+  };
+  const [readiness, eligibility] = await Promise.all([
+    getApplicationReadiness(supabase, {
+      application,
+      documents,
+      testScores,
+      linkedDocumentIds,
+      profile: eligibilityProfile,
+    }),
+    getApplicationEligibility(supabase, {
+      application,
+      documents,
+      testScores,
+      linkedDocumentIds,
+      profile: eligibilityProfile,
+    }),
+  ]);
 
   const t = await getTranslations("ApplicationDetail");
   const fields = await getTranslations("Fields");
@@ -200,6 +217,7 @@ export default async function ApplicationDetailPage({
 
       <RequirementReadiness
         readiness={readiness}
+        eligibility={eligibility}
         communityHref={
           !application.isCustomUniversity && application.university?.id
             ? `/universities/${application.university.id}/community`

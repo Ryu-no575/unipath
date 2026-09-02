@@ -1,4 +1,5 @@
 import type { CalendarEvent } from "@/app/lib/journey";
+import { effectiveSequencingDate } from "./dateConfidence";
 import { ROUTE_STEP_STYLES } from "./step-style";
 import type { Route, RouteStep, RouteStepType, RouteSubStep, RouteType } from "./types";
 
@@ -40,13 +41,13 @@ function subStepEvents(
   title: string,
 ): CalendarEvent[] {
   return subSteps
-    .filter((s) => !s.done && s.date?.suggestedDate)
+    .filter((s) => !s.done && effectiveSequencingDate(s.date))
     .map((s) =>
       toEvent({
         id: `route-${routeType}-${parent.id}-${s.key}`,
         type: parent.type,
         title,
-        suggestedDate: s.date!.suggestedDate!,
+        suggestedDate: effectiveSequencingDate(s.date)!,
         officialTimezone: s.date!.officialTimezone,
         universityName,
         routeType,
@@ -79,14 +80,15 @@ export function buildRouteSuggestedEvents(
       continue;
     }
 
-    if (step.date?.suggestedDate) {
+    const sequencingDate = effectiveSequencingDate(step.date);
+    if (sequencingDate) {
       events.push(
         toEvent({
           id: `route-${route.type}-${step.id}`,
           type: step.type,
           title,
-          suggestedDate: step.date.suggestedDate,
-          officialTimezone: step.date.officialTimezone,
+          suggestedDate: sequencingDate,
+          officialTimezone: step.date!.officialTimezone,
           universityName,
           routeType: route.type,
         }),

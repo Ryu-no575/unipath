@@ -120,6 +120,55 @@ export async function manuallyVerifyUniversitySourceAction(
  * an admin looked at this record and decided it genuinely isn't ready yet,
  * as distinct from simply never having been reviewed. No catalog data
  * changes; this only feeds Verification History (task brief item 19/20). */
+export interface UniversityStudentStatsInput {
+  totalStudents: number | null;
+  internationalStudents: number | null;
+  internationalStudentPercentage: number | null;
+  academicYear: string | null;
+  sourceName: string | null;
+  sourceUrl: string | null;
+}
+
+/** Personalized Planning Phase 1, task item 6: the only way international
+ * student statistics ever enter `universities` -- no automated importer
+ * exists for this data (no specified source of truth), so every figure is
+ * admin-entered and stamped with a real `last_verified_at` at write time.
+ * Any field left null renders as "Being verified" in the UI, never an
+ * estimate. */
+export async function updateUniversityStudentStatsAction(
+  locale: AppLocale,
+  universityId: string,
+  input: UniversityStudentStatsInput,
+): Promise<AdminActionResult> {
+  const result = await withAdmin(async (adminUserId) => {
+    const admin = createAdminClient();
+    const { error } = await admin
+      .from("universities")
+      .update({
+        total_students: input.totalStudents,
+        international_students: input.internationalStudents,
+        international_student_percentage: input.internationalStudentPercentage,
+        student_stats_academic_year: input.academicYear,
+        student_stats_source_name: input.sourceName,
+        student_stats_source_url: input.sourceUrl,
+        student_stats_last_verified_at: new Date().toISOString(),
+      })
+      .eq("id", universityId);
+    if (error) return { error: error.message };
+
+    await logAdminAction({
+      adminUserId,
+      action: "UNIVERSITY_STUDENT_STATS_UPDATED",
+      entityType: "university",
+      entityId: universityId,
+    });
+    revalidatePath(`/${locale}/admin/universities/${universityId}`);
+    revalidatePath(`/${locale}/universities/${universityId}/student-reality`);
+    return {};
+  });
+  return result as AdminActionResult;
+}
+
 export async function keepUniversityNeedsReviewAction(locale: AppLocale, universityId: string): Promise<AdminActionResult> {
   const result = await withAdmin(async (adminUserId) => {
     await logAdminAction({

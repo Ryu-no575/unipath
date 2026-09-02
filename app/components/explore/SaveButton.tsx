@@ -5,6 +5,7 @@ import { useLocale, useTranslations } from "next-intl";
 import { usePathname, useRouter } from "@/i18n/navigation";
 import { useToast } from "@/app/components/ui/Toast";
 import { isSaved, toggleSaved, type SavedUniversityItem } from "@/app/lib/explore/savedUniversities";
+import { recordUniversitySavedAction } from "@/app/lib/actions/explore";
 
 export default function SaveButton({
   item,
@@ -38,6 +39,7 @@ export default function SaveButton({
     const nowSaved = toggleSaved(item);
     setSaved(nowSaved);
     showToast(nowSaved ? t("savedToast") : t("removedToast"), nowSaved ? "success" : "neutral");
+    if (nowSaved) recordUniversitySavedAction(item.key).catch(() => {});
   }
 
   return (

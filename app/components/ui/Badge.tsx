@@ -8,7 +8,7 @@ const TONE_CLASSES: Record<BadgeTone, string> = {
   success: "bg-emerald-50 text-emerald-700",
   warning: "bg-amber-50 text-amber-700",
   danger: "bg-red-50 text-red-700",
-  accent: "bg-zinc-900 text-white",
+  accent: "bg-navy-900 text-gold-soft",
 };
 
 export default function Badge({

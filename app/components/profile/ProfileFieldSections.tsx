@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 import { useLocale, useTranslations } from "next-intl";
 import { getCountryOptions } from "@/app/lib/countries";
+import { flagEmoji } from "@/app/lib/countryFlag";
 import { CURRENCIES } from "@/app/lib/currencies";
 import { localeLabels, routing } from "@/i18n/routing";
 import { COMMON_TIMEZONES, detectBrowserTimezone } from "@/app/lib/timezone";
@@ -12,6 +13,7 @@ import {
   INTAKE_SEASONS,
   PRIORITY_LABEL_KEYS,
   PRIORITY_TYPES,
+  QUALIFICATION_TYPES,
   SELF_REPORTED_STAGES,
   type ProfileFormValues,
 } from "@/app/lib/profile-types";
@@ -254,16 +256,17 @@ export function DestinationSection({ values, onChange }: SectionProps) {
           return (
             <label
               key={c.code}
-              className={`flex items-center gap-2 rounded px-2 py-1.5 text-sm ${
-                checked ? "bg-zinc-100 text-zinc-900" : "text-zinc-600"
+              className={`flex items-center gap-2 rounded-md px-2 py-2 text-sm transition-colors ${
+                checked ? "bg-primary/10 text-primary" : "text-zinc-600"
               }`}
             >
               <input
                 type="checkbox"
                 checked={checked}
                 onChange={() => toggle(c.code)}
-                className="h-4 w-4 rounded border-zinc-300"
+                className="h-4 w-4 rounded border-zinc-300 accent-primary"
               />
+              <span aria-hidden="true">{flagEmoji(c.code)}</span>
               {c.label}
             </label>
           );
@@ -276,6 +279,7 @@ export function DestinationSection({ values, onChange }: SectionProps) {
 export function AcademicSection({ values, onChange }: SectionProps) {
   const t = useTranslations("ProfileFields");
   const englishTestOptions = useTranslations("EnglishTestOptions");
+  const qualificationTypeOptions = useTranslations("QualificationTypeOptions");
   const common = useTranslations("Common");
 
   return (
@@ -287,6 +291,21 @@ export function AcademicSection({ values, onChange }: SectionProps) {
           onChange={(e) => onChange({ educationLevel: e.target.value })}
           className={inputClasses}
         />
+      </Field>
+
+      <Field label={t("qualificationType")}>
+        <select
+          value={values.qualificationType}
+          onChange={(e) => onChange({ qualificationType: e.target.value as ProfileFormValues["qualificationType"] })}
+          className={inputClasses}
+        >
+          <option value="">{common("selectPlaceholder")}</option>
+          {QUALIFICATION_TYPES.map((type) => (
+            <option key={type} value={type}>
+              {qualificationTypeOptions(type)}
+            </option>
+          ))}
+        </select>
       </Field>
 
       <Field label={t("previousInstitution")}>

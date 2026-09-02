@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useEffect, useState, useTransition } from "react";
 import { useTranslations } from "next-intl";
 import { usePathname } from "@/i18n/navigation";
 import type { AppLocale } from "@/i18n/routing";
@@ -52,8 +52,20 @@ export default function FeedbackWidget({ locale }: { locale: AppLocale }) {
     setError(null);
   }
 
+  useEffect(() => {
+    if (!open) return;
+    function handleHardwareBack(event: Event) {
+      event.preventDefault();
+      close();
+    }
+    window.addEventListener("unipath:hardwareBack", handleHardwareBack);
+    return () => window.removeEventListener("unipath:hardwareBack", handleHardwareBack);
+  }, [open]);
+
   return (
-    <div className="fixed bottom-4 right-4 z-40">
+    <div
+      className="fixed right-[calc(1rem+var(--safe-right))] z-40 bottom-[calc(4.75rem+var(--safe-bottom))] sm:bottom-[calc(1rem+var(--safe-bottom))]"
+    >
       {open ? (
         <div className="flex w-72 flex-col gap-3 rounded-xl border border-zinc-200 bg-white p-4 shadow-lg">
           <div className="flex items-center justify-between">

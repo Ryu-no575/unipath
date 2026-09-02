@@ -3,7 +3,7 @@
 import { useState, useTransition, type FormEvent } from "react";
 import { useTranslations } from "next-intl";
 import type { AppLocale } from "@/i18n/routing";
-import type { Database } from "@/app/lib/supabase/database.types";
+import type { Database, SecondaryQualificationType } from "@/app/lib/supabase/database.types";
 import {
   createEducationAction,
   updateEducationAction,
@@ -11,6 +11,17 @@ import {
 } from "@/app/lib/actions/passport-education";
 
 type EducationRowData = Database["public"]["Tables"]["education_history"]["Row"];
+
+const QUALIFICATION_TYPES: SecondaryQualificationType[] = [
+  "national_secondary_diploma",
+  "ib_diploma",
+  "a_levels",
+  "abitur",
+  "french_baccalaureat",
+  "other_national_secondary",
+  "bachelor_degree",
+  "master_degree",
+];
 
 const fieldClasses =
   "rounded-md border border-zinc-300 bg-white px-3 py-2 text-sm text-zinc-900 focus:border-zinc-500 focus:outline-none focus:ring-1 focus:ring-zinc-500";
@@ -21,6 +32,7 @@ function toFormValues(entry?: EducationRowData): EducationFormInput {
     institutionName: entry?.institution_name ?? "",
     countryCode: entry?.country_code ?? "",
     educationLevel: entry?.education_level ?? "",
+    qualificationType: entry?.qualification_type ?? "",
     fieldOfStudy: entry?.field_of_study ?? "",
     startDate: entry?.start_date ?? "",
     endDate: entry?.end_date ?? "",
@@ -40,6 +52,7 @@ export default function EducationForm({
   onDone: () => void;
 }) {
   const t = useTranslations("PassportEducation");
+  const qualificationTypeT = useTranslations("QualificationTypeOptions");
   const [values, setValues] = useState<EducationFormInput>(toFormValues(entry));
   const [error, setError] = useState<string | null>(null);
   const [isPending, startTransition] = useTransition();
@@ -98,6 +111,22 @@ export default function EducationForm({
             onChange={(e) => set("educationLevel", e.target.value)}
             className={fieldClasses}
           />
+        </label>
+
+        <label className="flex flex-col gap-1">
+          <span className={labelClasses}>{t("qualificationTypeLabel")}</span>
+          <select
+            value={values.qualificationType}
+            onChange={(e) => set("qualificationType", e.target.value as SecondaryQualificationType | "")}
+            className={fieldClasses}
+          >
+            <option value="">{t("qualificationTypeNone")}</option>
+            {QUALIFICATION_TYPES.map((type) => (
+              <option key={type} value={type}>
+                {qualificationTypeT(type)}
+              </option>
+            ))}
+          </select>
         </label>
 
         <label className="flex flex-col gap-1 sm:col-span-2">

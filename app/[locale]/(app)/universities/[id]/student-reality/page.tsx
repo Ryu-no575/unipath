@@ -8,6 +8,7 @@ import UniversityTabs from "@/app/components/universities/UniversityTabs";
 import PostCard from "@/app/components/community/PostCard";
 import EmptyState from "@/app/components/ui/EmptyState";
 import Button from "@/app/components/ui/Button";
+import Card from "@/app/components/ui/Card";
 import { Link } from "@/i18n/navigation";
 
 const PREVIEW_LIMIT = 5;
@@ -20,9 +21,16 @@ export default async function UniversityStudentRealityPage({
   setRequestLocale(locale);
 
   const supabase = await createClient();
-  const [university, user] = await Promise.all([
+  const [university, user, { data: studentStats }] = await Promise.all([
     getUniversityForCommunity(supabase, id),
     getOptionalUser(),
+    supabase
+      .from("universities")
+      .select(
+        "total_students, international_students, international_student_percentage, student_stats_academic_year, student_stats_source_name, student_stats_source_url, student_stats_last_verified_at",
+      )
+      .eq("id", id)
+      .maybeSingle(),
   ]);
   if (!university) notFound();
 
@@ -44,6 +52,51 @@ export default async function UniversityStudentRealityPage({
       </div>
 
       <UniversityTabs universityId={id} active="studentReality" />
+
+      {/* Task item 6: international student statistics -- admin-entered
+          only (no automated importer exists for this data), and every
+          missing field renders "Being verified" rather than an estimate. */}
+      <Card padding="lg" className="flex flex-col gap-1">
+        <h2 className="text-sm font-semibold text-zinc-900">{t("internationalStudentsHeading")}</h2>
+        {studentStats?.international_students != null ? (
+          <>
+            <p className="text-2xl font-semibold text-zinc-900">
+              {studentStats.international_students.toLocaleString(locale)}
+            </p>
+            {studentStats.international_student_percentage != null && (
+              <p className="text-sm text-zinc-600">
+                {t("internationalStudentsPercentOfBody", { percent: studentStats.international_student_percentage })}
+              </p>
+            )}
+            {studentStats.student_stats_academic_year && (
+              <p className="text-xs text-zinc-400">{t("academicYear", { year: studentStats.student_stats_academic_year })}</p>
+            )}
+            {studentStats.student_stats_source_name && (
+              <p className="text-xs text-zinc-400">
+                {studentStats.student_stats_source_url ? (
+                  <a
+                    href={studentStats.student_stats_source_url}
+                    target="_blank"
+                    rel="noopener noreferrer nofollow"
+                    className="underline underline-offset-2 hover:text-zinc-700"
+                  >
+                    {studentStats.student_stats_source_name}
+                  </a>
+                ) : (
+                  studentStats.student_stats_source_name
+                )}
+              </p>
+            )}
+            {studentStats.student_stats_last_verified_at && (
+              <p className="text-xs text-zinc-400">
+                {t("lastVerified", { date: new Date(studentStats.student_stats_last_verified_at).toLocaleDateString(locale) })}
+              </p>
+            )}
+          </>
+        ) : (
+          <p className="text-sm text-zinc-400">{t("beingVerified")}</p>
+        )}
+      </Card>
 
       <div className="flex flex-col gap-1">
         <h2 className="text-lg font-semibold tracking-tight text-zinc-900">

@@ -42,3 +42,17 @@ next-env.d.ts
 
 # local agent/editor state
 .claude/
+
+# Capacitor native build artifacts (ios/ and android/ project sources ARE
+# committed; only generated/build output and dependency caches are ignored)
+ios/App/Pods/
+ios/App/build/
+ios/App/DerivedData/
+ios/.xcode.env.local
+android/.gradle/
+android/build/
+android/app/build/
+android/local.properties
+android/captures/
+android/*.iml
+android/.idea/

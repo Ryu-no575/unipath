@@ -18,6 +18,7 @@ export default function EducationRow({
   onEdit: () => void;
 }) {
   const t = useTranslations("PassportEducation");
+  const qualificationTypeT = useTranslations("QualificationTypeOptions");
   const [isPending, startTransition] = useTransition();
 
   function remove() {
@@ -32,9 +33,20 @@ export default function EducationRow({
   return (
     <li className="flex flex-col gap-2 py-3 sm:flex-row sm:items-center sm:justify-between">
       <div className="flex flex-col gap-1">
-        <span className="text-sm font-medium text-zinc-800">{entry.institution_name}</span>
+        <span className="flex flex-wrap items-center gap-2 text-sm font-medium text-zinc-800">
+          {entry.institution_name}
+          <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
+            {t("userReported")}
+          </span>
+        </span>
         <span className="text-xs text-zinc-500">
-          {[entry.education_level, entry.field_of_study, entry.country_code].filter(Boolean).join(" · ")}
+          {[
+            entry.qualification_type ? qualificationTypeT(entry.qualification_type) : entry.education_level,
+            entry.field_of_study,
+            entry.country_code,
+          ]
+            .filter(Boolean)
+            .join(" · ")}
         </span>
         {dateRange && <span className="text-xs text-zinc-400">{dateRange}</span>}
       </div>

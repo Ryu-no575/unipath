@@ -78,7 +78,22 @@ export default async function UniversityAdmissionsPage({
                       {req.required && <Badge tone="neutral">{req.requirement_type}</Badge>}
                     </div>
                     {req.minimum_value && (
-                      <span className="text-sm text-zinc-600">{req.minimum_value}</span>
+                      <span className="flex flex-wrap items-center gap-2 text-sm text-zinc-600">
+                        {req.minimum_value}
+                        {/* Task item 3: a university's own published minimum is
+                            never shown as "Verified" merely because a row
+                            exists -- this reuses the same confidence value a
+                            curator/import script already set against its
+                            source (see 20260826240000_real_university_data_v1.sql),
+                            never a new/guessed status. */}
+                        <Badge tone={req.confidence === "high" ? "success" : req.confidence ? "warning" : "neutral"}>
+                          {req.confidence === "high"
+                            ? t("requirementVerified")
+                            : req.confidence
+                              ? t("requirementNeedsReview")
+                              : t("requirementBeingVerified")}
+                        </Badge>
+                      </span>
                     )}
                     {req.description && (
                       <span className="text-sm text-zinc-500">{req.description}</span>

@@ -73,15 +73,52 @@ export const CALENDAR_LINKED_STEP_TYPES: RouteStepType[] = [
  * an official date everywhere it's rendered (task brief item 10/13). */
 export type SuggestedDateSource = "unipath" | "task";
 
+/** Date Engine v2's trust taxonomy (Public Beta brief PART B, items 3/16/17):
+ * "official" = a verified fact from a university/government source;
+ * "suggested" = a UniPath-computed date backward-planned from a real official
+ * anchor, or a task's own due_at the user set;
+ * "estimated_window" = no fixed date exists, only a bounded range or
+ * qualitative estimate computed from real official process-time data;
+ * "unverified" = nothing real to compute from yet -- render "Being verified",
+ * never a fabricated date. Derived once by makeRouteStepDate()
+ * (backwardPlanner.ts), never re-derived ad hoc by a UI component. */
+export type DateConfidence = "official" | "suggested" | "estimated_window" | "unverified";
+
+/** Attached to officialDate when it traces back to a real `sources` row (task
+ * brief item 16's "Official / Verified / Source"). Null when the underlying
+ * date exists but no source row is linked yet. */
+export interface DateSourceInfo {
+  label: string;
+  url: string | null;
+  lastCheckedAt: string | null;
+}
+
+/** Used instead of suggestedDate when only a bounded range or a qualitative
+ * estimate is knowable -- task brief item 17: never render false precision.
+ * `qualitativeLabel` (e.g. "2-6 weeks", "Early March") takes priority over
+ * start/endISO in the UI whenever both are present. */
+export interface EstimatedWindow {
+  startISO: string | null;
+  endISO: string | null;
+  qualitativeLabel: string | null;
+}
+
 export interface RouteStepDate {
   /** From admission_cycles.application_deadline (or the equivalent custom_*
    * field) -- a verified official fact, never computed. Null when unknown. */
   officialDate: string | null;
   officialTimezone: string | null;
+  /** Set only when officialDate traces back to a real, linked `sources` row
+   * (task brief item 16). */
+  officialSource: DateSourceInfo | null;
   /** Either a UniPath-computed preparation buffer before officialDate, or an
    * existing task's own due_at the user set -- see `suggestedSource`. */
   suggestedDate: string | null;
   suggestedSource: SuggestedDateSource | null;
+  /** Mutually exclusive with suggestedDate -- set when only a range/estimate
+   * is knowable (task brief item 3's Visa/Housing/Travel domains). */
+  estimatedWindow: EstimatedWindow | null;
+  confidence: DateConfidence;
 }
 
 export interface RouteStepLabelParams {
@@ -129,7 +166,13 @@ export type RouteSubStepKey =
   | "essay_draft"
   | "essay_feedback"
   | "essay_revise"
-  | "essay_final";
+  | "essay_final"
+  // Post-arrival legal checklist items (Date Engine v2 Arrival domain) --
+  // mirrors VisaItemKey's post-arrival keys 1:1, see arrivalDates.ts.
+  | "residence_permit_registration"
+  | "local_registration"
+  | "student_card_registration"
+  | "health_registration";
 
 export interface RouteSubStep {
   key: RouteSubStepKey;
@@ -297,6 +340,25 @@ export interface RouteTarget {
    * match candidates -- display-only, never used as an admission-probability
    * signal (task brief item 13). */
   matchScorePercent: number | null;
+  /** From universities.country_code -- the Visa Date Engine's destination
+   * key (see app/lib/routes/visaDates.ts). Null when unknown. */
+  destinationCountryCode: string | null;
+}
+
+type VisaRequirementProfileRow = Database["public"]["Tables"]["visa_requirement_profiles"]["Row"];
+type VisaRequirementItemRow = Database["public"]["Tables"]["visa_requirement_items"]["Row"];
+
+/** Real, sourced Visa timing data for this user's (nationality, destination,
+ * study level) -- resolved once by app/lib/data/routes.ts the same way
+ * user_visa_journeys already resolves a visa_requirement_profiles row (see
+ * app/lib/actions/visa.ts). Null when no matching profile exists yet --
+ * visaDates.ts then falls back to "unverified", never a fabricated number
+ * (task brief item 6's caveat). */
+export interface VisaTimingInput {
+  profile: VisaRequirementProfileRow;
+  source: DateSourceInfo | null;
+  /** Only the items carrying a real deadline_days_after_arrival -- arrivalDates.ts's input. */
+  postArrivalItems: VisaRequirementItemRow[];
 }
 
 export interface RouteEngineInput {
@@ -311,6 +373,7 @@ export interface RouteEngineInput {
   linkedDocumentIds: Set<string>;
   matchResults: RealMatchResult[];
   target: RouteTarget | null;
+  visaTiming: VisaTimingInput | null;
 }
 
 export const APPLICATION_ACTIVE_STATUSES: ApplicationStatus[] = [

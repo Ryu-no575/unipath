@@ -49,9 +49,12 @@ export default async function PassportTestsPage({ params }: PageProps<"/[locale]
           }
         />
         {hasPrimary ? (
-          <p className="text-sm text-zinc-700">
+          <p className="flex flex-wrap items-center gap-2 text-sm text-zinc-700">
             {englishTestOptions(profile.english_test_type ?? "other")}
             {profile.english_test_score ? ` · ${profile.english_test_score}` : ""}
+            <span className="rounded-full bg-zinc-100 px-2 py-0.5 text-xs font-medium text-zinc-500">
+              {t("userReported")}
+            </span>
           </p>
         ) : (
           <p className="text-sm text-zinc-400">{t("primaryEmpty")}</p>

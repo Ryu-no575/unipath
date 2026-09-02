@@ -29,6 +29,19 @@ export interface AdmissionCycleSummary {
   intakeSeason: IntakeSeason;
   applicationDeadline: string | null;
   deadlineTimezone: string | null;
+  /** Date Engine v2 anchors -- real program logistics, distinct from
+   * applicationDeadline (see app/lib/routes/visaDates.ts and siblings). Null
+   * for a custom (non-catalog) university, same as applicationDeadline can be. */
+  programStartDate: string | null;
+  orientationDate: string | null;
+  housingDeadline: string | null;
+  housingMoveInDate: string | null;
+  /** The real `sources` row backing applicationDeadline, when one is linked
+   * (task brief item 6/16: an Official Date must always be able to show its
+   * Official Source). Null for a custom (non-catalog) university -- there is
+   * no sources pipeline for those -- or a catalog cycle with no source
+   * linked yet. Never fabricated. */
+  applicationDeadlineSource: { label: string; url: string | null; lastCheckedAt: string | null } | null;
 }
 
 export interface ApplicationWithDetails {
@@ -53,6 +66,15 @@ type ProgramRow = Database["public"]["Tables"]["programs"]["Row"];
 type AdmissionCycleRow = Database["public"]["Tables"]["admission_cycles"]["Row"];
 type UniversityRow = Database["public"]["Tables"]["universities"]["Row"];
 type CustomUniversityRow = Database["public"]["Tables"]["user_custom_universities"]["Row"];
+type SourceRow = Database["public"]["Tables"]["sources"]["Row"];
+
+export function bestSourceInfo(rows: SourceRow[] | undefined): AdmissionCycleSummary["applicationDeadlineSource"] {
+  if (!rows || rows.length === 0) return null;
+  const best = rows.find((r) => r.url_status === "valid" || r.url_status === "redirected") ?? rows[0];
+  const label = best.publisher ?? best.title ?? best.resolved_url ?? best.official_url;
+  if (!label) return null;
+  return { label, url: best.resolved_url ?? best.official_url, lastCheckedAt: best.last_checked_at };
+}
 
 /** All applications for a user, joined with program/university/admission
  * cycle info via separate in-memory joins (the typed client's Relationships
@@ -112,7 +134,7 @@ async function joinApplicationDetails(
     ),
   );
 
-  const [programsResult, cyclesResult, customUniversitiesResult] = await Promise.all([
+  const [programsResult, cyclesResult, customUniversitiesResult, cycleSourcesResult] = await Promise.all([
     programIds.length > 0
       ? supabase.from("programs").select("*").in("id", programIds)
       : Promise.resolve({ data: [] as ProgramRow[] }),
@@ -122,10 +144,21 @@ async function joinApplicationDetails(
     customUniversityIds.length > 0
       ? supabase.from("user_custom_universities").select("*").in("id", customUniversityIds)
       : Promise.resolve({ data: [] as CustomUniversityRow[] }),
+    cycleIds.length > 0
+      ? supabase.from("sources").select("*").in("admission_cycle_id", cycleIds).eq("admin_rejected", false)
+      : Promise.resolve({ data: [] as SourceRow[] }),
   ]);
   const programs = programsResult.data ?? [];
   const cycles = cyclesResult.data ?? [];
   const customUniversities = customUniversitiesResult.data ?? [];
+
+  const sourcesByCycleId = new Map<string, SourceRow[]>();
+  for (const source of cycleSourcesResult.data ?? []) {
+    if (!source.admission_cycle_id) continue;
+    const list = sourcesByCycleId.get(source.admission_cycle_id) ?? [];
+    list.push(source);
+    sourcesByCycleId.set(source.admission_cycle_id, list);
+  }
 
   const universityIds = Array.from(new Set(programs.map((p) => p.university_id)));
   const { data: universities } =
@@ -177,6 +210,11 @@ async function joinApplicationDetails(
                 intakeSeason: application.custom_intake_season,
                 applicationDeadline: application.custom_application_deadline,
                 deadlineTimezone: application.custom_deadline_timezone,
+                programStartDate: null,
+                orientationDate: null,
+                housingDeadline: null,
+                housingMoveInDate: null,
+                applicationDeadlineSource: null,
               }
             : null,
         isCustomUniversity: true,
@@ -222,6 +260,11 @@ async function joinApplicationDetails(
             intakeSeason: cycle.intake_season,
             applicationDeadline: cycle.application_deadline,
             deadlineTimezone: cycle.deadline_timezone,
+            programStartDate: cycle.program_start_date,
+            orientationDate: cycle.orientation_date,
+            housingDeadline: cycle.housing_deadline,
+            housingMoveInDate: cycle.housing_move_in_date,
+            applicationDeadlineSource: bestSourceInfo(sourcesByCycleId.get(cycle.id)),
           }
         : null,
       isCustomUniversity: false,

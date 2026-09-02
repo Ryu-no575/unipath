@@ -32,7 +32,7 @@ export default function Card<T extends ElementType = "div">({
     <Component
       className={`rounded-xl border border-zinc-200 bg-white ${PADDING_CLASSES[padding]} ${
         interactive
-          ? "transition-all hover:-translate-y-0.5 hover:border-zinc-300 hover:shadow-sm"
+          ? "transition-all hover:-translate-y-0.5 hover:border-primary/30 hover:shadow-elevated"
           : ""
       } ${className}`}
       {...props}

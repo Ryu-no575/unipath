@@ -68,6 +68,7 @@ export interface AdminVisaItemRow {
   required: boolean;
   orderIndex: number;
   sourceId: string | null;
+  deadlineDaysAfterArrival: number | null;
 }
 
 export interface AdminVisaSourceRow {
@@ -87,6 +88,10 @@ export interface AdminVisaProfileDetail {
   summary: string | null;
   status: VisaRequirementStatus;
   lastCheckedAt: string | null;
+  earliestApplicationMonthsBeforeStart: number | null;
+  processingWeeksMin: number | null;
+  processingWeeksMax: number | null;
+  latestSafeSubmissionWeeksBeforeStart: number | null;
   items: AdminVisaItemRow[];
   sources: AdminVisaSourceRow[];
 }
@@ -109,6 +114,10 @@ export async function getAdminVisaProfileDetail(supabase: Client, id: string): P
     summary: profile.summary,
     status: profile.status,
     lastCheckedAt: profile.last_checked_at,
+    earliestApplicationMonthsBeforeStart: profile.earliest_application_months_before_start,
+    processingWeeksMin: profile.processing_weeks_min,
+    processingWeeksMax: profile.processing_weeks_max,
+    latestSafeSubmissionWeeksBeforeStart: profile.latest_safe_submission_weeks_before_start,
     items: (items ?? []).map((i) => ({
       id: i.id,
       itemKey: i.item_key,
@@ -117,6 +126,7 @@ export async function getAdminVisaProfileDetail(supabase: Client, id: string): P
       required: i.required,
       orderIndex: i.order_index,
       sourceId: i.source_id,
+      deadlineDaysAfterArrival: i.deadline_days_after_arrival,
     })),
     sources: (sources ?? []).map((s) => ({
       id: s.id,

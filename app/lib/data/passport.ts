@@ -9,6 +9,9 @@ import {
   type ReadinessItem,
 } from "@/app/lib/passport/readiness";
 import { syncMissingRequirementTasks } from "@/app/lib/passport/tasks";
+import { computeProgramEligibility } from "@/app/lib/eligibility/programEligibility";
+import { profileToUserCredentials } from "@/app/lib/data/eligibility";
+import type { ProgramEligibility } from "@/app/lib/eligibility/types";
 
 type Client = SupabaseClient<Database>;
 type EducationHistoryRow = Database["public"]["Tables"]["education_history"]["Row"];
@@ -118,6 +121,39 @@ export async function getApplicationReadiness(
   });
 
   return { applicationId: params.application.id, ...readiness };
+}
+
+/** Personalized Planning Phase 1, task item 4: the same per-application
+ * multi-factor Eligibility Engine classification (ELIGIBLE_NOW/
+ * ALMOST_ELIGIBLE/NOT_CURRENTLY_ELIGIBLE/UNKNOWN), computed alongside
+ * Readiness above -- null for a custom-university application or one with no
+ * admission cycle yet (nothing to classify against). */
+export async function getApplicationEligibility(
+  supabase: Client,
+  params: {
+    application: Pick<ApplicationWithDetails, "id" | "isCustomUniversity" | "admissionCycle">;
+    documents: ApplicationDocumentRow[];
+    testScores: TestScoreRow[];
+    linkedDocumentIds: Set<string>;
+    profile: Pick<ProfileRow, "english_test_type" | "english_test_score" | "gpa_value" | "gpa_scale" | "qualification_type">;
+  },
+): Promise<ProgramEligibility | null> {
+  if (params.application.isCustomUniversity || !params.application.admissionCycle) return null;
+
+  const requirements = await getAdmissionRequirementsForCycle(supabase, params.application.admissionCycle.id);
+  const readiness = computeApplicationReadiness({
+    requirements,
+    documents: params.documents,
+    testScores: params.testScores,
+    linkedDocumentIds: params.linkedDocumentIds,
+    profile: params.profile,
+  });
+
+  return computeProgramEligibility({
+    requirements,
+    readiness,
+    credentials: profileToUserCredentials(params.profile),
+  });
 }
 
 /** Readiness for every one of a user's applications in one pass -- used on

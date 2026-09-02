@@ -22,10 +22,10 @@ export interface QuizSectionProps {
 }
 
 const optionCardClasses = (active: boolean) =>
-  `flex flex-1 flex-col items-start gap-1 rounded-lg border px-4 py-3 text-left text-sm transition-colors ${
+  `flex min-h-14 flex-1 flex-col items-start justify-center gap-1 rounded-xl border-2 px-5 py-4 text-left text-sm font-medium transition-all duration-150 active:scale-[0.98] ${
     active
-      ? "border-zinc-900 bg-zinc-900 text-white"
-      : "border-zinc-200 text-zinc-700 hover:border-zinc-300 hover:bg-zinc-50"
+      ? "border-primary bg-primary text-white shadow-soft"
+      : "border-zinc-200 text-zinc-700 hover:border-primary/40 hover:bg-primary/5"
   }`;
 
 export function ProfileSummaryStep({ summary }: { summary: ProfileSummary }) {
@@ -197,7 +197,7 @@ export function WorkImportanceStep({ values, onChange }: QuizSectionProps) {
           max={5}
           value={values.workWhileStudyingImportance}
           onChange={(e) => onChange({ workWhileStudyingImportance: Number(e.target.value) })}
-          className="w-full accent-zinc-900"
+          className="w-full accent-primary"
         />
         <span className="text-xs text-zinc-400">{t("workHintHigh")}</span>
         <span className="w-4 shrink-0 text-center text-sm font-medium text-zinc-900">
@@ -242,7 +242,7 @@ export function ReviewStep({ values }: { values: MatchQuizAnswers }) {
         <h3 className="text-sm font-semibold text-zinc-900">{t("reviewTitle")}</h3>
         <p className="text-sm text-zinc-500">{t("reviewHint")}</p>
       </div>
-      <dl className="grid grid-cols-2 gap-x-6 gap-y-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm">
+      <dl className="grid grid-cols-1 gap-x-6 gap-y-3 rounded-lg border border-zinc-200 bg-zinc-50 p-4 text-sm sm:grid-cols-2">
         <dt className="text-zinc-500">{t("environmentQuestion")}</dt>
         <dd className="text-zinc-900">{options(ENVIRONMENT_LABEL_KEYS[values.campusEnvironment])}</dd>
         <dt className="text-zinc-500">{t("sizeQuestion")}</dt>

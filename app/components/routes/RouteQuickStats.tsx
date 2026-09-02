@@ -42,7 +42,7 @@ export default function RouteQuickStats({
   const format = useFormatter();
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-5">
+    <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-5">
       <Stat label={t("starts")}>
         <span className="text-sm font-medium text-zinc-900">
           {comparison.startsDate ? format.dateTime(new Date(comparison.startsDate), "long") : t("startsNow")}

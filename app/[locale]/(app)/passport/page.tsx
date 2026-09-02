@@ -22,6 +22,7 @@ import PageHeader from "@/app/components/ui/PageHeader";
 import SectionHeader from "@/app/components/ui/SectionHeader";
 import Card from "@/app/components/ui/Card";
 import EmptyState from "@/app/components/ui/EmptyState";
+import UnlockSimulator from "@/app/components/passport/UnlockSimulator";
 
 export default async function PassportPage({ params }: PageProps<"/[locale]/passport">) {
   const { locale } = await params;
@@ -197,6 +198,8 @@ export default async function PassportPage({ params }: PageProps<"/[locale]/pass
           <span className="mt-1 text-sm font-medium text-zinc-600">{t("manage")}</span>
         </Card>
       </div>
+
+      <UnlockSimulator />
 
       <div className="flex flex-col gap-4">
         <SectionHeader title={t("applicationsReadinessHeading")} />
